@@ -1,0 +1,367 @@
+@import "tailwindcss";
+
+:root {
+  font-family:
+    Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", Inter, ui-sans-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #0f172a;
+  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.signal-flow {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.125rem 0.75rem;
+  scrollbar-width: thin;
+}
+
+.signal-node {
+  display: inline-flex;
+  min-height: 2.75rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 0.65rem 0.95rem;
+  color: #334155;
+  font-size: 0.875rem;
+  font-weight: 750;
+  box-shadow: 0 10px 25px -20px rgba(30, 41, 59, 0.8);
+}
+
+.signal-node-dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 9999px;
+  background: #6366f1;
+  box-shadow: 0 0 0 4px #e0e7ff;
+}
+
+.signal-arrow {
+  flex: 0 0 auto;
+  color: #0891b2;
+}
+
+.step-navigation {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+}
+
+.step-list {
+  display: flex;
+  min-width: max-content;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step-item {
+  position: relative;
+  width: 10.25rem;
+}
+
+.step-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 1.35rem;
+  left: calc(100% - 1rem);
+  z-index: 0;
+  width: 2rem;
+  height: 2px;
+  background: #cbd5e1;
+}
+
+.step-button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: calc(100% - 0.5rem);
+  min-height: 5.25rem;
+  grid-template-columns: 2.5rem 1fr;
+  align-items: start;
+  gap: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: 0.75rem;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.step-button:hover {
+  border-color: #a5b4fc;
+  background: #f8fafc;
+}
+
+.step-button:focus-visible {
+  outline: 3px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+.step-button-current {
+  border-color: #818cf8;
+  background: #eef2ff;
+}
+
+.step-number {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.step-button-current .step-number {
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.step-focus-target {
+  scroll-margin-top: 11rem;
+}
+
+.mnist-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.mnist-pixel-grid {
+  display: grid;
+  width: min(100%, 35rem);
+  aspect-ratio: 1;
+  grid-template-columns: repeat(28, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  border: 3px solid #0f172a;
+  border-radius: 0.75rem;
+  background: #334155;
+  box-shadow: 0 16px 35px -24px rgba(15, 23, 42, 0.8);
+}
+
+.mnist-pixel-cell {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 1;
+  border: 0;
+  padding: 0;
+}
+
+.mnist-pixel-cell:hover {
+  z-index: 1;
+  outline: 2px solid #22d3ee;
+}
+
+.mnist-pixel-cell:focus-visible,
+.mnist-pixel-cell-selected {
+  z-index: 2;
+  outline: 3px solid #f97316;
+  outline-offset: -1px;
+}
+
+.mnist-pixel-cell span {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  color: #fef3c7;
+  font-size: clamp(0.3rem, 1vw, 0.55rem);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 2px #000;
+}
+
+.metric-chart-card {
+  min-width: 0;
+  border: 1px solid #ddd6fe;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.25rem;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.section-heading-row h3 {
+  margin: 0.2rem 0 0;
+  color: #0f172a;
+  font-size: 1.05rem;
+  font-weight: 850;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #6d28d9;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.metric-chart-card svg {
+  width: 100%;
+  min-height: 12rem;
+  overflow: visible;
+}
+
+.chart-axis {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.chart-label {
+  fill: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.metric-chart-line {
+  fill: none;
+  stroke: #7c3aed;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.metric-chart-point {
+  fill: #7c3aed;
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.metric-chart-point:focus {
+  outline: none;
+  stroke: #0891b2;
+  stroke-width: 4;
+}
+
+.metric-selected-value {
+  margin: 0.25rem 0 0;
+  color: #334155;
+  text-align: center;
+}
+
+.secondary-button {
+  min-height: 2.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background: #fff;
+  padding: 0.55rem 0.8rem;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.choice-row.compact,
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.choice-chip {
+  min-height: 2.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.7rem;
+  background: #fff;
+  padding: 0.4rem 0.7rem;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.choice-chip.selected {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.drawing-workbench {
+  width: min(100%, 280px);
+}
+
+.digit-drawing-canvas {
+  display: block;
+  width: min(100%, 280px) !important;
+  height: auto !important;
+  aspect-ratio: 1;
+  border: 4px solid #334155;
+  border-radius: 1rem;
+  background: #000;
+  box-shadow: 0 18px 35px -24px rgba(15, 23, 42, 0.9);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.digit-drawing-canvas:focus-visible {
+  outline: 3px solid #7c3aed;
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .signal-flow {
+    gap: 0.4rem;
+  }
+
+  .signal-node {
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+  }
+
+  .step-item {
+    width: 9.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

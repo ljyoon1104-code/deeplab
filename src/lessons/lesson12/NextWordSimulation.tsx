@@ -1,0 +1,12 @@
+import { NEXT_WORD_STAGES } from './lesson12Data'
+import { formatProbability } from './languageModelMath'
+
+function CandidateButtons({ candidates, selected, onChoose }: { candidates: readonly { word: string; probability: number }[]; selected: string; onChoose: (word: string) => void }) {
+  return <div className="mt-3 grid gap-3 sm:grid-cols-3">{candidates.map((candidate) => <button key={candidate.word} type="button" aria-pressed={selected === candidate.word} onClick={() => onChoose(candidate.word)} className={`min-h-20 rounded-xl border p-3 text-left ${selected === candidate.word ? 'border-emerald-700 bg-emerald-50' : 'border-slate-300 bg-white'}`}><span className="flex justify-between gap-2 font-black"><span>{candidate.word}</span><span>{formatProbability(candidate.probability)}</span></span><span className="mt-2 block h-3 overflow-hidden rounded-full bg-slate-200"><span className="block h-full rounded-full bg-emerald-600" style={{ width: `${candidate.probability * 100}%` }} /></span></button>)}</div>
+}
+
+export default function NextWordSimulation({ firstChoice, secondChoice, onFirstChoice, onSecondChoice }: { firstChoice: string; secondChoice: string; onFirstChoice: (word: string) => void; onSecondChoice: (word: string) => void }) {
+  const currentContext = secondChoice ? `${NEXT_WORD_STAGES.milk.context} ${secondChoice}.` : firstChoice ? `${NEXT_WORD_STAGES.first.context} ${firstChoice}` : NEXT_WORD_STAGES.first.context
+  return <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5" aria-live="polite"><p className="text-sm font-black text-emerald-900">현재 문맥</p><p className="mt-2 rounded-xl bg-white p-4 text-xl font-black">{currentContext}</p><div className="mt-5"><h3 className="font-black">첫 번째 다음 단어 후보</h3><CandidateButtons candidates={NEXT_WORD_STAGES.first.candidates} selected={firstChoice} onChoose={onFirstChoice} /></div>{firstChoice && firstChoice !== '우유를' ? <p className="mt-3 text-sm font-bold text-amber-800">선택한 “{firstChoice}”가 문맥에 추가되었습니다. 제공된 두 번째 단계는 기본 학습 경로인 “우유를”을 선택하면 이어집니다.</p> : null}{firstChoice === '우유를' ? <div className="mt-6 border-t border-emerald-200 pt-5"><h3 className="font-black">새 문맥 “세훈이는 우유를”의 다음 후보</h3><CandidateButtons candidates={NEXT_WORD_STAGES.milk.candidates} selected={secondChoice} onChoose={onSecondChoice} /><p className="mt-3 text-sm leading-6"><strong>가장 높은 확률 후보는 “마신다” 60%</strong>입니다. 다른 후보도 0%가 아니므로 선택 가능성이 완전히 사라진 것은 아닙니다.</p></div> : null}</div>
+}
+
