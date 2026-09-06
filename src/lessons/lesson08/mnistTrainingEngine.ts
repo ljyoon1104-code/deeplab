@@ -1,6 +1,7 @@
 import type { MnistDataset, MnistSample } from '../lesson07/mnistTypes'
 import { MODEL_OPTIONS } from './lesson08Data'
 import type {
+  BatchProgress,
   DrawingPrediction,
   EpochMetric,
   EvaluationResult,
@@ -78,15 +79,54 @@ export async function fitModel(
   trainXs: import('@tensorflow/tfjs').Tensor2D,
   trainYs: import('@tensorflow/tfjs').Tensor2D,
   epochs: number,
+  onBatch: (progress: BatchProgress) => void,
   onEpoch: (metric: EpochMetric) => void,
 ) {
   const history: EpochMetric[] = []
+  const batchesPerEpoch = Math.ceil(trainXs.shape[0] / 32)
+  const totalBatches = batchesPerEpoch * epochs
+  let activeEpoch = 0
+  let lastPublishedAt = 0
+
   await model.fit(trainXs, trainYs, {
     epochs,
     batchSize: 32,
     shuffle: true,
     yieldEvery: 'batch',
     callbacks: {
+      onEpochBegin: (epoch) => {
+        activeEpoch = epoch
+      },
+      onBatchEnd: async (batch, logs) => {
+        const loss = Number(logs?.loss)
+        const accuracy = Number(logs?.acc ?? logs?.accuracy)
+        if (!Number.isFinite(loss) || !Number.isFinite(accuracy)) {
+          throw new Error('Batch 학습 지표가 유한한 숫자가 아닙니다.')
+        }
+
+        const batchInEpoch = batch + 1
+        const completedBatches = activeEpoch * batchesPerEpoch + batchInEpoch
+        const now = performance.now()
+        const shouldPublish =
+          batch === 0 ||
+          batchInEpoch === batchesPerEpoch ||
+          completedBatches === totalBatches ||
+          now - lastPublishedAt >= 120
+
+        if (shouldPublish) {
+          lastPublishedAt = now
+          onBatch({
+            currentEpoch: activeEpoch + 1,
+            batchInEpoch,
+            batchesPerEpoch,
+            completedBatches,
+            totalBatches,
+            loss,
+            accuracy,
+          })
+          await tf.nextFrame()
+        }
+      },
       onEpochEnd: async (epoch, logs) => {
         const loss = Number(logs?.loss)
         const accuracy = Number(logs?.acc ?? logs?.accuracy)

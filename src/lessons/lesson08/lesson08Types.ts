@@ -6,10 +6,14 @@ export type Lesson08Epochs = 1 | 3 | 5
 export type TrainingStatus =
   | 'idle'
   | 'loading-data'
-  | 'preparing'
+  | 'loading-engine'
+  | 'converting-data'
+  | 'preparing-model'
   | 'training'
+  | 'summarizing'
   | 'trained'
   | 'evaluating'
+  | 'predicting'
   | 'ready'
   | 'cancelled'
   | 'error'
@@ -24,6 +28,16 @@ export interface TrainingConfig {
 
 export interface EpochMetric {
   epoch: number
+  loss: number
+  accuracy: number
+}
+
+export interface BatchProgress {
+  currentEpoch: number
+  batchInEpoch: number
+  batchesPerEpoch: number
+  completedBatches: number
+  totalBatches: number
   loss: number
   accuracy: number
 }

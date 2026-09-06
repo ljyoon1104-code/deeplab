@@ -29,8 +29,16 @@ export function BottomLessonNavigation({
           <ArrowLeft size={18} aria-hidden="true" />
           이전
         </Button>
-        <span className="text-sm font-bold tabular-nums text-slate-700" aria-live="polite">
-          {currentStep} / {STEP_COUNT}
+        <span
+          className="text-center text-sm font-bold tabular-nums text-slate-700"
+          aria-live="polite"
+        >
+          <span className="block">{currentStep} / {STEP_COUNT}</span>
+          {isLast && !canComplete && !lessonCompleted && (
+            <span className="mt-0.5 block max-w-44 text-[0.68rem] font-semibold leading-tight text-amber-700 sm:max-w-none">
+              완료되지 않은 STEP의 활동을 확인하세요.
+            </span>
+          )}
         </span>
         {isLast ? (
           <Button

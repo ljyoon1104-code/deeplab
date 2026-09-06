@@ -24,6 +24,7 @@ import {
   type TrainableModel,
 } from './mnistTrainingEngine'
 import type {
+  BatchProgress,
   DrawingPrediction,
   EpochMetric,
   EvaluationResult,
@@ -49,6 +50,7 @@ interface Lesson08LabValue {
   currentEpoch: number
   elapsedMs: number
   liveMetric: EpochMetric | null
+  batchProgress: BatchProgress | null
   trainingResult: TrainingResult | null
   evaluation: EvaluationResult | null
   drawingPrediction: DrawingPrediction | null
@@ -121,6 +123,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const [currentEpoch, setCurrentEpoch] = useState(0)
   const [elapsedMs, setElapsedMs] = useState(0)
   const [liveMetric, setLiveMetric] = useState<EpochMetric | null>(null)
+  const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null)
   const [trainingResult, setTrainingResult] = useState<TrainingResult | null>(null)
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null)
   const [drawingPrediction, setDrawingPrediction] = useState<DrawingPrediction | null>(null)
@@ -139,7 +142,16 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const currentOptimizerRef = useRef<OwnedOptimizer | null>(null)
   const currentRecordIdRef = useRef<string | null>(null)
 
-  const isBusy = ['loading-data', 'preparing', 'training', 'evaluating'].includes(status)
+  const isBusy = [
+    'loading-data',
+    'loading-engine',
+    'converting-data',
+    'preparing-model',
+    'training',
+    'summarizing',
+    'evaluating',
+    'predicting',
+  ].includes(status)
 
   const setDatasetSize = useCallback((size: MnistDatasetSize) => {
     if (operationBusyRef.current) return
@@ -180,6 +192,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       setCurrentEpoch(0)
       setElapsedMs(0)
       setLiveMetric(null)
+      setBatchProgress(null)
       setTrainingResult(null)
       setEvaluation(null)
       setDrawingPrediction(null)
@@ -201,7 +214,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
       if (cancelRequestedRef.current || controller.signal.aborted) throw new DOMException('취소됨', 'AbortError')
 
-      if (mountedRef.current) setStatus('preparing')
+      if (mountedRef.current) setStatus('loading-engine')
       let tf
       try {
         tf = await loadTensorFlow()
@@ -209,6 +222,12 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
         throw new OperationFailure('engine', cause)
       }
       if (cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
+
+      if (mountedRef.current) {
+        setBackend(tf.getBackend() || 'unknown')
+        setStatus('converting-data')
+      }
+      await tf.nextFrame()
 
       disposeOwned(currentModelRef.current, currentOptimizerRef.current)
       currentModelRef.current = null
@@ -222,6 +241,8 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       } catch (cause) {
         throw new OperationFailure('training', cause)
       }
+      if (mountedRef.current) setStatus('preparing-model')
+      await tf.nextFrame()
       try {
         const created = createTrainableModel(tf, selected.modelType)
         nextModel = created.model
@@ -243,17 +264,37 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }, 200)
       let history: EpochMetric[]
       try {
-        history = await fitModel(tf, nextModel, trainXs, trainYs, selected.epochs, (metric) => {
-          if (!mountedRef.current) return
-          setCurrentEpoch(metric.epoch)
-          setLiveMetric(metric)
-        })
+        history = await fitModel(
+          tf,
+          nextModel,
+          trainXs,
+          trainYs,
+          selected.epochs,
+          (progress) => {
+            if (!mountedRef.current || cancelRequestedRef.current) return
+            setCurrentEpoch(progress.currentEpoch)
+            setBatchProgress(progress)
+            setLiveMetric({
+              epoch: progress.currentEpoch,
+              loss: progress.loss,
+              accuracy: progress.accuracy,
+            })
+          },
+          (metric) => {
+            if (!mountedRef.current || cancelRequestedRef.current) return
+            setCurrentEpoch(metric.epoch)
+            setLiveMetric(metric)
+          },
+        )
       } catch (cause) {
         throw new OperationFailure('training', cause)
       } finally {
         window.clearInterval(elapsedTimer)
       }
       const durationMs = performance.now() - startedAt
+
+      if (mountedRef.current) setStatus('summarizing')
+      await tf.nextFrame()
 
       if (cancelRequestedRef.current || history.length !== selected.epochs) {
         throw new DOMException('취소됨', 'AbortError')
@@ -390,15 +431,22 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
     try {
       setError(null)
       setEmptyDrawingMessage(null)
+      setStatus('predicting')
       const tf = await loadTensorFlow()
       const prediction = await runDrawingPrediction(tf, model, normalized, previewPixels)
-      if (mountedRef.current) setDrawingPrediction(prediction)
+      if (mountedRef.current) {
+        setDrawingPrediction(prediction)
+        setStatus(evaluation ? 'ready' : 'trained')
+      }
     } catch (cause) {
-      if (mountedRef.current) setError(makeOperationError('drawing', cause))
+      if (mountedRef.current) {
+        setError(makeOperationError('drawing', cause))
+        setStatus('error')
+      }
     } finally {
       operationBusyRef.current = false
     }
-  }, [])
+  }, [evaluation])
 
   const clearDrawingPrediction = useCallback(() => {
     setDrawingPrediction(null)
@@ -412,6 +460,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    mountedRef.current = true
     return () => {
       mountedRef.current = false
       cancelRequestedRef.current = true
@@ -437,6 +486,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       currentEpoch,
       elapsedMs,
       liveMetric,
+      batchProgress,
       trainingResult,
       evaluation,
       drawingPrediction,
@@ -467,6 +517,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       currentEpoch,
       elapsedMs,
       liveMetric,
+      batchProgress,
       trainingResult,
       evaluation,
       drawingPrediction,
@@ -485,6 +536,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       clearDrawingPrediction,
       markEmptyDrawing,
       clearError,
+      emptyDrawingMessage,
     ],
   )
 

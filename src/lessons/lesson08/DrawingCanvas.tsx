@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
+import { LoaderCircle } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 
 interface PreparedDrawing {
@@ -129,6 +130,9 @@ export default function DrawingCanvas({
     context.lineJoin = 'round'
     context.strokeStyle = '#fff'
     context.lineWidth = Math.max(18, canvas.width * 0.065)
+    // 짧게 탭한 경우에도 입력이 보이도록 첫 점을 즉시 그린다.
+    context.lineTo(point.x + 0.01, point.y + 0.01)
+    context.stroke()
   }
 
   const continueDrawing = (event: PointerEvent<HTMLCanvasElement>) => {
@@ -195,10 +199,16 @@ export default function DrawingCanvas({
         <Button variant="secondary" onClick={clear} disabled={busy}>
           지우기
         </Button>
-        <Button onClick={predict} disabled={disabled || busy}>
-          {busy ? '예측 중…' : 'AI에게 물어보기'}
+        <Button onClick={predict} disabled={disabled || busy} aria-busy={busy}>
+          {busy ? <LoaderCircle className="animate-spin" size={17} aria-hidden="true" /> : null}
+          {busy ? '실제 모델로 예측 중…' : 'AI에게 물어보기'}
         </Button>
       </div>
+      {busy ? (
+        <p className="mt-2 text-sm font-bold text-violet-800" role="status" aria-live="polite">
+          28×28 입력을 현재 모델에 전달하고 있습니다.
+        </p>
+      ) : null}
     </div>
   )
 }

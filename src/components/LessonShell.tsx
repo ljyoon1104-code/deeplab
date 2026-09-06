@@ -55,7 +55,15 @@ export function LessonShell({
                 {lesson.title}
               </h1>
             </div>
-            <ProgressBar value={progress.progress} label="차시 진행률" size="sm" />
+            <div>
+              <ProgressBar value={progress.progress} label="차시 진행률" size="sm" />
+              <p
+                className="mt-1.5 text-right text-xs font-semibold tabular-nums text-slate-600"
+                aria-live="polite"
+              >
+                완료한 STEP {progress.completedSteps.length} / {stepTitles.length}
+              </p>
+            </div>
           </div>
         </div>
       </header>

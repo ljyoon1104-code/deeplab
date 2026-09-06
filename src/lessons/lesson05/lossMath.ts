@@ -1,5 +1,18 @@
 export const LOSS_EPSILON = 1e-12
 
+export const parseFiniteNumberInput = (value: string) => {
+  const normalized = value.trim().replace(',', '.')
+  if (normalized === '') return null
+  const parsed = Number(normalized)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+export const isWithinTolerance = (
+  actual: number | null,
+  expected: number,
+  tolerance: number,
+) => actual !== null && Math.abs(actual - expected) <= tolerance
+
 export const clampProbability = (probability: number) =>
   Math.min(1 - LOSS_EPSILON, Math.max(LOSS_EPSILON, probability))
 
@@ -53,4 +66,3 @@ export const categoricalCrossEntropy = (
 
 export const formatLoss = (value: number, digits = 2) =>
   value.toFixed(digits)
-

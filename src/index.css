@@ -31,6 +31,38 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+button:not(:disabled),
+a[href] {
+  touch-action: manipulation;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:active:not(:disabled),
+a[href]:active {
+  transform: scale(0.98);
+}
+
+button[aria-pressed="true"],
+button[aria-selected="true"] {
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 22%);
+}
+
+@keyframes training-progress-sweep {
+  from {
+    translate: -115% 0;
+  }
+  to {
+    translate: 290% 0;
+  }
+}
+
+.training-progress-indeterminate > span {
+  animation: training-progress-sweep 1.15s ease-in-out infinite;
+}
+
 .signal-flow {
   display: flex;
   align-items: center;
@@ -148,6 +180,28 @@ a {
 .step-button-current .step-number {
   background: #4f46e5;
   color: #ffffff;
+}
+
+@keyframes step-complete-pop {
+  0% {
+    transform: scale(0.82);
+  }
+  58% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.step-number-complete {
+  background: #059669;
+  color: #ffffff;
+  animation: step-complete-pop 240ms ease-out both;
+}
+
+.step-button-current .step-number-complete {
+  background: #047857;
 }
 
 .step-focus-target {
@@ -298,7 +352,7 @@ a {
 }
 
 .choice-chip {
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.7rem;
   background: #fff;

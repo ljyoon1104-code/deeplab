@@ -36,7 +36,9 @@ import {
   binaryCrossEntropy,
   categoricalCrossEntropy,
   formatLoss,
+  isWithinTolerance,
   mse,
+  parseFiniteNumberInput,
   predictionError,
   squaredError,
 } from './lossMath'
@@ -671,6 +673,11 @@ export function Lesson05Step4(props: CommonStepProps) {
   const [squares, setSquares] = useState(['', '', ''])
   const [average, setAverage] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [fieldResults, setFieldResults] = useState<{
+    errors: boolean[]
+    squares: boolean[]
+    average: boolean
+  } | null>(null)
 
   const targets = mseExamples.map((item) => item.target)
   const predictions = mseExamples.map((item) => item.prediction)
@@ -682,13 +689,38 @@ export function Lesson05Step4(props: CommonStepProps) {
   )
   const expectedMse = mse(targets, predictions)
   const allFilled =
-    errors.every((value) => value !== '') &&
-    squares.every((value) => value !== '') &&
-    average !== ''
-  const correct =
-    errors.every((value, index) => Number(value) === expectedErrors[index]) &&
-    squares.every((value, index) => Number(value) === expectedSquares[index]) &&
-    Math.abs(Number(average.replace(',', '.')) - expectedMse) < 0.01
+    errors.every((value) => value.trim() !== '') &&
+    squares.every((value) => value.trim() !== '') &&
+    average.trim() !== ''
+
+  const gradeInputs = () => {
+    const errorResults = errors.map((value, index) =>
+      isWithinTolerance(parseFiniteNumberInput(value), expectedErrors[index], 1e-9),
+    )
+    const squareResults = squares.map((value, index) =>
+      isWithinTolerance(parseFiniteNumberInput(value), expectedSquares[index], 1e-9),
+    )
+    const averageResult = isWithinTolerance(
+      parseFiniteNumberInput(average),
+      expectedMse,
+      0.005,
+    )
+    return {
+      errors: errorResults,
+      squares: squareResults,
+      average: averageResult,
+      correct:
+        errorResults.every(Boolean) &&
+        squareResults.every(Boolean) &&
+        averageResult,
+    }
+  }
+
+  const correct = fieldResults
+    ? fieldResults.errors.every(Boolean) &&
+      fieldResults.squares.every(Boolean) &&
+      fieldResults.average
+    : false
 
   const updateValue = (
     setter: Dispatch<SetStateAction<string[]>>,
@@ -699,12 +731,15 @@ export function Lesson05Step4(props: CommonStepProps) {
       current.map((item, itemIndex) => (itemIndex === index ? value : item)),
     )
     setSubmitted(false)
+    setFieldResults(null)
   }
 
   const submit = () => {
     if (!allFilled) return
+    const result = gradeInputs()
+    setFieldResults(result)
     setSubmitted(true)
-    if (correct) props.onComplete()
+    if (result.correct) props.onComplete()
   }
 
   return (
@@ -756,14 +791,33 @@ export function Lesson05Step4(props: CommonStepProps) {
               </label>
               <input
                 id={`mse-error-${index}`}
-                type="number"
+                type="text"
                 inputMode="decimal"
                 value={errors[index]}
+                aria-invalid={fieldResults ? !fieldResults.errors[index] : undefined}
+                aria-describedby={fieldResults ? `mse-error-${index}-result` : undefined}
                 onChange={(event) =>
                   updateValue(setErrors, index, event.target.value)
                 }
-                className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-lg font-black focus:border-indigo-500 focus:outline-none focus:ring-3 focus:ring-indigo-100"
+                className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-lg font-black focus:outline-none focus:ring-3 ${
+                  fieldResults
+                    ? fieldResults.errors[index]
+                      ? 'border-emerald-500 focus:ring-emerald-100'
+                      : 'border-rose-500 focus:ring-rose-100'
+                    : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'
+                }`}
               />
+              {fieldResults ? (
+                <p
+                  id={`mse-error-${index}-result`}
+                  className={`mt-2 flex items-center gap-1.5 text-sm font-bold ${
+                    fieldResults.errors[index] ? 'text-emerald-700' : 'text-rose-700'
+                  }`}
+                >
+                  {fieldResults.errors[index] ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                  {fieldResults.errors[index] ? '오차가 맞습니다.' : `오차를 다시 확인하세요.`}
+                </p>
+              ) : null}
               <label
                 htmlFor={`mse-square-${index}`}
                 className="mt-4 block font-bold text-slate-800"
@@ -772,15 +826,33 @@ export function Lesson05Step4(props: CommonStepProps) {
               </label>
               <input
                 id={`mse-square-${index}`}
-                type="number"
+                type="text"
                 inputMode="decimal"
-                min="0"
                 value={squares[index]}
+                aria-invalid={fieldResults ? !fieldResults.squares[index] : undefined}
+                aria-describedby={fieldResults ? `mse-square-${index}-result` : undefined}
                 onChange={(event) =>
                   updateValue(setSquares, index, event.target.value)
                 }
-                className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-lg font-black focus:border-indigo-500 focus:outline-none focus:ring-3 focus:ring-indigo-100"
+                className={`mt-2 min-h-12 w-full rounded-xl border bg-white px-4 text-lg font-black focus:outline-none focus:ring-3 ${
+                  fieldResults
+                    ? fieldResults.squares[index]
+                      ? 'border-emerald-500 focus:ring-emerald-100'
+                      : 'border-rose-500 focus:ring-rose-100'
+                    : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'
+                }`}
               />
+              {fieldResults ? (
+                <p
+                  id={`mse-square-${index}-result`}
+                  className={`mt-2 flex items-center gap-1.5 text-sm font-bold ${
+                    fieldResults.squares[index] ? 'text-emerald-700' : 'text-rose-700'
+                  }`}
+                >
+                  {fieldResults.squares[index] ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+                  {fieldResults.squares[index] ? '오차 제곱이 맞습니다.' : '오차 제곱을 다시 확인하세요.'}
+                </p>
+              ) : null}
             </fieldset>
           ))}
         </div>
@@ -803,14 +875,36 @@ export function Lesson05Step4(props: CommonStepProps) {
               type="text"
               inputMode="decimal"
               value={average}
+              aria-invalid={fieldResults ? !fieldResults.average : undefined}
+              aria-describedby={fieldResults ? 'mse-average-result' : undefined}
               onChange={(event) => {
                 setAverage(event.target.value)
                 setSubmitted(false)
+                setFieldResults(null)
               }}
-              className="min-h-12 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 text-lg font-black focus:border-indigo-500 focus:outline-none focus:ring-3 focus:ring-indigo-100"
+              className={`min-h-12 min-w-0 flex-1 rounded-xl border bg-white px-4 text-lg font-black focus:outline-none focus:ring-3 ${
+                fieldResults
+                  ? fieldResults.average
+                    ? 'border-emerald-500 focus:ring-emerald-100'
+                    : 'border-rose-500 focus:ring-rose-100'
+                  : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'
+              }`}
             />
             <span className="font-bold text-slate-600">MSE</span>
           </div>
+          {fieldResults ? (
+            <p
+              id="mse-average-result"
+              className={`mt-2 flex items-center gap-1.5 text-sm font-bold ${
+                fieldResults.average ? 'text-emerald-700' : 'text-rose-700'
+              }`}
+            >
+              {fieldResults.average ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
+              {fieldResults.average
+                ? 'MSE가 맞습니다.'
+                : '소수점 둘째 자리까지 계산해 다시 입력하세요.'}
+            </p>
+          ) : null}
         </div>
         <Button className="mt-5" disabled={!allFilled} onClick={submit}>
           MSE 계산 확인

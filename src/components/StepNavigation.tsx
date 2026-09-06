@@ -28,7 +28,10 @@ export function StepNavigation({
                 onClick={() => onStepChange(step)}
                 aria-current={isCurrent ? 'step' : undefined}
               >
-                <span className="step-number" aria-hidden="true">
+                <span
+                  className={`step-number ${isComplete ? 'step-number-complete' : ''}`}
+                  aria-hidden="true"
+                >
                   {isComplete ? <Check size={15} /> : <Circle size={12} />}
                 </span>
                 <span>

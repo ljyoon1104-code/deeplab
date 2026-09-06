@@ -7,6 +7,7 @@ import {
   Eye,
   FlaskConical,
   Info,
+  LoaderCircle,
   Play,
   RotateCcw,
   Square,
@@ -248,7 +249,33 @@ export function Lesson08Step1(props: CommonStepProps) {
 
 export function Lesson08Step2(props: CommonStepProps) {
   const lab = useLesson08Lab()
-  const running = ['loading-data', 'preparing', 'training'].includes(lab.status)
+  const running = [
+    'loading-data',
+    'loading-engine',
+    'converting-data',
+    'preparing-model',
+    'training',
+    'summarizing',
+  ].includes(lab.status)
+  const hasMeasuredProgress = Boolean(lab.batchProgress) || Boolean(lab.trainingResult)
+  const hasIndeterminateProgress = running && !hasMeasuredProgress
+  const measuredPercentage = lab.trainingResult
+    ? 100
+    : lab.batchProgress && lab.batchProgress.totalBatches > 0
+      ? Math.min(
+          99,
+          Math.max(
+            0,
+            (lab.batchProgress.completedBatches / lab.batchProgress.totalBatches) * 100,
+          ),
+        )
+      : 0
+  const progressEpochs = lab.trainingResult?.config.epochs ?? lab.epochs
+  const progressLabel = lab.trainingResult
+    ? '학습 완료 · 전체 진행률 100%'
+    : lab.batchProgress
+      ? `Epoch ${lab.batchProgress.currentEpoch} / ${progressEpochs}, Batch ${lab.batchProgress.batchInEpoch} / ${lab.batchProgress.batchesPerEpoch}, 전체 진행률 ${Math.floor(measuredPercentage)}%`
+      : STATUS_LABELS[lab.status]
 
   return (
     <StepFrame {...props} step={2} intro="선택한 실제 MNIST Train subset으로 새 신경망을 만들고 학습합니다.">
@@ -263,9 +290,12 @@ export function Lesson08Step2(props: CommonStepProps) {
           <p className="mt-4 text-sm leading-6 text-slate-600">Train은 가중치와 편향을 학습하는 데만 사용합니다. 새 실험은 이전 모델을 이어 쓰지 않고 새 모델로 시작합니다.</p>
         </div>
 
-        <div className="rounded-2xl border border-violet-200 bg-white p-5" aria-live="polite">
+        <div className="rounded-2xl border border-violet-200 bg-white p-5" aria-busy={running}>
           <p className="text-xs font-black tracking-[0.15em] text-violet-700">TRAINING STATUS</p>
-          <h3 className="mt-2 text-xl font-black">{STATUS_LABELS[lab.status]}</h3>
+          <div className="mt-2 flex items-center gap-2" role="status" aria-live="polite" aria-atomic="true">
+            {running ? <LoaderCircle className="shrink-0 animate-spin text-violet-600" size={21} aria-hidden="true" /> : null}
+            <h3 className="text-xl font-black">{STATUS_LABELS[lab.status]}</h3>
+          </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div><dt className="text-slate-500">Train sample</dt><dd className="font-black">{(lab.trainingResult?.config.datasetSize ?? lab.datasetSize).toLocaleString()}</dd></div>
             <div><dt className="text-slate-500">모델</dt><dd className="font-black">{MODEL_OPTIONS[lab.trainingResult?.config.modelType ?? lab.modelType].name}</dd></div>
@@ -275,6 +305,49 @@ export function Lesson08Step2(props: CommonStepProps) {
             <div><dt className="text-slate-500">현재 Accuracy</dt><dd className="font-mono font-black">{lab.liveMetric ? <Percent value={lab.liveMetric.accuracy} /> : '—'}</dd></div>
             <div className="col-span-2"><dt className="text-slate-500">경과 시간</dt><dd className="font-mono font-black">{(lab.elapsedMs / 1000).toFixed(1)}초</dd></div>
           </dl>
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-3 text-sm font-bold text-slate-700">
+              <span>학습 진행률</span>
+              <span className="tabular-nums">
+                {hasMeasuredProgress ? `${Math.floor(measuredPercentage)}%` : '준비 중…'}
+              </span>
+            </div>
+            <div
+              className={`mt-2 h-3 overflow-hidden rounded-full bg-slate-200 ${
+                hasIndeterminateProgress ? 'training-progress-indeterminate' : ''
+              }`}
+              role="progressbar"
+              aria-label="실제 모델 학습 진행률"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={hasMeasuredProgress ? Math.floor(measuredPercentage) : undefined}
+              aria-valuetext={progressLabel}
+            >
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-cyan-500 to-violet-600 transition-[width] duration-200"
+                style={{
+                  width: hasMeasuredProgress
+                    ? `${measuredPercentage}%`
+                    : hasIndeterminateProgress
+                      ? '35%'
+                      : '0%',
+                }}
+              />
+            </div>
+            {lab.batchProgress ? (
+              <p className="mt-2 text-sm font-semibold text-slate-600">
+                Epoch {lab.batchProgress.currentEpoch} / {progressEpochs} · Batch{' '}
+                {lab.batchProgress.batchInEpoch} / {lab.batchProgress.batchesPerEpoch} · 완료{' '}
+                {lab.batchProgress.completedBatches} / {lab.batchProgress.totalBatches} Batch
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-slate-600">
+                {running
+                  ? `${STATUS_LABELS[lab.status]}… 정확한 Batch 진행률이 준비되면 표시합니다.`
+                  : '학습을 시작하면 실제 Batch 완료 수로 진행률을 표시합니다.'}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 
@@ -282,11 +355,19 @@ export function Lesson08Step2(props: CommonStepProps) {
         <Notice danger><p className="font-black">{lab.error.message}</p><p className="mt-1 break-words">{lab.error.detail}</p></Notice>
       ) : null}
       <div className="mt-6 flex flex-wrap gap-3">
-        <Button onClick={() => void lab.startTraining()} disabled={running || lab.status === 'evaluating'}>
-          <Play size={18} aria-hidden="true" /> 실제 모델 학습 시작
+        <Button onClick={() => void lab.startTraining()} disabled={lab.isBusy}>
+          {running ? <LoaderCircle className="animate-spin" size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+          {running ? '실제 모델 학습 중…' : lab.trainingResult ? '새 모델로 다시 학습' : '실제 모델 학습 시작'}
         </Button>
         {running ? <Button variant="danger" onClick={lab.cancelTraining}><Square size={17} aria-hidden="true" /> 학습 취소</Button> : null}
       </div>
+
+      {lab.status === 'cancelled' ? (
+        <Notice>
+          <p className="font-black">학습이 취소되었습니다.</p>
+          <p className="mt-1">진행률은 다음 학습을 시작할 때 0부터 다시 계산됩니다.</p>
+        </Notice>
+      ) : null}
 
       {lab.trainingResult ? (
         <div className="mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
@@ -302,7 +383,13 @@ export function Lesson08Step2(props: CommonStepProps) {
           </Button>
         </div>
       ) : null}
-      {props.isComplete ? <Completion>실제 model.fit()이 완료되어 마지막 Loss와 Accuracy를 확인했습니다.</Completion> : null}
+      {props.isComplete ? (
+        <Completion>
+          {lab.trainingResult
+            ? '실제 model.fit()이 완료되어 마지막 Loss와 Accuracy를 확인했습니다.'
+            : '이 STEP의 완료 기록이 저장되어 있습니다. 현재 메모리의 모델이 필요하면 실제 학습을 다시 실행하세요.'}
+        </Completion>
+      ) : null}
     </StepFrame>
   )
 }
@@ -384,9 +471,21 @@ export function Lesson08Step4(props: CommonStepProps) {
       {!modelReady ? <ModelRequired /> : (
         <>
           <Notice>Train subset은 가중치와 편향 학습에만, Test 500은 학습이 끝난 현재 모델의 평가에만 사용합니다. Test 결과로 모델을 다시 학습하지 않습니다.</Notice>
-          <Button className="mt-5" onClick={() => void evaluateTest()} disabled={status === 'evaluating'}>
-            <Play size={18} aria-hidden="true" /> {status === 'evaluating' ? '평가 중…' : 'Test 500개로 평가하기'}
+          <Button
+            className="mt-5"
+            onClick={() => void evaluateTest()}
+            disabled={status === 'evaluating'}
+            aria-busy={status === 'evaluating'}
+          >
+            {status === 'evaluating' ? <LoaderCircle className="animate-spin" size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+            {status === 'evaluating' ? 'Test 500개 평가 중…' : 'Test 500개로 평가하기'}
           </Button>
+          {status === 'evaluating' ? (
+            <p className="mt-3 flex items-center gap-2 text-sm font-bold text-violet-800" role="status" aria-live="polite">
+              <LoaderCircle className="animate-spin" size={17} aria-hidden="true" />
+              학습에 사용하지 않은 Test JSON을 불러와 실제 model.predict()를 실행하고 있습니다.
+            </p>
+          ) : null}
         </>
       )}
       {error?.kind === 'evaluation' ? <Notice danger><p className="font-black">{error.message}</p><p className="mt-1">{error.detail}</p><Button className="mt-3" onClick={() => void evaluateTest()}><RotateCcw size={17} /> 다시 시도</Button></Notice> : null}
