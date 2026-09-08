@@ -427,13 +427,21 @@ export function Lesson05Step2(props: CommonStepProps) {
   const [differenceB, setDifferenceB] = useState('')
   const [closer, setCloser] = useState<'A' | 'B' | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [signedErrors, setSignedErrors] = useState(['', ''])
+  const [cancelSum, setCancelSum] = useState('')
+  const [squareReason, setSquareReason] = useState<'avoid-cancel' | 'accuracy' | null>(null)
+  const [analysisSubmitted, setAnalysisSubmitted] = useState(false)
   const correct =
-    Number(differenceA) === 10 && Number(differenceB) === 2 && closer === 'B'
+    parseFiniteNumberInput(differenceA) === 10 && parseFiniteNumberInput(differenceB) === 2 && closer === 'B'
+  const analysisCorrect = parseFiniteNumberInput(signedErrors[0]) === -10 && parseFiniteNumberInput(signedErrors[1]) === 10 && parseFiniteNumberInput(cancelSum) === 0 && squareReason === 'avoid-cancel'
+
+  useEffect(() => {
+    if (!props.isComplete && submitted && correct && analysisSubmitted && analysisCorrect) props.onComplete()
+  }, [analysisCorrect, analysisSubmitted, correct, props, submitted])
 
   const submit = () => {
     if (!differenceA || !differenceB || !closer) return
     setSubmitted(true)
-    if (correct) props.onComplete()
   }
 
   return (
@@ -557,9 +565,11 @@ export function Lesson05Step2(props: CommonStepProps) {
         />
       )}
 
+      <section className="mt-9 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="signed-error-title"><h3 id="signed-error-title" className="text-xl font-black text-indigo-950">오차의 부호와 상쇄</h3><p className="mt-2 leading-7 text-slate-700">이번에는 오차를 <strong>예측값 - 실제값</strong>으로 계산하세요. 부호는 예측이 실제보다 높은지 낮은지를 나타내고, 절댓값은 차이의 크기를 나타냅니다.</p><div className="mt-5 grid gap-5 md:grid-cols-2">{[{ label: '실제 80, 예측 70', expected: -10 }, { label: '실제 80, 예측 90', expected: 10 }].map((item,index) => <label key={item.label} className="rounded-xl bg-white p-4"><span className="font-black">{item.label}</span><span className="mt-1 block text-sm text-slate-600">부호 있는 오차를 입력</span><input type="text" inputMode="decimal" value={signedErrors[index]} onChange={(event) => { setSignedErrors((items) => items.map((answer,itemIndex) => itemIndex===index ? event.target.value : answer)); setAnalysisSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 px-4 font-black" aria-label={`${item.label}의 부호 있는 오차`} /></label>)}</div><label className="mt-5 block"><span className="font-black">두 오차 -10과 +10을 그대로 더하면?</span><input type="text" inputMode="decimal" value={cancelSum} onChange={(event) => { setCancelSum(event.target.value); setAnalysisSubmitted(false) }} className="mt-2 min-h-12 w-full max-w-sm rounded-xl border border-slate-300 px-4 font-black" /></label><fieldset className="mt-5"><legend className="font-black">MSE에서 오차를 제곱하는 중요한 이유는?</legend><div className="mt-3 grid gap-3 sm:grid-cols-2"><Button variant={squareReason === 'avoid-cancel' ? 'primary' : 'secondary'} aria-pressed={squareReason === 'avoid-cancel'} onClick={() => { setSquareReason('avoid-cancel'); setAnalysisSubmitted(false) }}>양수·음수 오차가 서로 지워지지 않게 한다</Button><Button variant={squareReason === 'accuracy' ? 'primary' : 'secondary'} aria-pressed={squareReason === 'accuracy'} onClick={() => { setSquareReason('accuracy'); setAnalysisSubmitted(false) }}>정확도와 같은 값을 만들기 위해서다</Button></div></fieldset><Button className="mt-5" disabled={signedErrors.some((value) => parseFiniteNumberInput(value) === null) || parseFiniteNumberInput(cancelSum) === null || !squareReason} onClick={() => setAnalysisSubmitted(true)}>부호와 제곱 이유 제출</Button>{analysisSubmitted && <AnswerFeedback correct={analysisCorrect} explanation={analysisCorrect ? '오차 -10과 +10은 크기는 같지만 방향이 반대입니다. 그대로 더하면 0이 되어 차이가 사라지므로 제곱해 모두 양수로 만듭니다.' : '예측값-실제값의 순서로 부호를 정하고, 반대 부호 오차를 그대로 더했을 때 무엇이 사라지는지 확인하세요.'} />}</section>
+
       {props.isComplete && (
         <StepCompletionMessage>
-          두 예측의 차이를 계산하고 실제값에 더 가까운 예측을 찾았습니다.
+          두 예측의 거리와 부호 있는 오차를 계산하고, 제곱이 오차 상쇄를 막는 이유를 설명했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -678,6 +688,10 @@ export function Lesson05Step4(props: CommonStepProps) {
     squares: boolean[]
     average: boolean
   } | null>(null)
+  const [modelMseAnswers, setModelMseAnswers] = useState(['', ''])
+  const [betterModel, setBetterModel] = useState<'A' | 'B' | null>(null)
+  const [comparisonReason, setComparisonReason] = useState<'large-error' | 'same' | null>(null)
+  const [comparisonSubmitted, setComparisonSubmitted] = useState(false)
 
   const targets = mseExamples.map((item) => item.target)
   const predictions = mseExamples.map((item) => item.prediction)
@@ -688,6 +702,10 @@ export function Lesson05Step4(props: CommonStepProps) {
     squaredError(item.target, item.prediction),
   )
   const expectedMse = mse(targets, predictions)
+  const comparisonTargets = [10, 20, 30, 40]
+  const modelPredictions = [[10, 20, 30, 50], [7, 17, 27, 37]]
+  const modelMses = modelPredictions.map((values) => mse(comparisonTargets, values))
+  const comparisonCorrect = modelMseAnswers.every((answer, index) => isWithinTolerance(parseFiniteNumberInput(answer), modelMses[index], 0.005)) && betterModel === 'B' && comparisonReason === 'large-error'
   const allFilled =
     errors.every((value) => value.trim() !== '') &&
     squares.every((value) => value.trim() !== '') &&
@@ -739,8 +757,11 @@ export function Lesson05Step4(props: CommonStepProps) {
     const result = gradeInputs()
     setFieldResults(result)
     setSubmitted(true)
-    if (result.correct) props.onComplete()
   }
+
+  useEffect(() => {
+    if (!props.isComplete && correct && comparisonSubmitted && comparisonCorrect) props.onComplete()
+  }, [comparisonCorrect, comparisonSubmitted, correct, props])
 
   return (
     <StepFrame
@@ -933,9 +954,11 @@ export function Lesson05Step4(props: CommonStepProps) {
         </>
       )}
 
+      <section className="mt-9 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="mse-model-compare-title"><h3 id="mse-model-compare-title" className="text-xl font-black text-indigo-950">3. 두 모델의 MSE 비교</h3><p className="mt-2 leading-7 text-slate-700">실제값은 [10, 20, 30, 40]입니다. 화면과 판정은 같은 MSE 계산 함수를 사용합니다.</p><div className="mt-5 grid gap-5 md:grid-cols-2">{modelPredictions.map((values,index) => <label key={values.join(',')} className="rounded-xl bg-white p-4"><span className="font-black">모델 {index === 0 ? 'A' : 'B'} 예측 [{values.join(', ')}]</span><span className="mt-1 block text-sm text-slate-600">MSE 입력</span><input type="text" inputMode="decimal" value={modelMseAnswers[index]} onChange={(event) => { setModelMseAnswers((items) => items.map((answer,item) => item===index ? event.target.value : answer)); setComparisonSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 px-4 font-black" /></label>)}</div><fieldset className="mt-5"><legend className="font-black">새 예측에서 더 나은 모델은?</legend><div className="mt-3 grid grid-cols-2 gap-3"><Button variant={betterModel === 'A' ? 'primary' : 'secondary'} aria-pressed={betterModel === 'A'} onClick={() => { setBetterModel('A'); setComparisonSubmitted(false) }}>모델 A</Button><Button variant={betterModel === 'B' ? 'primary' : 'secondary'} aria-pressed={betterModel === 'B'} onClick={() => { setBetterModel('B'); setComparisonSubmitted(false) }}>모델 B</Button></div></fieldset><fieldset className="mt-5"><legend className="font-black">모델 A의 MSE가 더 큰 까닭은?</legend><div className="mt-3 grid gap-3 sm:grid-cols-2"><Button variant={comparisonReason === 'large-error' ? 'primary' : 'secondary'} aria-pressed={comparisonReason === 'large-error'} onClick={() => { setComparisonReason('large-error'); setComparisonSubmitted(false) }}>큰 오차 하나도 제곱하면 크게 반영된다</Button><Button variant={comparisonReason === 'same' ? 'primary' : 'secondary'} aria-pressed={comparisonReason === 'same'} onClick={() => { setComparisonReason('same'); setComparisonSubmitted(false) }}>오차 부호만 달라서 두 MSE는 같다</Button></div></fieldset><Button className="mt-5" disabled={modelMseAnswers.some((value) => parseFiniteNumberInput(value) === null) || !betterModel || !comparisonReason} onClick={() => setComparisonSubmitted(true)}>두 모델 비교 제출</Button>{comparisonSubmitted && <AnswerFeedback correct={comparisonCorrect} explanation={comparisonCorrect ? `모델 A MSE=${modelMses[0]}, 모델 B MSE=${modelMses[1]}입니다. 큰 오차 10은 제곱되어 100으로 반영됩니다.` : '각 예측의 오차를 제곱해 평균을 다시 구하세요. 큰 오차가 제곱 뒤 얼마나 커지는지도 비교하세요.'} />}</section>
+
       {props.isComplete && (
         <StepCompletionMessage>
-          각 오차와 오차 제곱을 입력하고 MSE {formatLoss(expectedMse)}를 계산했습니다.
+          MSE {formatLoss(expectedMse)}를 계산하고 큰 오차에 민감한 성질로 두 모델을 비교했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -947,6 +970,10 @@ export function Lesson05Step5(props: CommonStepProps) {
   const [probability, setProbability] = useState(0.5)
   const [observedClose, setObservedClose] = useState(false)
   const [observedFar, setObservedFar] = useState(false)
+  const [goodTargetOne, setGoodTargetOne] = useState(false)
+  const [goodTargetZero, setGoodTargetZero] = useState(false)
+  const [observedAmbiguous, setObservedAmbiguous] = useState(false)
+  const [observedConfidentWrong, setObservedConfidentWrong] = useState(false)
   const [seenTargets, setSeenTargets] = useState<Array<0 | 1>>([1])
   const loss = useMemo(
     () => binaryCrossEntropy(target, probability),
@@ -959,13 +986,24 @@ export function Lesson05Step5(props: CommonStepProps) {
       nextTarget === 1 ? nextProbability : 1 - nextProbability
     if (correctProbability >= 0.8) setObservedClose(true)
     if (correctProbability <= 0.2) setObservedFar(true)
+    if (nextTarget === 1 && nextProbability >= 0.8) setGoodTargetOne(true)
+    if (nextTarget === 0 && nextProbability <= 0.2) setGoodTargetZero(true)
+    if (Math.abs(nextProbability - 0.5) < 1e-9) setObservedAmbiguous(true)
+    if (correctProbability <= 0.1) setObservedConfidentWrong(true)
   }
 
   useEffect(() => {
-    if (observedClose && observedFar && !props.isComplete) {
+    if (observedClose && observedFar && goodTargetOne && goodTargetZero && observedAmbiguous && observedConfidentWrong && !props.isComplete) {
       props.onComplete()
     }
-  }, [observedClose, observedFar, props.isComplete, props.onComplete])
+  }, [goodTargetOne, goodTargetZero, observedAmbiguous, observedClose, observedConfidentWrong, observedFar, props.isComplete, props.onComplete])
+
+  const applyScenario = (nextTarget: 0 | 1, nextProbability: number) => {
+    setTarget(nextTarget)
+    setProbability(nextProbability)
+    setSeenTargets((current) => current.includes(nextTarget) ? current : [...current, nextTarget])
+    recordObservation(nextTarget, nextProbability)
+  }
 
   return (
     <StepFrame
@@ -1018,6 +1056,8 @@ export function Lesson05Step5(props: CommonStepProps) {
           확인한 실제 정답: {seenTargets.length}/2
         </p>
       </section>
+
+      <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="bcee-scenarios-title"><h3 id="bcee-scenarios-title" className="text-xl font-black text-indigo-950">네 상황을 빠르게 비교</h3><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Button variant={goodTargetOne ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.9)}>{goodTargetOne ? <Check size={18} aria-hidden="true" /> : null}정답 1 · 좋은 예측</Button><Button variant={goodTargetZero ? 'primary' : 'secondary'} onClick={() => applyScenario(0,0.1)}>{goodTargetZero ? <Check size={18} aria-hidden="true" /> : null}정답 0 · 좋은 예측</Button><Button variant={observedConfidentWrong ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.05)}>{observedConfidentWrong ? <Check size={18} aria-hidden="true" /> : null}자신 있게 틀림</Button><Button variant={observedAmbiguous ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.5)}>{observedAmbiguous ? <Check size={18} aria-hidden="true" /> : null}애매한 0.5</Button></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><p className="rounded-xl bg-white p-4 font-semibold">정답에 가까운 예측: Loss가 작아지는 경향</p><p className="rounded-xl bg-white p-4 font-semibold">자신 있게 틀린 예측: Loss가 크게 증가</p></div></section>
 
       <section className="mt-8" aria-labelledby="bcee-slider-title">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -1124,7 +1164,7 @@ export function Lesson05Step5(props: CommonStepProps) {
 
       {props.isComplete && (
         <StepCompletionMessage>
-          BCEE에서 정답과 가까운 예측과 먼 예측을 모두 관찰했습니다.
+          BCEE에서 정답 0·1의 좋은 예측, 애매한 0.5와 자신 있게 틀린 예측을 모두 비교했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -1137,14 +1177,22 @@ const irisTarget = [0, 0, 1] as const
 export function Lesson05Step6(props: CommonStepProps) {
   const [presetId, setPresetId] = useState<(typeof cceePresets)[number]['id']>('A')
   const [viewedPresets, setViewedPresets] = useState<string[]>([])
+  const [usedProbability, setUsedProbability] = useState<'setosa' | 'all' | 'virginica' | null>(null)
+  const [reasonSubmitted, setReasonSubmitted] = useState(false)
   const preset = cceePresets.find((item) => item.id === presetId)!
   const loss = categoricalCrossEntropy(irisTarget, preset.probabilities)
+  const reasonCorrect = usedProbability === 'virginica'
 
   useEffect(() => {
-    if (viewedPresets.length === cceePresets.length && !props.isComplete) {
+    if (
+      viewedPresets.length === cceePresets.length &&
+      reasonSubmitted &&
+      reasonCorrect &&
+      !props.isComplete
+    ) {
       props.onComplete()
     }
-  }, [viewedPresets, props.isComplete, props.onComplete])
+  }, [reasonCorrect, reasonSubmitted, viewedPresets, props.isComplete, props.onComplete])
 
   const selectPreset = (id: (typeof cceePresets)[number]['id']) => {
     setPresetId(id)
@@ -1273,6 +1321,20 @@ export function Lesson05Step6(props: CommonStepProps) {
       </section>
 
       <div className="mt-8">
+        <FlowChain
+          label="점수에서 CCEE Loss까지의 흐름"
+          items={[
+            '점수',
+            'Softmax',
+            '클래스별 예측 확률',
+            '실제 정답 위치 확인',
+            'CCEE',
+            'Loss',
+          ]}
+        />
+      </div>
+
+      <div className="mt-8">
         <PredictionLossFlow
           prediction={
             <>
@@ -1309,9 +1371,56 @@ export function Lesson05Step6(props: CommonStepProps) {
         </p>
       </div>
 
+      <fieldset className="mt-8">
+        <legend className="text-xl font-black leading-snug text-slate-950">
+          현재 실제 정답이 Virginica일 때 CCEE가 직접 확인하는 값은?
+        </legend>
+        <div className="mt-4 grid gap-3">
+          {[
+            ['setosa', 'Setosa 위치의 확률만 사용한다.'],
+            ['all', '세 확률을 단순히 더한 값만 사용한다.'],
+            ['virginica', 'Virginica 위치의 예측 확률을 확인한다.'],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={usedProbability === key}
+              onClick={() => {
+                setUsedProbability(key as typeof usedProbability)
+                setReasonSubmitted(false)
+              }}
+              className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                usedProbability === key
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                  : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <Button
+          className="mt-5"
+          disabled={!usedProbability}
+          onClick={() => setReasonSubmitted(true)}
+        >
+          계산에 쓰는 위치 확인
+        </Button>
+        {reasonSubmitted && (
+          <AnswerFeedback
+            correct={reasonCorrect}
+            explanation={
+              reasonCorrect
+                ? '원-핫 정답에서 1인 Virginica 위치의 예측 확률을 CCEE 계산에 사용합니다.'
+                : '원-핫 배열 [0, 0, 1]에서 값이 1인 위치와 예측 확률 배열의 같은 위치를 찾아보세요.'
+            }
+          />
+        )}
+      </fieldset>
+
       {props.isComplete && (
         <StepCompletionMessage>
-          CCEE 예측 확률 세 가지를 모두 비교했습니다.
+          세 확률 분포를 비교하고 CCEE가 실제 정답 위치의 확률을 사용한다는 점을 찾았습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -1344,14 +1453,36 @@ export function Lesson05Step7({
     false,
     false,
   ])
+  const [recordAnswers, setRecordAnswers] = useState<Record<string, string>>({})
+  const [recordsSubmitted, setRecordsSubmitted] = useState(false)
 
   const allMatched = lossMatchingCases.every((item) => matches[item.id])
   const matchesCorrect = lossMatchingCases.every(
     (item) => matches[item.id] === item.answer,
   )
   const allQuizSubmitted = quizSubmitted.every(Boolean)
+  const allQuizCorrect = lesson05Quiz.every(
+    (quiz, index) => quizSubmitted[index] && quizAnswers[index] === quiz.answer,
+  )
+  const recordSolutions: Record<string, string> = {
+    generalization: 'B',
+    wobble: 'A',
+    sameAccuracy: 'A',
+    testPurpose: 'B',
+  }
+  const allRecordsAnswered = Object.keys(recordSolutions).every(
+    (id) => recordAnswers[id],
+  )
+  const recordsCorrect = Object.entries(recordSolutions).every(
+    ([id, answer]) => recordAnswers[id] === answer,
+  )
   const completionReady =
-    matchesSubmitted && matchesCorrect && allQuizSubmitted
+    matchesSubmitted &&
+    matchesCorrect &&
+    recordsSubmitted &&
+    recordsCorrect &&
+    allQuizSubmitted &&
+    allQuizCorrect
 
   useEffect(() => {
     onCompletionReadyChange(completionReady)
@@ -1376,6 +1507,11 @@ export function Lesson05Step7({
     setQuizSubmitted((current) =>
       current.map((value, itemIndex) => (itemIndex === index ? true : value)),
     )
+  }
+
+  const chooseRecord = (id: string, answer: string) => {
+    setRecordAnswers((current) => ({ ...current, [id]: answer }))
+    setRecordsSubmitted(false)
   }
 
   return (
@@ -1434,7 +1570,7 @@ export function Lesson05Step7({
             explanation={
               matchesCorrect
                 ? '연속적인 숫자 예측은 MSE, 이진 분류는 BCEE, 다중 분류는 CCEE로 연결합니다.'
-                : '기온처럼 연속적인 숫자는 MSE, 스팸/정상은 BCEE, 여러 동물 중 하나는 CCEE입니다.'
+                : '출력이 연속적인 수치인지, 두 상태인지, 여러 클래스 중 하나인지부터 다시 구분해 보세요.'
             }
           />
         )}
@@ -1489,9 +1625,89 @@ export function Lesson05Step7({
         </p>
       </section>
 
+      <section className="mt-10" aria-labelledby="training-record-title">
+        <h3 id="training-record-title" className="text-xl font-black text-slate-950">
+          3. 학습 기록을 비교하고 해석하기
+        </h3>
+        <p className="mt-2 leading-7 text-slate-600">
+          학습 데이터의 결과만 보지 말고, 처음 보는 Test 데이터의 결과와 Loss 변화도 함께 살펴보세요.
+        </p>
+        <div className="mt-5 space-y-6">
+          {[
+            {
+              id: 'generalization',
+              title: '모델 A와 B 중 새로운 데이터에도 더 잘 적용될 가능성이 큰 모델은?',
+              evidence: 'A: Train Loss 0.08 · Test 정확도 58% / B: Train Loss 0.18 · Test 정확도 86%',
+              options: [['A', '모델 A'], ['B', '모델 B']],
+            },
+            {
+              id: 'wobble',
+              title: 'Epoch별 Loss가 0.52 → 0.38 → 0.31 → 0.33이라면?',
+              evidence: '마지막에 0.02 커졌지만 처음보다 작습니다.',
+              options: [['A', '전체적으로 감소했지만 마지막에 조금 흔들렸다.'], ['B', '학습 내내 같은 값이었다.']],
+            },
+            {
+              id: 'sameAccuracy',
+              title: '두 모델의 정확도가 모두 90%일 때 더 낮은 Loss를 보인 모델은?',
+              evidence: 'A: Loss 0.12 / B: Loss 0.42',
+              options: [['A', '모델 A'], ['B', '모델 B']],
+            },
+            {
+              id: 'testPurpose',
+              title: '왜 Train 결과와 Test 결과를 구분해야 할까?',
+              evidence: 'Test는 학습에 직접 사용하지 않은 새로운 데이터입니다.',
+              options: [['A', 'Train Loss만 작으면 언제나 충분하기 때문에'], ['B', '새로운 데이터에도 성능이 유지되는지 확인하기 위해']],
+            },
+          ].map((record) => (
+            <fieldset key={record.id} className="rounded-2xl border border-slate-200 p-5">
+              <legend className="px-1 text-lg font-black leading-7 text-slate-950">
+                {record.title}
+              </legend>
+              <p className="mt-3 rounded-xl bg-slate-50 p-4 font-mono text-sm font-bold leading-6 text-slate-700">
+                {record.evidence}
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {record.options.map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={recordAnswers[record.id] === key}
+                    onClick={() => chooseRecord(record.id, key)}
+                    className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                      recordAnswers[record.id] === key
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                    }`}
+                  >
+                    {key}. {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+        <Button
+          className="mt-5"
+          disabled={!allRecordsAnswered}
+          onClick={() => setRecordsSubmitted(true)}
+        >
+          학습 기록 해석 제출
+        </Button>
+        {recordsSubmitted && (
+          <AnswerFeedback
+            correct={recordsCorrect}
+            explanation={
+              recordsCorrect
+                ? 'Train과 Test를 함께 보고, 전체 변화와 작은 흔들림을 구분했으며 같은 정확도에서도 Loss를 비교했습니다.'
+                : 'Train에서만 잘 맞는지, 새로운 Test 데이터에서도 잘 맞는지와 Loss의 전체 변화 방향을 다시 살펴보세요.'
+            }
+          />
+        )}
+      </section>
+
       <section className="mt-10" aria-labelledby="lesson05-quiz-title">
         <h3 id="lesson05-quiz-title" className="text-xl font-black text-slate-950">
-          3. 확인 문제 4개
+          4. 확인 문제 4개
         </h3>
         <p className="mt-2 leading-7 text-slate-600">
           오답은 해설을 확인하고 답을 바꾸어 다시 제출할 수 있습니다.
@@ -1532,7 +1748,11 @@ export function Lesson05Step7({
               {quizSubmitted[index] && (
                 <AnswerFeedback
                   correct={quizAnswers[index] === quiz.answer}
-                  explanation={quiz.explanation}
+                  explanation={
+                    quizAnswers[index] === quiz.answer
+                      ? quiz.explanation
+                      : '문제가 연속적인 숫자, 두 상태, 여러 클래스 중 어느 출력인지와 함수의 역할을 다시 확인해 보세요.'
+                  }
                 />
               )}
             </fieldset>
@@ -1547,7 +1767,7 @@ export function Lesson05Step7({
         >
           <CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
           <p className="leading-7">
-            문제 유형 연결과 확인 문제 네 개 제출을 마쳤습니다.{' '}
+            문제 유형 연결, 학습 기록 해석과 확인 문제 네 개를 모두 맞혔습니다.{' '}
             {priorStepsComplete
               ? '화면 아래의 완료 버튼으로 Lesson 05를 완료하세요.'
               : '완료되지 않은 앞 STEP의 핵심 활동을 마치면 완료 버튼이 활성화됩니다.'}

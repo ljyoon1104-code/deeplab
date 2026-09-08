@@ -1,30 +1,30 @@
 import {
   ArrowDown,
   ArrowRight,
+  ArrowUp,
   Check,
   CheckCircle2,
   Circle,
   CircleHelp,
-  Equal,
-  Gauge,
-  Lightbulb,
   RotateCcw,
-  SlidersHorizontal,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { lesson02Objectives, lesson02StepTitles } from './lesson02Data'
 import {
-  calculatePerceptron,
+  calculatePerceptronN,
+  classifyPoint,
   formatNumber,
-  lesson02Objectives,
-  lesson02StepTitles,
+  getBoundarySegment,
+  isCloseNumber,
+  matchesTruthTable,
   parseStudentNumber,
-  perceptronElements,
-  type PerceptronValues,
-} from './lesson02Data'
+  truthTable,
+  type PerceptronInput,
+} from './perceptronMath'
 
 interface CommonStepProps {
   active: boolean
@@ -38,1149 +38,235 @@ interface StepFrameProps extends CommonStepProps {
   children: ReactNode
 }
 
-function StepFrame({
-  step,
-  intro,
-  active,
-  isComplete,
-  children,
-}: StepFrameProps) {
+function StepFrame({ step, intro, active, isComplete, children }: StepFrameProps) {
   const titleId = active ? 'lesson-step-title' : `lesson02-step-${step}-title`
-
   return (
-    <Card
-      as="section"
-      hidden={!active}
-      aria-labelledby={titleId}
-      className="overflow-hidden"
-    >
+    <Card as="section" hidden={!active} aria-labelledby={titleId} className="overflow-hidden">
       <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 px-5 py-6 sm:px-8 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-sm font-black tracking-[0.15em] text-indigo-700">
-            STEP {step}
-          </span>
-          <span
-            className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold ${
-              isComplete
-                ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-white text-slate-600 ring-1 ring-slate-200'
-            }`}
-          >
-            {isComplete ? (
-              <CheckCircle2 size={17} aria-hidden="true" />
-            ) : (
-              <Circle size={14} aria-hidden="true" />
-            )}
+          <span className="text-sm font-black tracking-[0.15em] text-indigo-700">STEP {step}</span>
+          <span className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold ${isComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>
+            {isComplete ? <CheckCircle2 size={17} aria-hidden="true" /> : <Circle size={14} aria-hidden="true" />}
             {isComplete ? '활동 완료' : '활동 필요'}
           </span>
         </div>
-        <h2
-          id={titleId}
-          tabIndex={active ? -1 : undefined}
-          className="step-focus-target mt-4 text-2xl font-black leading-snug tracking-tight text-slate-950 focus:outline-none sm:text-3xl"
-        >
-          {lesson02StepTitles[step - 1]}
-        </h2>
-        <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
-          {intro}
-        </p>
+        <h2 id={titleId} tabIndex={active ? -1 : undefined} className="step-focus-target mt-4 text-2xl font-black leading-snug tracking-tight text-slate-950 focus:outline-none sm:text-3xl">{lesson02StepTitles[step - 1]}</h2>
+        <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
       </div>
       <div className="px-5 py-7 sm:px-8 sm:py-9">{children}</div>
     </Card>
   )
 }
 
-function StepCompletionMessage({ children }: { children: ReactNode }) {
-  return (
-    <div
-      className="mt-7 flex items-start gap-3 border-t border-emerald-200 pt-5 text-emerald-900"
-      role="status"
-    >
-      <CheckCircle2 className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
-      <p className="font-semibold leading-7">{children}</p>
-    </div>
-  )
+function Completion({ children }: { children: ReactNode }) {
+  return <div className="mt-7 flex items-start gap-3 border-t border-emerald-200 pt-5 text-emerald-900" role="status"><CheckCircle2 className="mt-0.5 shrink-0" size={21} aria-hidden="true" /><p className="font-semibold leading-7">{children}</p></div>
 }
 
-function AnswerFeedback({
-  correct,
-  explanation,
-}: {
-  correct: boolean
-  explanation: string
-}) {
-  return (
-    <div
-      className={`mt-4 flex items-start gap-3 rounded-xl p-4 ${
-        correct ? 'bg-emerald-50 text-emerald-950' : 'bg-rose-50 text-rose-950'
-      }`}
-      role="status"
-    >
-      {correct ? (
-        <CheckCircle2
-          className="mt-0.5 shrink-0 text-emerald-600"
-          size={21}
-          aria-hidden="true"
-        />
-      ) : (
-        <XCircle
-          className="mt-0.5 shrink-0 text-rose-600"
-          size={21}
-          aria-hidden="true"
-        />
-      )}
-      <div>
-        <p className="font-black">
-          {correct ? '정답입니다' : '계산 과정을 확인하고 다시 시도하세요'}
-        </p>
-        <p className="mt-1 leading-6">{explanation}</p>
-      </div>
-    </div>
-  )
+function Feedback({ correct, children }: { correct: boolean; children: ReactNode }) {
+  return <div className={`mt-4 flex items-start gap-3 rounded-xl p-4 ${correct ? 'bg-emerald-50 text-emerald-950' : 'bg-rose-50 text-rose-950'}`} role="status" aria-live="polite">{correct ? <CheckCircle2 className="mt-0.5 shrink-0 text-emerald-600" size={21} aria-hidden="true" /> : <XCircle className="mt-0.5 shrink-0 text-rose-600" size={21} aria-hidden="true" />}<div><p className="font-black">{correct ? '정답입니다' : '다시 살펴보세요'}</p><div className="mt-1 leading-6">{children}</div></div></div>
 }
 
-function NumericInput({
-  id,
-  label,
-  value,
-  onChange,
-  describedBy,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-  describedBy?: string
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="mb-2 block text-sm font-bold text-slate-700">{label}</span>
-      <input
-        id={id}
-        type="text"
-        inputMode="decimal"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        aria-describedby={describedBy}
-        className="min-h-12 w-full rounded-xl border border-slate-300 bg-white px-4 text-lg font-black tabular-nums text-slate-950 outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100"
-      />
-    </label>
-  )
+function NumberField({ id, label, value, onChange, state }: { id: string; label: string; value: string; onChange: (value: string) => void; state?: 'correct' | 'wrong' }) {
+  const messageId = `${id}-message`
+  return <label htmlFor={id} className="block"><span className="mb-2 block text-sm font-bold text-slate-700">{label}</span><span className="relative block"><input id={id} type="text" inputMode="decimal" value={value} onChange={(event) => onChange(event.target.value)} aria-invalid={state === 'wrong' || undefined} aria-describedby={state ? messageId : undefined} className={`min-h-12 w-full rounded-xl border bg-white px-4 pr-11 text-lg font-black tabular-nums text-slate-950 outline-none focus:ring-3 ${state === 'correct' ? 'border-emerald-500 focus:ring-emerald-100' : state === 'wrong' ? 'border-rose-500 focus:ring-rose-100' : 'border-slate-300 focus:border-indigo-500 focus:ring-indigo-100'}`} />{state === 'correct' ? <CheckCircle2 className="absolute right-3 top-3 text-emerald-600" size={22} aria-hidden="true" /> : state === 'wrong' ? <XCircle className="absolute right-3 top-3 text-rose-600" size={22} aria-hidden="true" /> : null}</span>{state ? <span id={messageId} className={`mt-1.5 block text-sm font-semibold ${state === 'correct' ? 'text-emerald-700' : 'text-rose-700'}`}>{state === 'correct' ? '✓ 계산이 맞습니다.' : '✕ 이 단계의 계산을 다시 확인하세요.'}</span> : null}</label>
 }
 
-function FlowArrow() {
-  return (
-    <>
-      <ArrowDown className="mx-auto text-cyan-600 md:hidden" size={22} aria-hidden="true" />
-      <ArrowRight className="hidden shrink-0 text-cyan-600 md:block" size={22} aria-hidden="true" />
-    </>
-  )
+function ChoiceButtons<T extends string>({ value, options, onChange }: { value: T | null; options: readonly { value: T; label: string }[]; onChange: (value: T) => void }) {
+  return <div className="grid gap-3">{options.map((option) => <button key={option.value} type="button" aria-pressed={value === option.value} onClick={() => onChange(option.value)} className={`min-h-12 rounded-xl border px-4 py-3 text-left font-bold leading-6 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${value === option.value ? 'border-indigo-600 bg-indigo-50 text-indigo-950' : 'border-slate-300 bg-white text-slate-800 hover:border-indigo-300'}`}><span className="flex items-center gap-2">{value === option.value ? <CheckCircle2 size={18} className="shrink-0 text-indigo-600" aria-hidden="true" /> : <Circle size={16} className="shrink-0 text-slate-400" aria-hidden="true" />}{option.label}</span></button>)}</div>
 }
 
-function FlowNode({
-  eyebrow,
-  title,
-  detail,
-  tone = 'slate',
-}: {
-  eyebrow: string
-  title: string
-  detail: string
-  tone?: 'slate' | 'indigo' | 'cyan' | 'emerald'
-}) {
-  const tones = {
-    slate: 'border-slate-200 bg-white text-slate-950',
-    indigo: 'border-indigo-200 bg-indigo-50 text-indigo-950',
-    cyan: 'border-cyan-200 bg-cyan-50 text-cyan-950',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-950',
-  }
+const sequenceItems = [
+  { id: 'input', label: '입력값' },
+  { id: 'multiply', label: '입력값 × 가중치' },
+  { id: 'sum', label: '곱한 값을 모두 더하기' },
+  { id: 'bias', label: '편향 더하기' },
+  { id: 'z', label: '가중합 z' },
+  { id: 'activation', label: '활성화 함수' },
+  { id: 'output', label: '최종 출력' },
+] as const
 
-  return (
-    <div className={`min-w-0 rounded-2xl border p-4 text-center ${tones[tone]}`}>
-      <p className="text-xs font-black tracking-wider text-slate-500">{eyebrow}</p>
-      <p className="mt-2 break-words text-lg font-black tabular-nums">{title}</p>
-      <p className="mt-1 break-words text-sm leading-6 text-slate-600">{detail}</p>
-    </div>
-  )
-}
-
-function PerceptronSignalFlow({
-  values,
-  label = '퍼셉트론 계산 Signal Flow',
-}: {
-  values: PerceptronValues
-  label?: string
-}) {
-  const result = calculatePerceptron(values)
-
-  return (
-    <div
-      className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5"
-      aria-label={label}
-    >
-      <div className="grid min-w-0 items-center gap-3 md:grid-cols-[minmax(0,1.45fr)_auto_minmax(0,0.8fr)_auto_minmax(0,1.15fr)_auto_minmax(0,0.85fr)_auto_minmax(0,0.7fr)]">
-        <div className="grid min-w-0 gap-3">
-          <FlowNode
-            eyebrow="입력값 × 가중치"
-            title={`${formatNumber(values.x1)} × ${formatNumber(values.w1)} = ${formatNumber(result.product1)}`}
-            detail="x1 × w1"
-            tone="indigo"
-          />
-          <FlowNode
-            eyebrow="입력값 × 가중치"
-            title={`${formatNumber(values.x2)} × ${formatNumber(values.w2)} = ${formatNumber(result.product2)}`}
-            detail="x2 × w2"
-            tone="indigo"
-          />
-        </div>
-        <FlowArrow />
-        <FlowNode
-          eyebrow="모두 더하기"
-          title={formatNumber(result.productSum)}
-          detail={`${formatNumber(result.product1)} + ${formatNumber(result.product2)}`}
-        />
-        <FlowArrow />
-        <FlowNode
-          eyebrow={`편향 ${formatNumber(values.b)} 더하기`}
-          title={`가중합 z = ${formatNumber(result.z)}`}
-          detail={`${formatNumber(result.productSum)} + (${formatNumber(values.b)})`}
-          tone="cyan"
-        />
-        <FlowArrow />
-        <FlowNode
-          eyebrow="활성화 함수"
-          title="계단 함수"
-          detail={result.z < 0 ? 'z < 0 → 0' : 'z ≥ 0 → 1'}
-        />
-        <FlowArrow />
-        <FlowNode
-          eyebrow="최종 출력"
-          title={`출력 = ${result.output}`}
-          detail="활성화 함수 적용 후"
-          tone="emerald"
-        />
-      </div>
-    </div>
-  )
-}
+const roleItems = [
+  { id: 'input', label: '입력값', role: '모델이 받는 정보' },
+  { id: 'weight', label: '가중치', role: '입력을 얼마나 중요하게 볼지 정하는 값' },
+  { id: 'bias', label: '편향', role: '판단 기준을 이동시키는 값' },
+  { id: 'z', label: '가중합 z', role: '활성화 함수에 전달되는 계산 결과' },
+  { id: 'activation', label: '활성화 함수', role: '가중합을 최종 출력 형태로 바꾸는 함수' },
+] as const
 
 export function Lesson02Step1(props: CommonStepProps) {
-  const [choice, setChoice] = useState<'A' | 'B' | 'C' | null>(null)
+  const [order, setOrder] = useState(['input', 'multiply', 'bias', 'sum', 'z', 'output', 'activation'])
+  const [roles, setRoles] = useState<Record<string, string>>({})
   const [submitted, setSubmitted] = useState(false)
-
-  const submit = () => {
-    if (!choice) return
-    setSubmitted(true)
-    props.onComplete()
+  const correctOrder = order.every((id, index) => id === sequenceItems[index].id)
+  const correctRoles = roleItems.every((item) => roles[item.id] === item.role)
+  const move = (index: number, direction: -1 | 1) => {
+    const target = index + direction
+    if (target < 0 || target >= order.length) return
+    setOrder((current) => { const next = [...current]; [next[index], next[target]] = [next[target], next[index]]; return next })
+    setSubmitted(false)
   }
+  const submit = () => { setSubmitted(true); if (correctOrder && correctRoles) props.onComplete() }
+  return <StepFrame {...props} step={1} intro="설명을 읽은 뒤 계산 순서와 각 요소의 역할을 직접 연결합니다.">
+    <section aria-labelledby="lesson02-objectives"><h3 id="lesson02-objectives" className="text-xl font-black">학습 목표</h3><ul className="mt-4 grid gap-3 md:grid-cols-2">{lesson02Objectives.map((objective) => <li key={objective} className="rounded-xl bg-slate-50 p-4 font-semibold leading-7 text-slate-700">{objective}</li>)}</ul></section>
+    <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><h3 className="font-black text-indigo-950">인공 뉴런의 판단 흐름</h3><div className="mt-4 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">{sequenceItems.map((item, index) => <div key={item.id} className="contents"><span className="flex min-h-11 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 text-center text-sm font-black">{item.label}</span>{index < sequenceItems.length - 1 ? <><ArrowDown className="mx-auto text-cyan-700 lg:hidden" size={18} aria-hidden="true" /><ArrowRight className="hidden shrink-0 text-cyan-700 lg:block" size={18} aria-hidden="true" /></> : null}</div>)}</div><dl className="mt-5 grid gap-3 md:grid-cols-2">{roleItems.map((item) => <div key={item.id} className="rounded-xl bg-white p-4"><dt className="font-black text-indigo-900">{item.label}</dt><dd className="mt-1 leading-6 text-slate-700">{item.role}</dd></div>)}</dl></section>
+    <section className="mt-9" aria-labelledby="sequence-title"><h3 id="sequence-title" className="text-xl font-black">활동 1. 계산 순서 배열</h3><p className="mt-2 leading-7 text-slate-600">위·아래 버튼으로 카드를 옮기세요. 키보드만으로도 조작할 수 있습니다.</p><ol className="mt-4 grid gap-3">{order.map((id, index) => { const item = sequenceItems.find((candidate) => candidate.id === id)!; return <li key={id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"><span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 font-black text-indigo-800">{index + 1}</span><span className="min-w-0 flex-1 font-bold">{item.label}</span><button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label={`${item.label} 위로 이동`} className="flex size-11 items-center justify-center rounded-xl border border-slate-300 disabled:opacity-35"><ArrowUp size={18} aria-hidden="true" /></button><button type="button" onClick={() => move(index, 1)} disabled={index === order.length - 1} aria-label={`${item.label} 아래로 이동`} className="flex size-11 items-center justify-center rounded-xl border border-slate-300 disabled:opacity-35"><ArrowDown size={18} aria-hidden="true" /></button></li> })}</ol></section>
+    <section className="mt-9" aria-labelledby="roles-title"><h3 id="roles-title" className="text-xl font-black">활동 2. 역할 연결</h3><div className="mt-4 grid gap-4 md:grid-cols-2">{roleItems.map((item) => <label key={item.id} className="rounded-xl border border-slate-200 p-4"><span className="block font-black">{item.label}</span><select value={roles[item.id] ?? ''} onChange={(event) => { setRoles((current) => ({ ...current, [item.id]: event.target.value })); setSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 focus-visible:outline-3 focus-visible:outline-indigo-600"><option value="">역할 선택</option>{roleItems.map((candidate) => <option key={candidate.role} value={candidate.role}>{candidate.role}</option>)}</select></label>)}</div></section>
+    <Button className="mt-6" onClick={submit} disabled={Object.keys(roles).length < roleItems.length}>순서와 역할 확인</Button>
+    {submitted ? <Feedback correct={correctOrder && correctRoles}>{correctOrder && correctRoles ? '입력부터 출력까지의 순서와 다섯 요소의 역할을 정확히 연결했습니다.' : <><p>{!correctOrder ? '순서 활동에 어긋난 카드가 있습니다. 곱셈 결과를 먼저 모두 더한 뒤 편향을 더하는지 확인하세요.' : '순서는 맞습니다.'}</p><p>{!correctRoles ? '역할 연결을 다시 확인하세요. 가중합은 활성화 함수에 들어가기 직전의 계산값입니다.' : '역할 연결은 맞습니다.'}</p></>}</Feedback> : null}
+    {props.isComplete ? <Completion>계산 순서와 각 요소의 역할을 모두 올바르게 연결했습니다.</Completion> : null}
+  </StepFrame>
+}
 
-  return (
-    <StepFrame
-      {...props}
-      step={1}
-      intro="여러 신호를 받아 하나의 결과를 만드는 과정을 사람의 신경세포에 빗대어 살펴봅니다. 두 구조가 실제로 완전히 같다는 뜻은 아닙니다."
-    >
-      <section aria-labelledby="lesson02-goals-title">
-        <h3 id="lesson02-goals-title" className="text-xl font-black text-slate-950">
-          이번 차시에서 알아볼 것
-        </h3>
-        <ul className="mt-4 grid gap-3 md:grid-cols-2">
-          {lesson02Objectives.map((objective, index) => (
-            <li
-              key={objective}
-              className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 leading-7 text-slate-700"
-            >
-              <span className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-black text-indigo-700">
-                {index + 1}
-              </span>
-              <span>{objective}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-sm leading-6 text-slate-600">
-          이번 차시는 입력값 2개인 단순 퍼셉트론만 다루며, 행렬·벡터·미분은 사용하지 않습니다.
-        </p>
-      </section>
+const guidedProblem: PerceptronInput = { inputs: [2, 1], weights: [1.5, -1], bias: -0.5 }
+const guidedResult = calculatePerceptronN(guidedProblem)
 
-      <section className="mt-9" aria-labelledby="neuron-flow-title">
-        <h3 id="neuron-flow-title" className="text-xl font-black text-slate-950">
-          여러 신호에서 하나의 판단으로
-        </h3>
-        <div className="mt-5 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
-          <FlowNode eyebrow="사람의 신경세포 비유" title="여러 신호" detail="여러 곳에서 정보가 들어옵니다." />
-          <FlowArrow />
-          <FlowNode eyebrow="처리" title="신경세포" detail="신호를 종합합니다." tone="indigo" />
-          <FlowArrow />
-          <FlowNode eyebrow="결과" title="판단 결과" detail="하나의 결과로 이어집니다." tone="emerald" />
-        </div>
-        <div className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-          <p className="font-black text-indigo-950">
-            퍼셉트론은 여러 입력을 받아 계산한 뒤 하나의 결과를 출력하는 가장 기본적인 인공 뉴런입니다.
-          </p>
-          <p className="mt-2 leading-7 text-slate-700">
-            입력값 x1, x2 → 퍼셉트론 → 출력의 흐름으로 생각할 수 있습니다.
-          </p>
-        </div>
-      </section>
-
-      <fieldset className="mt-9">
-        <legend className="text-xl font-black leading-snug text-slate-950">
-          퍼셉트론의 기본 역할로 알맞은 것을 선택하세요.
-        </legend>
-        <div className="mt-4 grid gap-3">
-          {[
-            ['A', '여러 입력을 받아 하나의 출력을 만든다.'],
-            ['B', '데이터를 인터넷에서 자동으로 다운로드한다.'],
-            ['C', '이미지를 저장만 한다.'],
-          ].map(([key, text]) => (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={choice === key}
-              onClick={() => {
-                setChoice(key as 'A' | 'B' | 'C')
-                setSubmitted(false)
-              }}
-              className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold leading-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                choice === key
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
-                  : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
-              }`}
-            >
-              {key}. {text}
-            </button>
-          ))}
-        </div>
-        <Button className="mt-4" onClick={submit} disabled={!choice}>
-          선택 제출
-          <Check size={18} aria-hidden="true" />
-        </Button>
-      </fieldset>
-
-      {submitted && (
-        <AnswerFeedback
-          correct={choice === 'A'}
-          explanation={
-            choice === 'A'
-              ? '여러 입력을 계산하여 하나의 출력을 만드는 것이 퍼셉트론의 기본 역할입니다.'
-              : '정답은 A입니다. 퍼셉트론은 입력을 다운로드하거나 저장하는 도구가 아니라 여러 입력을 계산해 하나의 출력을 만듭니다.'
-          }
-        />
-      )}
-
-      {props.isComplete && (
-        <StepCompletionMessage>퍼셉트론의 기본 역할을 선택해 제출하고 해설을 확인했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+function CalculationFields({ idPrefix, values, onChange, submitted, expected }: { idPrefix: string; values: string[]; onChange: (index: number, value: string) => void; submitted: boolean; expected: readonly number[] }) {
+  const labels = ['x1 × w1', 'x2 × w2', ...(expected.length === 6 ? ['x3 × w3'] : []), '곱셈 결과의 합', '편향을 더한 가중합 z', '계단 함수 출력']
+  return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{labels.map((label, index) => { const parsed = parseStudentNumber(values[index] ?? ''); const state = submitted ? (isCloseNumber(parsed, expected[index]) ? 'correct' : 'wrong') : undefined; return <NumberField key={label} id={`${idPrefix}-${index}`} label={label} value={values[index] ?? ''} onChange={(value) => onChange(index, value)} state={state} /> })}</div>
 }
 
 export function Lesson02Step2(props: CommonStepProps) {
-  const [viewed, setViewed] = useState<string[]>([])
-  const [activeElement, setActiveElement] = useState<(typeof perceptronElements)[number] | null>(null)
-
-  useEffect(() => {
-    if (!props.isComplete && viewed.length === perceptronElements.length) {
-      props.onComplete()
-    }
-  }, [props.isComplete, props.onComplete, viewed.length])
-
-  const inspect = (element: (typeof perceptronElements)[number]) => {
-    setActiveElement(element)
-    setViewed((current) =>
-      current.includes(element.id) ? current : [...current, element.id],
-    )
-  }
-
-  return (
-    <StepFrame
-      {...props}
-      step={2}
-      intro="퍼셉트론 계산에 등장하는 값을 하나씩 눌러 역할을 확인합니다. 가중합과 출력은 활성화 함수를 기준으로 서로 다른 값입니다."
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-xl font-black text-slate-950">퍼셉트론 Signal Flow</h3>
-        <span className="text-sm font-bold tabular-nums text-indigo-700">
-          {viewed.length} / {perceptronElements.length} 확인
-        </span>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {perceptronElements.map((element) => {
-          const isViewed = viewed.includes(element.id)
-          const isActive = activeElement?.id === element.id
-          return (
-            <button
-              key={element.id}
-              type="button"
-              onClick={() => inspect(element)}
-              aria-pressed={isActive}
-              className={`min-h-28 rounded-2xl border p-4 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                isActive
-                  ? 'border-indigo-500 bg-indigo-50'
-                  : 'border-slate-200 bg-white hover:border-indigo-300'
-              }`}
-            >
-              <span className="flex items-start justify-between gap-3">
-                <span>
-                  <span className="block font-black text-slate-950">{element.label}</span>
-                  <span className="mt-1 block text-sm font-bold text-indigo-700">{element.symbol}</span>
-                </span>
-                {isViewed ? (
-                  <CheckCircle2 className="shrink-0 text-emerald-600" size={20} aria-label="확인함" />
-                ) : (
-                  <Circle className="shrink-0 text-slate-400" size={18} aria-label="확인 전" />
-                )}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="mt-5 min-h-28 rounded-2xl bg-slate-100 p-5" aria-live="polite">
-        {activeElement ? (
-          <>
-            <p className="font-black text-indigo-800">
-              {activeElement.label} <span className="text-sm">({activeElement.symbol})</span>
-            </p>
-            <p className="mt-2 leading-7 text-slate-700">{activeElement.description}</p>
-          </>
-        ) : (
-          <p className="leading-7 text-slate-600">여섯 요소를 눌러 각각의 설명을 확인하세요.</p>
-        )}
-      </div>
-
-      <div className="mt-7">
-        <PerceptronSignalFlow values={{ x1: 4, x2: 5, w1: 1, w2: 1, b: -10 }} />
-      </div>
-
-      {props.isComplete && (
-        <StepCompletionMessage>입력값부터 출력까지 여섯 구성 요소의 역할을 모두 확인했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+  const expected = [...guidedResult.products, guidedResult.productSum, guidedResult.z, guidedResult.output]
+  const [answers, setAnswers] = useState(Array(expected.length).fill(''))
+  const [submitted, setSubmitted] = useState(false)
+  const allCorrect = answers.every((answer, index) => isCloseNumber(parseStudentNumber(answer), expected[index]))
+  const change = (index: number, value: string) => { setAnswers((current) => current.map((answer, item) => item === index ? value : answer)); setSubmitted(false) }
+  const submit = () => { setSubmitted(true); if (allCorrect) props.onComplete() }
+  return <StepFrame {...props} step={2} intro="안내를 따라 두 입력에 가중치를 곱하고, 편향과 계단 함수까지 차례로 계산합니다."><div className="rounded-2xl bg-indigo-50 p-5"><p className="font-black text-indigo-950">x1=2, x2=1, w1=1.5, w2=-1, b=-0.5</p><ol className="mt-3 list-decimal space-y-1 pl-5 leading-7 text-slate-700"><li>각 입력과 가중치를 곱합니다.</li><li>곱셈 결과를 더합니다.</li><li>편향 -0.5를 더해 z를 구합니다.</li><li>z&lt;0이면 0, z≥0이면 1을 출력합니다.</li></ol></div><div className="mt-6"><CalculationFields idPrefix="guided" values={answers} onChange={change} submitted={submitted} expected={expected} /></div><Button className="mt-6" onClick={submit} disabled={answers.some((answer) => parseStudentNumber(answer) === null)}>전체 계산 제출</Button>{submitted ? <Feedback correct={allCorrect}>{allCorrect ? `가중합 z=${formatNumber(guidedResult.z)}이고 최종 출력은 ${guidedResult.output}입니다.` : '✕ 표시가 있는 필드만 다시 계산하세요. 곱셈 → 곱셈 결과의 합 → 편향을 더한 z → 계단 함수 순서로 확인하면 됩니다.'}</Feedback> : null}<p className="mt-4 text-sm leading-6 text-slate-600">쉼표 소수와 마침표 소수를 모두 입력할 수 있습니다. 예: 1,5 또는 1.5</p>{props.isComplete ? <Completion>안내된 2입력 퍼셉트론의 모든 중간값과 출력을 계산했습니다.</Completion> : null}</StepFrame>
 }
 
-const step3Targets = [4, 5, 9] as const
+const independentProblems = [
+  { title: '문제 A · 출력 0', input: { inputs: [-2, 3, 1], weights: [1.5, -1, 0.5], bias: 0.5 } },
+  { title: '문제 B · 출력 1', input: { inputs: [-1, 2, 4], weights: [-2, 0.5, 0.5], bias: -1 } },
+] as const
 
 export function Lesson02Step3(props: CommonStepProps) {
-  const [answers, setAnswers] = useState(['', '', ''])
-  const [submitted, setSubmitted] = useState([false, false, false])
-  const correct = answers.map((answer, index) => parseStudentNumber(answer) === step3Targets[index])
-
-  useEffect(() => {
-    if (!props.isComplete && submitted.every(Boolean) && correct.every(Boolean)) {
-      props.onComplete()
-    }
-  }, [correct, props, submitted])
-
-  const changeAnswer = (index: number, value: string) => {
-    setAnswers((current) => current.map((answer, item) => (item === index ? value : answer)))
-    setSubmitted((current) => current.map((value, item) => (item === index ? false : value)))
-  }
-
-  const submitAnswer = (index: number) => {
-    if (parseStudentNumber(answers[index]) === null) return
-    setSubmitted((current) => current.map((value, item) => (item === index ? true : value)))
-  }
-
-  const activities = [
-    { label: '첫 번째 곱셈 결과', equation: '4 × 1 = ?', explanation: '입력값 4에 가중치 1을 곱하면 4입니다.' },
-    { label: '두 번째 곱셈 결과', equation: '5 × 1 = ?', explanation: '입력값 5에 가중치 1을 곱하면 5입니다.' },
-    { label: '두 결과의 합', equation: '4 + 5 = ?', explanation: '두 곱셈 결과 4와 5를 더하면 9입니다.' },
-  ]
-
-  return (
-    <StepFrame
-      {...props}
-      step={3}
-      intro="편향은 잠시 제외하고, 입력값에 가중치를 곱한 뒤 두 결과를 더해 봅니다."
-    >
-      <div className="rounded-2xl bg-indigo-50 p-5">
-        <p className="font-black text-indigo-950">주어진 값</p>
-        <p className="mt-2 break-words text-lg font-black tabular-nums text-slate-900">
-          x1 = 4, x2 = 5, w1 = 1, w2 = 1
-        </p>
-      </div>
-
-      <div className="mt-7 grid gap-5 lg:grid-cols-3">
-        {activities.map((activity, index) => (
-          <section key={activity.label} className="rounded-2xl border border-slate-200 p-5">
-            <p className="text-sm font-black text-indigo-700">계산 {index + 1}</p>
-            <p className="mt-2 text-2xl font-black tabular-nums text-slate-950">{activity.equation}</p>
-            <div className="mt-5">
-              <NumericInput
-                id={`step3-answer-${index}`}
-                label={activity.label}
-                value={answers[index]}
-                onChange={(value) => changeAnswer(index, value)}
-              />
-            </div>
-            <Button
-              className="mt-4 w-full"
-              onClick={() => submitAnswer(index)}
-              disabled={parseStudentNumber(answers[index]) === null}
-            >
-              계산 확인
-            </Button>
-            {submitted[index] && (
-              <AnswerFeedback correct={correct[index]} explanation={activity.explanation} />
-            )}
-          </section>
-        ))}
-      </div>
-
-      <div className="mt-7 flex items-start gap-3 rounded-2xl bg-cyan-50 p-5">
-        <Lightbulb className="mt-0.5 shrink-0 text-cyan-700" size={22} aria-hidden="true" />
-        <p className="font-semibold leading-7 text-slate-800">
-          가중치는 각 입력에 곱해져 입력이 결과에 미치는 정도를 조절합니다.
-        </p>
-      </div>
-
-      {props.isComplete && (
-        <StepCompletionMessage>두 곱셈과 덧셈, 세 계산의 정답을 모두 확인했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+  const results = independentProblems.map((problem) => calculatePerceptronN(problem.input))
+  const expected = results.map((result) => [...result.products, result.productSum, result.z, result.output])
+  const [answers, setAnswers] = useState<string[][]>(expected.map((items) => Array(items.length).fill('')))
+  const [submitted, setSubmitted] = useState([false, false])
+  const correct = answers.map((row, problemIndex) => row.every((answer, index) => isCloseNumber(parseStudentNumber(answer), expected[problemIndex][index])))
+  useEffect(() => { if (!props.isComplete && correct.every(Boolean)) props.onComplete() }, [correct, props])
+  return <StepFrame {...props} step={3} intro="안내를 줄였습니다. 음수 입력·음수 가중치·소수 가중치가 섞인 두 문제를 스스로 풉니다."><div className="grid gap-6 xl:grid-cols-2">{independentProblems.map((problem, problemIndex) => <section key={problem.title} className="rounded-2xl border border-slate-200 p-5"><h3 className="text-xl font-black">{problem.title}</h3><p className="mt-2 break-words font-mono text-sm leading-7 text-slate-700">입력 [{problem.input.inputs.join(', ')}] · 가중치 [{problem.input.weights.join(', ')}] · 편향 {problem.input.bias}</p><div className="mt-5"><CalculationFields idPrefix={`independent-${problemIndex}`} values={answers[problemIndex]} onChange={(index, value) => { setAnswers((current) => current.map((row, item) => item === problemIndex ? row.map((answer, field) => field === index ? value : answer) : row)); setSubmitted((current) => current.map((submittedValue, item) => item === problemIndex ? false : submittedValue)) }} submitted={submitted[problemIndex]} expected={expected[problemIndex]} /></div><Button className="mt-5 w-full" onClick={() => setSubmitted((current) => current.map((value, item) => item === problemIndex ? true : value))} disabled={answers[problemIndex].some((answer) => parseStudentNumber(answer) === null)}>문제 {problemIndex === 0 ? 'A' : 'B'} 제출</Button>{submitted[problemIndex] ? <Feedback correct={correct[problemIndex]}>{correct[problemIndex] ? `z=${formatNumber(results[problemIndex].z)}, 출력 ${results[problemIndex].output}을 정확히 계산했습니다.` : '✕ 표시가 있는 단계부터 다시 계산하세요. 음수×음수는 양수가 된다는 점도 확인하세요.'}</Feedback> : null}</section>)}</div>{props.isComplete ? <Completion>출력 0 문제와 출력 1 문제를 모두 독립적으로 계산했습니다.</Completion> : null}</StepFrame>
 }
 
+type AdjustableKey = 'x1' | 'x2' | 'w1' | 'w2' | 'b'
+type Direction = 'increase' | 'decrease' | 'same'
+const adjustableSettings: Array<{ key: AdjustableKey; label: string; min: number; max: number; step: number }> = [
+  { key: 'x1', label: '입력값 x1', min: -3, max: 3, step: 0.5 },
+  { key: 'x2', label: '입력값 x2', min: -3, max: 3, step: 0.5 },
+  { key: 'w1', label: '가중치 w1', min: -3, max: 3, step: 0.5 },
+  { key: 'w2', label: '가중치 w2', min: -3, max: 3, step: 0.5 },
+  { key: 'b', label: '편향 b', min: -3, max: 3, step: 0.5 },
+]
+const toInput = (values: Record<AdjustableKey, number>): PerceptronInput => ({ inputs: [values.x1, values.x2], weights: [values.w1, values.w2], bias: values.b })
+
 export function Lesson02Step4(props: CommonStepProps) {
-  const [answer, setAnswer] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const correct = parseStudentNumber(answer) === -1
-
-  const submit = () => {
-    if (parseStudentNumber(answer) === null) return
-    setSubmitted(true)
-    if (correct) props.onComplete()
+  const initial = { x1: 1, x2: -1, w1: 1, w2: 1, b: -0.5 }
+  const [values, setValues] = useState(initial)
+  const [key, setKey] = useState<AdjustableKey>('w1')
+  const [candidate, setCandidate] = useState(initial.w1)
+  const [prediction, setPrediction] = useState<Direction | null>(null)
+  const [feedback, setFeedback] = useState<{ correct: boolean; text: string } | null>(null)
+  const [observed, setObserved] = useState<string[]>([])
+  const [successfulCount, setSuccessfulCount] = useState(0)
+  const current = calculatePerceptronN(toInput(values))
+  const previewValues = { ...values, [key]: candidate }
+  const preview = calculatePerceptronN(toInput(previewValues))
+  const ready = ['weight', 'bias', 'boundary'].every((item) => observed.includes(item)) && successfulCount >= 3
+  useEffect(() => { if (!props.isComplete && ready) props.onComplete() }, [props, ready])
+  const apply = () => {
+    if (!prediction || candidate === values[key]) return
+    const direction: Direction = preview.z > current.z ? 'increase' : preview.z < current.z ? 'decrease' : 'same'
+    const correct = prediction === direction
+    setValues(previewValues)
+    setFeedback({ correct, text: `z ${formatNumber(current.z)} → ${formatNumber(preview.z)}, 출력 ${current.output} → ${preview.output}. ${correct ? '예측과 실제 변화가 같습니다.' : '변경한 값이 곱셈과 편향에 어떤 부호로 반영되는지 확인하고 다시 예측해 보세요.'}` })
+    if (correct) { setSuccessfulCount((count) => count + 1); setObserved((items) => [...new Set([...items, ...(key.startsWith('w') ? ['weight'] : []), ...(key === 'b' ? ['bias'] : []), ...(current.output !== preview.output ? ['boundary'] : [])])]) }
+    setPrediction(null)
   }
-
-  return (
-    <StepFrame
-      {...props}
-      step={4}
-      intro="두 곱셈 결과의 합 9에 편향 -10을 더해 활성화 함수 적용 전 값인 가중합을 구합니다."
-    >
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.75fr)]">
-        <section className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-          <p className="text-sm font-black text-indigo-700">편향까지 포함한 계산</p>
-          <div className="mt-4 space-y-2 text-lg font-black tabular-nums text-slate-950 sm:text-xl">
-            <p>(4 × 1) + (5 × 1) - 10</p>
-            <p>= 4 + 5 - 10</p>
-            <p>= 9 + (-10)</p>
-          </div>
-          <div className="mt-5 max-w-sm">
-            <NumericInput
-              id="step4-answer"
-              label="가중합 z를 입력하세요"
-              value={answer}
-              onChange={(value) => {
-                setAnswer(value)
-                setSubmitted(false)
-              }}
-            />
-          </div>
-          <Button
-            className="mt-4"
-            onClick={submit}
-            disabled={parseStudentNumber(answer) === null}
-          >
-            가중합 확인
-          </Button>
-          {submitted && (
-            <AnswerFeedback
-              correct={correct}
-              explanation="4 + 5 = 9이고, 여기에 편향 -10을 더하면 9 + (-10) = -1이므로 가중합 z = -1입니다."
-            />
-          )}
-        </section>
-
-        <aside className="rounded-2xl bg-cyan-50 p-5 sm:p-6" aria-label="가중합 식 설명">
-          <Equal className="text-cyan-700" size={28} aria-hidden="true" />
-          <h3 className="mt-4 text-xl font-black text-cyan-950">가중합</h3>
-          <p className="mt-3 leading-7 text-slate-700">
-            입력값과 가중치의 계산 결과에 편향을 더한 값을 가중합이라고 합니다.
-          </p>
-          <p className="mt-4 rounded-xl bg-white p-4 font-black tabular-nums text-slate-950">
-            z = x1 × w1 + x2 × w2 + b
-          </p>
-        </aside>
-      </div>
-
-      <div className="mt-7">
-        <PerceptronSignalFlow values={{ x1: 4, x2: 5, w1: 1, w2: 1, b: -10 }} />
-      </div>
-
-      {props.isComplete && (
-        <StepCompletionMessage>편향을 포함해 가중합 z = -1을 직접 계산했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+  const selectKey = (nextKey: AdjustableKey) => { setKey(nextKey); setCandidate(values[nextKey]); setPrediction(null); setFeedback(null) }
+  return <StepFrame {...props} step={4} intro="값을 바꾸기 전에 z의 변화 방향을 먼저 예측한 뒤 실제 계산과 비교합니다."><div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]"><section className="rounded-2xl border border-slate-200 p-5"><h3 className="text-xl font-black">1. 바꿀 값 선택</h3><label className="mt-4 block"><span className="text-sm font-bold">변수</span><select value={key} onChange={(event) => selectKey(event.target.value as AdjustableKey)} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3">{adjustableSettings.map((setting) => <option key={setting.key} value={setting.key}>{setting.label}</option>)}</select></label>{(() => { const setting = adjustableSettings.find((item) => item.key === key)!; return <label className="mt-5 block"><span className="flex justify-between gap-3 font-bold"><span>바꿀 값</span><output className="rounded-lg bg-indigo-50 px-3 py-1 tabular-nums text-indigo-800">{formatNumber(candidate)}</output></span><input className="mt-3 min-h-11 w-full accent-indigo-600" type="range" min={setting.min} max={setting.max} step={setting.step} value={candidate} onChange={(event) => { setCandidate(Number(event.target.value)); setPrediction(null); setFeedback(null) }} /></label> })()}<div className="mt-4 flex flex-wrap gap-2"><Button variant="secondary" onClick={() => setCandidate(Math.min(3, values[key] + 1))}>1 크게</Button><Button variant="secondary" onClick={() => setCandidate(Math.max(-3, values[key] - 1))}>1 작게</Button></div></section><section className="rounded-2xl bg-slate-900 p-5 text-white"><h3 className="text-xl font-black">현재 계산</h3><p className="mt-4 break-words font-mono leading-8">({values.x1}×{values.w1}) + ({values.x2}×{values.w2}) + ({values.b})</p><p className="mt-2 text-lg font-black text-cyan-300">z={formatNumber(current.z)} → 출력 {current.output}</p><p className="mt-4 text-sm leading-6 text-slate-300">음수 입력에 음수 가중치를 곱하면 양수 항이 됩니다. 편향을 늘리면 다른 값이 같을 때 z도 같은 만큼 커집니다.</p></section></div><fieldset className="mt-7"><legend className="text-xl font-black">2. 변경 후 z는?</legend><div className="mt-4 grid gap-3 sm:grid-cols-3">{([{ value: 'increase', label: '커진다' }, { value: 'decrease', label: '작아진다' }, { value: 'same', label: '같다' }] as const).map((option) => <Button key={option.value} variant={prediction === option.value ? 'primary' : 'secondary'} aria-pressed={prediction === option.value} onClick={() => setPrediction(option.value)}>{prediction === option.value ? <Check size={18} aria-hidden="true" /> : null}{option.label}</Button>)}</div><Button className="mt-4" onClick={apply} disabled={!prediction || candidate === values[key]}>예측 제출 후 실제 계산</Button></fieldset>{feedback ? <Feedback correct={feedback.correct}>{feedback.text}</Feedback> : null}<section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><h3 className="font-black text-indigo-950">완료 관찰</h3><div className="mt-4 grid gap-3 sm:grid-cols-3">{[['weight', '가중치 변화'], ['bias', '편향 변화'], ['boundary', '출력 경계 통과']].map(([id, label]) => <div key={id} className={`rounded-xl p-4 ${observed.includes(id) ? 'bg-emerald-100 text-emerald-900' : 'bg-white text-slate-700'}`}><p className="font-black">{observed.includes(id) ? '✓' : '○'} {label}</p></div>)}</div><p className="mt-4 font-semibold">맞게 예측한 서로 다른 변화 {successfulCount} / 3</p></section><Button className="mt-5" variant="ghost" onClick={() => { setValues(initial); setKey('w1'); setCandidate(initial.w1); setPrediction(null); setFeedback(null); setObserved([]); setSuccessfulCount(0) }}><RotateCcw size={18} aria-hidden="true" />처음부터 다시</Button>{props.isComplete ? <Completion>가중치와 편향의 변화를 예측하고 출력이 바뀌는 경계를 직접 확인했습니다.</Completion> : null}</StepFrame>
 }
 
 export function Lesson02Step5(props: CommonStepProps) {
-  const [firstOutput, setFirstOutput] = useState<0 | 1 | null>(null)
-  const [firstSubmitted, setFirstSubmitted] = useState(false)
-  const [secondZ, setSecondZ] = useState('')
-  const [secondOutput, setSecondOutput] = useState<0 | 1 | null>(null)
-  const [secondSubmitted, setSecondSubmitted] = useState(false)
-
-  useEffect(() => {
-    if (!props.isComplete && firstSubmitted && secondSubmitted) {
-      props.onComplete()
-    }
-  }, [firstSubmitted, props, secondSubmitted])
-
-  const secondCorrect = parseStudentNumber(secondZ) === 4 && secondOutput === 1
-
-  return (
-    <StepFrame
-      {...props}
-      step={5}
-      intro="가중합을 계단 함수에 넣어 최종 출력 0 또는 1로 바꿉니다. 가중합은 함수 적용 전 값이고, 출력은 적용 후 값입니다."
-    >
-      <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-        <p className="font-black text-indigo-950">계단 함수</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <p className="rounded-xl bg-white p-4 font-black tabular-nums text-slate-900">z &lt; 0이면 출력 0</p>
-          <p className="rounded-xl bg-white p-4 font-black tabular-nums text-slate-900">z ≥ 0이면 출력 1</p>
-        </div>
-      </div>
-
-      <div className="mt-7 grid gap-6 lg:grid-cols-2">
-        <fieldset className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-          <legend className="px-1 text-lg font-black text-slate-950">예제 1</legend>
-          <p className="mt-2 leading-7 text-slate-700">
-            x1 = 4, x2 = 5, w1 = 1, w2 = 1, b = -10
-          </p>
-          <p className="mt-3 font-black tabular-nums text-slate-950">
-            (4 × 1) + (5 × 1) - 10 = -1
-          </p>
-          <p className="mt-5 font-bold text-slate-800">가중합 z = -1일 때 출력은?</p>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {([0, 1] as const).map((value) => (
-              <Button
-                key={value}
-                variant={firstOutput === value ? 'primary' : 'secondary'}
-                aria-pressed={firstOutput === value}
-                onClick={() => {
-                  setFirstOutput(value)
-                  setFirstSubmitted(false)
-                }}
-              >
-                출력 {value}
-              </Button>
-            ))}
-          </div>
-          <Button
-            className="mt-4 w-full"
-            onClick={() => setFirstSubmitted(true)}
-            disabled={firstOutput === null}
-          >
-            예제 1 확인
-          </Button>
-          {firstSubmitted && (
-            <AnswerFeedback
-              correct={firstOutput === 0}
-              explanation="가중합 z = -1은 0보다 작으므로 계단 함수 적용 후 최종 출력은 0입니다."
-            />
-          )}
-        </fieldset>
-
-        <fieldset className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-          <legend className="px-1 text-lg font-black text-slate-950">예제 2</legend>
-          <p className="mt-2 leading-7 text-slate-700">
-            x1 = 8, x2 = 6, w1 = 1, w2 = 1, b = -10
-          </p>
-          <p className="mt-3 font-black tabular-nums text-slate-950">
-            (8 × 1) + (6 × 1) - 10 = ?
-          </p>
-          <div className="mt-5">
-            <NumericInput
-              id="step5-second-z"
-              label="가중합 z"
-              value={secondZ}
-              onChange={(value) => {
-                setSecondZ(value)
-                setSecondSubmitted(false)
-              }}
-            />
-          </div>
-          <p className="mt-5 font-bold text-slate-800">계단 함수 적용 후 출력은?</p>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            {([0, 1] as const).map((value) => (
-              <Button
-                key={value}
-                variant={secondOutput === value ? 'primary' : 'secondary'}
-                aria-pressed={secondOutput === value}
-                onClick={() => {
-                  setSecondOutput(value)
-                  setSecondSubmitted(false)
-                }}
-              >
-                출력 {value}
-              </Button>
-            ))}
-          </div>
-          <Button
-            className="mt-4 w-full"
-            onClick={() => setSecondSubmitted(true)}
-            disabled={parseStudentNumber(secondZ) === null || secondOutput === null}
-          >
-            예제 2 확인
-          </Button>
-          {secondSubmitted && (
-            <AnswerFeedback
-              correct={secondCorrect}
-              explanation="8 × 1 = 8, 6 × 1 = 6이므로 가중합 z = 8 + 6 - 10 = 4입니다. 4 ≥ 0이므로 최종 출력은 1입니다."
-            />
-          )}
-        </fieldset>
-      </div>
-
-      <section className="mt-7" aria-labelledby="example-compare-title">
-        <h3 id="example-compare-title" className="text-xl font-black text-slate-950">두 예제 비교</h3>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl bg-slate-100 p-5">
-            <p className="text-sm font-black text-slate-600">예제 A</p>
-            <p className="mt-2 text-xl font-black tabular-nums text-slate-950">가중합 -1 → 출력 0</p>
-          </div>
-          <div className="rounded-2xl bg-emerald-50 p-5">
-            <p className="text-sm font-black text-emerald-800">예제 B</p>
-            <p className="mt-2 text-xl font-black tabular-nums text-slate-950">가중합 4 → 출력 1</p>
-          </div>
-        </div>
-        <p className="mt-5 flex items-start gap-3 rounded-2xl bg-cyan-50 p-5 font-semibold leading-7 text-slate-800">
-          <Lightbulb className="mt-0.5 shrink-0 text-cyan-700" size={22} aria-hidden="true" />
-          퍼셉트론은 가중합을 계산한 뒤 활성화 함수를 이용하여 최종 출력을 만듭니다. 이번 차시에서는 계단 함수만 사용합니다.
-        </p>
-      </section>
-
-      {props.isComplete && (
-        <StepCompletionMessage>두 예제의 가중합과 계단 함수 출력을 제출하고 확인했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+  const [biasOne, setBiasOne] = useState(-2)
+  const [weightsZero, setWeightsZero] = useState<[number, number]>([1, 1])
+  const biasOptions = [-2.5, -2.1, -2.01, -1.9] as const
+  const [smallBias, setSmallBias] = useState<number>(-1.9)
+  const [submitted, setSubmitted] = useState([false, false, false])
+  const first = calculatePerceptronN({ inputs: [2, 1], weights: [1, -1], bias: biasOne })
+  const second = calculatePerceptronN({ inputs: [1, 2], weights: weightsZero, bias: -1 })
+  const third = calculatePerceptronN({ inputs: [1, 1], weights: [1, 1], bias: smallBias })
+  const validBiases = biasOptions.filter((candidateBias) => calculatePerceptronN({ inputs: [1, 1], weights: [1, 1], bias: candidateBias }).output === 0)
+  const smallestChange = Math.min(...validBiases.map((candidateBias) => Math.abs(candidateBias - -2)))
+  const correct = [first.output === 1, second.output === 0, third.output === 0 && Math.abs(smallBias - -2) === smallestChange]
+  useEffect(() => { if (!props.isComplete && submitted.every(Boolean) && correct.every(Boolean)) props.onComplete() }, [correct, props, submitted])
+  const submit = (index: number) => setSubmitted((items) => items.map((value, item) => item === index ? true : value))
+  return <StepFrame {...props} step={5} intro="입력은 고정하고 가중치나 편향을 설계해 목표 출력을 만드는 역문제를 해결합니다."><div className="grid gap-6 xl:grid-cols-3"><section className="rounded-2xl border border-slate-200 p-5"><h3 className="font-black">설계 A · 목표 출력 1</h3><p className="mt-2 text-sm leading-6 text-slate-600">입력 [2,1], 가중치 [1,-1]에서 편향을 고르세요.</p><label className="mt-5 block"><span className="flex justify-between font-bold"><span>편향 b</span><output>{biasOne}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-3} max={2} step={0.5} value={biasOne} onChange={(event) => { setBiasOne(Number(event.target.value)); setSubmitted((items) => [false, items[1], items[2]]) }} /></label><p className="mt-3 rounded-xl bg-slate-100 p-3 font-mono">z={formatNumber(first.z)} → 출력 {first.output}</p><Button className="mt-4 w-full" onClick={() => submit(0)}>설계 A 확인</Button>{submitted[0] ? <Feedback correct={correct[0]}>{correct[0] ? '실제 z가 0 이상이므로 목표 출력 1을 만들었습니다.' : '현재 z가 0보다 작습니다. 편향을 어느 방향으로 움직이면 z가 커질지 생각해 보세요.'}</Feedback> : null}</section><section className="rounded-2xl border border-slate-200 p-5"><h3 className="font-black">설계 B · 목표 출력 0</h3><p className="mt-2 text-sm leading-6 text-slate-600">입력 [1,2], 편향 -1에서 두 가중치를 고르세요.</p>{(['w1','w2'] as const).map((label, index) => <label key={label} className="mt-4 block"><span className="flex justify-between font-bold"><span>{label}</span><output>{weightsZero[index]}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-2} max={2} step={0.5} value={weightsZero[index]} onChange={(event) => { const next = [...weightsZero] as [number, number]; next[index] = Number(event.target.value); setWeightsZero(next); setSubmitted((items) => [items[0], false, items[2]]) }} /></label>)}<p className="mt-3 rounded-xl bg-slate-100 p-3 font-mono">z={formatNumber(second.z)} → 출력 {second.output}</p><Button className="mt-4 w-full" onClick={() => submit(1)}>설계 B 확인</Button>{submitted[1] ? <Feedback correct={correct[1]}>{correct[1] ? '실제 계산으로 목표 출력 0을 만들었습니다. 다른 조합도 가능합니다.' : 'z가 아직 0 이상입니다. 양의 입력에 어떤 부호의 가중치를 곱하면 z가 작아지는지 살펴보세요.'}</Feedback> : null}</section><section className="rounded-2xl border border-slate-200 p-5"><h3 className="font-black">설계 C · 가장 작은 편향 변화</h3><p className="mt-2 text-sm leading-6 text-slate-600">현재 b=-2이면 z=0, 출력 1입니다. 출력 0으로 바꾸는 가장 작은 선택지를 고르세요.</p><div className="mt-4 grid grid-cols-2 gap-3">{biasOptions.map((candidateBias) => <Button key={candidateBias} variant={smallBias === candidateBias ? 'primary' : 'secondary'} aria-pressed={smallBias === candidateBias} onClick={() => { setSmallBias(candidateBias); setSubmitted((items) => [items[0], items[1], false]) }}>b={candidateBias}</Button>)}</div><p className="mt-3 rounded-xl bg-slate-100 p-3 font-mono">z={formatNumber(third.z)} → 출력 {third.output}</p><Button className="mt-4 w-full" onClick={() => submit(2)}>설계 C 확인</Button>{submitted[2] ? <Feedback correct={correct[2]}>{correct[2] ? `출력 0을 만들면서 기존 편향과의 차이 ${formatNumber(Math.abs(smallBias + 2))}가 가장 작습니다.` : third.output !== 0 ? 'z=0도 계단 함수에서는 출력 1입니다. z를 0보다 조금 작게 만들어야 합니다.' : '출력 0은 만들었지만 더 작은 편향 변화로도 가능한 선택지가 있습니다.'}</Feedback> : null}</section></div>{props.isComplete ? <Completion>하나로 정해진 답을 외우지 않고 실제 조건식으로 세 목표 출력을 설계했습니다.</Completion> : null}</StepFrame>
 }
 
-type SliderKey = keyof PerceptronValues
-
-const sliderSettings: Array<{
-  key: SliderKey
-  label: string
-  min: number
-  max: number
-  step: number
-}> = [
-  { key: 'x1', label: '입력값 x1', min: 0, max: 10, step: 1 },
-  { key: 'x2', label: '입력값 x2', min: 0, max: 10, step: 1 },
-  { key: 'w1', label: '가중치 w1', min: -2, max: 2, step: 0.5 },
-  { key: 'w2', label: '가중치 w2', min: -2, max: 2, step: 0.5 },
-  { key: 'b', label: '편향 b', min: -10, max: 10, step: 1 },
+const boundaryPoints = [
+  { id: 'A', x: -2, y: -1, target: 0 as const, shape: 'square' as const },
+  { id: 'B', x: -1, y: -2, target: 0 as const, shape: 'square' as const },
+  { id: 'C', x: -2, y: 1, target: 0 as const, shape: 'square' as const },
+  { id: 'D', x: 1, y: 1, target: 1 as const, shape: 'circle' as const },
+  { id: 'E', x: 2, y: 1, target: 1 as const, shape: 'circle' as const },
+  { id: 'F', x: 1, y: 2, target: 1 as const, shape: 'circle' as const },
 ]
 
 export function Lesson02Step6(props: CommonStepProps) {
-  const [values, setValues] = useState<PerceptronValues>({ x1: 2, x2: 3, w1: 1, w2: 1, b: -4 })
-  const [observations, setObservations] = useState<string[]>([])
-  const [seenOutputs, setSeenOutputs] = useState<Array<0 | 1>>([])
-  const [notice, setNotice] = useState('값을 바꾸면 계산 결과가 즉시 갱신됩니다.')
-  const result = useMemo(() => calculatePerceptron(values), [values])
-
-  useEffect(() => {
-    if (
-      !props.isComplete &&
-      observations.length >= 3 &&
-      seenOutputs.includes(0) &&
-      seenOutputs.includes(1)
-    ) {
-      props.onComplete()
-    }
-  }, [observations.length, props, seenOutputs])
-
-  const configurationKey = sliderSettings.map(({ key }) => `${key}:${values[key]}`).join('|')
-
-  const recordObservation = () => {
-    if (observations.includes(configurationKey)) {
-      setNotice('이미 기록한 설정입니다. 입력값, 가중치 또는 편향을 바꿔 새 설정을 관찰하세요.')
-      return
-    }
-    setObservations((current) => [...current, configurationKey])
-    setSeenOutputs((current) =>
-      current.includes(result.output) ? current : [...current, result.output],
-    )
-    setNotice(`설정 ${observations.length + 1}을 기록했습니다. 이번 출력은 ${result.output}입니다.`)
-  }
-
-  const resetExperiment = () => {
-    setValues({ x1: 2, x2: 3, w1: 1, w2: 1, b: -4 })
-    setObservations([])
-    setSeenOutputs([])
-    setNotice('실험 기록을 초기화했습니다. 기본값부터 다시 관찰해 보세요.')
-  }
-
-  return (
-    <StepFrame
-      {...props}
-      step={6}
-      intro="입력값, 가중치와 편향을 조절하며 각 곱셈, 가중합, 계단 함수 판단과 출력이 어떻게 달라지는지 실험합니다."
-    >
-      <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.72fr)_minmax(0,1.45fr)]">
-        <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="slider-title">
-          <div className="flex items-center justify-between gap-3">
-            <h3 id="slider-title" className="text-xl font-black text-slate-950">값 조절하기</h3>
-            <SlidersHorizontal className="text-indigo-600" size={24} aria-hidden="true" />
-          </div>
-          <div className="mt-6 space-y-6">
-            {sliderSettings.map((setting) => (
-              <label key={setting.key} className="block">
-                <span className="flex items-center justify-between gap-3 text-sm font-bold text-slate-700">
-                  <span>{setting.label}</span>
-                  <output className="min-w-12 rounded-lg bg-indigo-50 px-2 py-1 text-center font-black tabular-nums text-indigo-800">
-                    {formatNumber(values[setting.key])}
-                  </output>
-                </span>
-                <input
-                  type="range"
-                  min={setting.min}
-                  max={setting.max}
-                  step={setting.step}
-                  value={values[setting.key]}
-                  onChange={(event) => {
-                    const next = Number(event.target.value)
-                    setValues((current) => ({ ...current, [setting.key]: next }))
-                    setNotice('값이 바뀌었습니다. 계산을 살펴본 뒤 이 설정을 기록하세요.')
-                  }}
-                  className="mt-3 min-h-11 w-full cursor-pointer accent-indigo-600"
-                />
-                <span className="flex justify-between text-xs font-semibold tabular-nums text-slate-500">
-                  <span>{setting.min}</span>
-                  <span>{setting.max}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section aria-labelledby="live-result-title">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h3 id="live-result-title" className="text-xl font-black text-slate-950">실시간 계산 결과</h3>
-            <span
-              className={`inline-flex min-h-11 items-center gap-2 rounded-xl px-4 font-black ${
-                result.output === 1
-                  ? 'bg-emerald-100 text-emerald-900'
-                  : 'bg-slate-200 text-slate-900'
-              }`}
-              aria-live="polite"
-            >
-              <Gauge size={20} aria-hidden="true" />
-              출력 {result.output}
-            </span>
-          </div>
-          <div className="mt-5">
-            <PerceptronSignalFlow values={values} label="조절 중인 퍼셉트론의 실시간 계산 흐름" />
-          </div>
-          <div className="mt-5 rounded-2xl bg-slate-900 p-5 text-white" aria-live="polite">
-            <p className="break-words font-black tabular-nums">
-              ({formatNumber(values.x1)} × {formatNumber(values.w1)}) + ({formatNumber(values.x2)} × {formatNumber(values.w2)}) + ({formatNumber(values.b)})
-            </p>
-            <p className="mt-2 break-words leading-7 text-slate-200">
-              = {formatNumber(result.product1)} + {formatNumber(result.product2)} + ({formatNumber(values.b)}) = 가중합 z {formatNumber(result.z)}
-            </p>
-            <p className="mt-2 font-bold text-cyan-300">
-              {result.z < 0 ? `${formatNumber(result.z)} < 0` : `${formatNumber(result.z)} ≥ 0`} → 계단 함수 → 출력 {result.output}
-            </p>
-          </div>
-        </section>
-      </div>
-
-      <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="observation-title">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 id="observation-title" className="font-black text-indigo-950">실험 관찰 기록</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-700" aria-live="polite">{notice}</p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button variant="secondary" onClick={resetExperiment}>
-              <RotateCcw size={18} aria-hidden="true" />
-              기록 초기화
-            </Button>
-            <Button onClick={recordObservation}>이 설정 관찰하기</Button>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl bg-white p-4">
-            <p className="text-sm font-bold text-slate-600">서로 다른 설정</p>
-            <p className="mt-1 text-xl font-black tabular-nums text-slate-950">{observations.length} / 3</p>
-          </div>
-          <div className={`rounded-xl p-4 ${seenOutputs.includes(0) ? 'bg-emerald-100' : 'bg-white'}`}>
-            <p className="text-sm font-bold text-slate-600">출력 0 관찰</p>
-            <p className="mt-1 font-black text-slate-950">{seenOutputs.includes(0) ? '완료' : '아직'}</p>
-          </div>
-          <div className={`rounded-xl p-4 ${seenOutputs.includes(1) ? 'bg-emerald-100' : 'bg-white'}`}>
-            <p className="text-sm font-bold text-slate-600">출력 1 관찰</p>
-            <p className="mt-1 font-black text-slate-950">{seenOutputs.includes(1) ? '완료' : '아직'}</p>
-          </div>
-        </div>
-        <p className="mt-4 text-sm leading-6 text-slate-600">
-          선택한 값 자체에는 정답이나 오답이 없습니다. 같은 입력에서도 가중치와 편향에 따라 결과가 달라지는지 관찰하세요.
-        </p>
-      </section>
-
-      {props.isComplete && (
-        <StepCompletionMessage>서로 다른 설정을 세 번 이상 실험하고 출력 0과 1을 모두 관찰했습니다.</StepCompletionMessage>
-      )}
-    </StepFrame>
-  )
+  const [weights, setWeights] = useState<[number, number]>([1, -1])
+  const [bias, setBias] = useState(0)
+  const [selectedId, setSelectedId] = useState('A')
+  const [prediction, setPrediction] = useState<0 | 1 | null>(null)
+  const [pointFeedback, setPointFeedback] = useState<{ correct: boolean; text: string } | null>(null)
+  const [pointCorrect, setPointCorrect] = useState(false)
+  const [biasRecords, setBiasRecords] = useState<number[]>([])
+  const [separationChecked, setSeparationChecked] = useState(false)
+  const selected = boundaryPoints.find((point) => point.id === selectedId)!
+  const pointResult = classifyPoint(selected, weights, bias)
+  const classifications = boundaryPoints.map((point) => ({ point, result: classifyPoint(point, weights, bias) }))
+  const wrong = classifications.filter(({ point, result }) => point.target !== result.output)
+  const segment = getBoundarySegment(weights, bias)
+  const ready = pointCorrect && biasRecords.length >= 2 && separationChecked && wrong.length === 0
+  const mapX = (x: number) => 36 + ((x + 3) / 6) * 288
+  const mapY = (y: number) => 324 - ((y + 3) / 6) * 288
+  useEffect(() => { if (!props.isComplete && ready) props.onComplete() }, [props, ready])
+  const selectPoint = (id: string) => { setSelectedId(id); setPrediction(null); setPointFeedback(null) }
+  return <StepFrame {...props} step={6} intro="w1x1+w2x2+b=0은 외울 공식이 아니라 출력 0과 1이 바뀌는 경계선입니다."><div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)]"><section className="rounded-2xl border border-slate-200 p-4"><div className="flex flex-wrap justify-between gap-3"><div><h3 className="text-xl font-black">2차원 결정 경계</h3><p className="mt-1 text-sm text-slate-600">■ 그룹 0 · ● 그룹 1</p></div><span className="rounded-xl bg-slate-100 px-3 py-2 font-mono text-sm">{weights[0]}x1 + {weights[1]}x2 + {bias} = 0</span></div><svg className="mt-4 h-auto w-full" viewBox="0 0 360 360" role="img" aria-label="두 그룹의 데이터 점과 퍼셉트론 결정 경계"><rect x="36" y="36" width="288" height="288" rx="12" fill="#f8fafc" stroke="#cbd5e1" />{[-2,-1,0,1,2].map((value) => <g key={value}><line x1={mapX(value)} x2={mapX(value)} y1="36" y2="324" stroke="#e2e8f0" /><line x1="36" x2="324" y1={mapY(value)} y2={mapY(value)} stroke="#e2e8f0" /></g>)}<line x1="36" x2="324" y1={mapY(0)} y2={mapY(0)} stroke="#64748b" /><line x1={mapX(0)} x2={mapX(0)} y1="36" y2="324" stroke="#64748b" />{segment ? <line x1={mapX(segment[0].x)} y1={mapY(segment[0].y)} x2={mapX(segment[1].x)} y2={mapY(segment[1].y)} stroke="#7c3aed" strokeWidth="4" strokeDasharray="8 5" /> : null}{boundaryPoints.map((point) => point.shape === 'square' ? <g key={point.id} onClick={() => selectPoint(point.id)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectPoint(point.id) } }} aria-label={`${point.id} 점 선택, 좌표 ${point.x}, ${point.y}, 그룹 0`}><rect x={mapX(point.x)-10} y={mapY(point.y)-10} width="20" height="20" rx="2" fill={selectedId === point.id ? '#f59e0b' : '#0ea5e9'} stroke="#0f172a" strokeWidth="2" /><text x={mapX(point.x)} y={mapY(point.y)+4} textAnchor="middle" fontSize="11" fontWeight="900">{point.id}</text></g> : <g key={point.id} onClick={() => selectPoint(point.id)} role="button" tabIndex={0} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectPoint(point.id) } }} aria-label={`${point.id} 점 선택, 좌표 ${point.x}, ${point.y}, 그룹 1`}><circle cx={mapX(point.x)} cy={mapY(point.y)} r="11" fill={selectedId === point.id ? '#f59e0b' : '#fb7185'} stroke="#0f172a" strokeWidth="2" /><text x={mapX(point.x)} y={mapY(point.y)+4} textAnchor="middle" fontSize="11" fontWeight="900">{point.id}</text></g>)}</svg></section><section className="rounded-2xl border border-slate-200 p-5"><h3 className="text-xl font-black">경계 조절</h3>{(['w1','w2'] as const).map((label, index) => <label key={label} className="mt-5 block"><span className="flex justify-between font-bold"><span>{label}</span><output>{weights[index]}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-2} max={2} step={0.5} value={weights[index]} onChange={(event) => { const next=[...weights] as [number,number]; next[index]=Number(event.target.value); setWeights(next); setSeparationChecked(false) }} /></label>)}<label className="mt-5 block"><span className="flex justify-between font-bold"><span>편향 b</span><output>{bias}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-2} max={2} step={0.5} value={bias} onChange={(event) => { setBias(Number(event.target.value)); setSeparationChecked(false) }} /></label><Button className="mt-5 w-full" variant="secondary" onClick={() => setBiasRecords((items) => items.includes(bias) ? items : [...items, bias])}>현재 편향의 경계 기록</Button><p className="mt-2 text-sm font-semibold">서로 다른 편향 {biasRecords.length} / 2</p><Button className="mt-5 w-full" onClick={() => setSeparationChecked(true)}>두 그룹 분류 상태 확인</Button>{separationChecked ? <div className={`mt-3 rounded-xl p-4 font-bold ${wrong.length === 0 ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900'}`} role="status">{wrong.length === 0 ? '✓ 모든 점이 목표 그룹과 일치합니다.' : `△ 잘못 분류된 점 ${wrong.length}개: ${wrong.map(({ point }) => point.id).join(', ')}`}</div> : null}</section></div><fieldset className="mt-7 rounded-2xl bg-indigo-50 p-5"><legend className="font-black text-indigo-950">선택한 {selected.id}점 ({selected.x}, {selected.y})의 출력 예상</legend><div className="mt-4 grid grid-cols-2 gap-3"><Button variant={prediction === 0 ? 'primary' : 'secondary'} aria-pressed={prediction === 0} onClick={() => setPrediction(0)}>출력 0</Button><Button variant={prediction === 1 ? 'primary' : 'secondary'} aria-pressed={prediction === 1} onClick={() => setPrediction(1)}>출력 1</Button></div><Button className="mt-4" onClick={() => { if (prediction === null) return; const correct = prediction === pointResult.output; setPointFeedback({ correct, text: `z=${formatNumber(pointResult.z)}이므로 실제 출력은 ${pointResult.output}입니다. ${correct ? '경계의 어느 쪽인지 정확히 예측했습니다.' : '점의 좌표를 식에 넣고 z의 부호를 다시 확인하세요.'}` }); if (correct) setPointCorrect(true) }} disabled={prediction === null}>예상과 실제 비교</Button>{pointFeedback ? <Feedback correct={pointFeedback.correct}>{pointFeedback.text}</Feedback> : null}</fieldset>{props.isComplete ? <Completion>점의 출력을 예측하고, 편향에 따른 경계 이동을 비교하며 두 그룹을 구분하는 설정을 찾았습니다.</Completion> : null}</StepFrame>
 }
 
-interface Step7Props extends CommonStepProps {
-  priorStepsComplete: boolean
-  onCompletionReadyChange: (ready: boolean) => void
-}
-
-const finalCalculation = [
-  { label: '① 첫 번째 곱셈', equation: '3 × 2 = ?', target: 6, explanation: '입력값 3에 가중치 2를 곱하면 6입니다.' },
-  { label: '② 두 번째 곱셈', equation: '4 × (-1) = ?', target: -4, explanation: '입력값 4에 가중치 -1을 곱하면 -4입니다.' },
-  { label: '③ 가중합', equation: '6 + (-4) + (-1) = ?', target: 1, explanation: '두 곱셈 결과를 더하고 편향 -1을 더하면 가중합 z = 1입니다.' },
-  { label: '④ 최종 출력', equation: 'z = 1일 때 계단 함수 출력은?', target: 1, explanation: '가중합 1은 0 이상이므로 계단 함수 적용 후 최종 출력은 1입니다.' },
+const finalQuiz = [
+  { question: '계산: 입력 [-1,2,1], 가중치 [2,0.5,-1], 편향 0.5의 출력은?', options: ['0', '1', '2'], answer: '0', hint: '각 곱셈 결과를 더하고 편향을 더한 z의 부호를 확인하세요.' },
+  { question: '다른 값이 같을 때 편향을 증가시키면 z는?', options: ['커진다', '작아진다', '항상 같다'], answer: '커진다', hint: '편향은 곱셈 결과의 합에 그대로 더해집니다.' },
+  { question: '입력 [1,1], 가중치 [1,1]에서 출력 0을 만드는 편향은?', options: ['-2.5', '-2', '0'], answer: '-2.5', hint: 'z=0일 때 계단 함수 출력은 1입니다.' },
+  { question: 'w1x1+w2x2+b=0이 뜻하는 것은?', options: ['출력이 바뀌는 경계', '항상 출력 0', '입력 데이터 개수'], answer: '출력이 바뀌는 경계', hint: 'z의 부호가 바뀌면 계단 함수 출력도 바뀝니다.' },
+  { question: '한 개의 퍼셉트론이 XOR을 완전히 구분하기 어려운 이유는?', options: ['직선 경계 하나만 만들기 때문', '입력이 두 개이기 때문', '출력이 0과 1이기 때문'], answer: '직선 경계 하나만 만들기 때문', hint: 'XOR의 1 두 점은 대각선으로 떨어져 있어 한 직선으로 나누기 어렵습니다.' },
 ] as const
 
-export function Lesson02Step7({
-  priorStepsComplete,
-  onCompletionReadyChange,
-  ...props
-}: Step7Props) {
-  const [calcAnswers, setCalcAnswers] = useState(['', '', '', ''])
-  const [calcSubmitted, setCalcSubmitted] = useState([false, false, false, false])
-  const [quizAnswers, setQuizAnswers] = useState<Array<'A' | 'B' | 'C' | 'D' | '0' | '1' | null>>([null, null, null])
-  const [quizSubmitted, setQuizSubmitted] = useState([false, false, false])
+interface Step7Props extends CommonStepProps { priorStepsComplete: boolean; onCompletionReadyChange: (ready: boolean) => void }
 
-  const allSubmitted = calcSubmitted.every(Boolean) && quizSubmitted.every(Boolean)
-
-  useEffect(() => {
-    onCompletionReadyChange(allSubmitted)
-  }, [allSubmitted, onCompletionReadyChange])
-
-  const changeCalc = (index: number, value: string) => {
-    setCalcAnswers((current) => current.map((answer, item) => (item === index ? value : answer)))
-    setCalcSubmitted((current) => current.map((submitted, item) => (item === index ? false : submitted)))
-  }
-
-  const submitCalc = (index: number) => {
-    if (parseStudentNumber(calcAnswers[index]) === null) return
-    setCalcSubmitted((current) => current.map((submitted, item) => (item === index ? true : submitted)))
-  }
-
-  const chooseQuiz = (index: number, answer: 'A' | 'B' | 'C' | 'D' | '0' | '1') => {
-    setQuizAnswers((current) => current.map((value, item) => (item === index ? answer : value)))
-    setQuizSubmitted((current) => current.map((submitted, item) => (item === index ? false : submitted)))
-  }
-
-  const submitQuiz = (index: number) => {
-    if (!quizAnswers[index]) return
-    setQuizSubmitted((current) => current.map((submitted, item) => (item === index ? true : submitted)))
-  }
-
-  return (
-    <StepFrame
-      {...props}
-      step={7}
-      intro="입력값×가중치부터 계단 함수 출력까지 한 번에 완성하고, 세 확인 문제로 각 값의 역할을 정리합니다."
-    >
-      <section aria-labelledby="final-calc-title">
-        <h3 id="final-calc-title" className="text-xl font-black text-slate-950">종합 계산 문제</h3>
-        <p className="mt-2 leading-7 text-slate-600">
-          x1 = 3, x2 = 4, w1 = 2, w2 = -1, b = -1
-        </p>
-        <div className="mt-5 grid gap-5 md:grid-cols-2">
-          {finalCalculation.map((item, index) => {
-            const correct = parseStudentNumber(calcAnswers[index]) === item.target
-            return (
-              <div key={item.label} className="rounded-2xl border border-slate-200 p-5">
-                <p className="font-black text-indigo-700">{item.label}</p>
-                <p className="mt-2 text-xl font-black tabular-nums text-slate-950">{item.equation}</p>
-                <div className="mt-4">
-                  <NumericInput
-                    id={`step7-calc-${index}`}
-                    label={index === 3 ? '출력 입력' : '계산 결과 입력'}
-                    value={calcAnswers[index]}
-                    onChange={(value) => changeCalc(index, value)}
-                  />
-                </div>
-                <Button
-                  className="mt-4 w-full"
-                  onClick={() => submitCalc(index)}
-                  disabled={parseStudentNumber(calcAnswers[index]) === null}
-                >
-                  계산 제출
-                </Button>
-                {calcSubmitted[index] && (
-                  <AnswerFeedback correct={correct} explanation={item.explanation} />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      <div className="mt-7">
-        <PerceptronSignalFlow values={{ x1: 3, x2: 4, w1: 2, w2: -1, b: -1 }} label="종합 문제의 퍼셉트론 계산 흐름" />
-      </div>
-
-      <section className="mt-10" aria-labelledby="lesson02-quiz-title">
-        <h3 id="lesson02-quiz-title" className="text-xl font-black text-slate-950">확인 문제 3개</h3>
-        <p className="mt-2 leading-7 text-slate-600">틀렸다면 계산 과정과 해설을 확인한 뒤 답을 바꾸어 다시 제출할 수 있습니다.</p>
-
-        <div className="mt-5 space-y-6">
-          <fieldset className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-            <legend className="px-1 text-lg font-black leading-7 text-slate-950">
-              문제 1. 퍼셉트론에서 가중치의 역할로 가장 적절한 것은?
-            </legend>
-            <div className="mt-4 grid gap-3">
-              {[
-                ['A', '입력의 중요도를 조절한다.'],
-                ['B', '데이터를 저장한다.'],
-                ['C', '인터넷 속도를 조절한다.'],
-                ['D', '출력값을 삭제한다.'],
-              ].map(([key, text]) => (
-                <button
-                  key={key}
-                  type="button"
-                  aria-pressed={quizAnswers[0] === key}
-                  onClick={() => chooseQuiz(0, key as 'A' | 'B' | 'C' | 'D')}
-                  className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold leading-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                    quizAnswers[0] === key
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
-                      : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
-                  }`}
-                >
-                  {key}. {text}
-                </button>
-              ))}
-            </div>
-            <Button className="mt-4" onClick={() => submitQuiz(0)} disabled={!quizAnswers[0]}>
-              문제 1 제출
-            </Button>
-            {quizSubmitted[0] && (
-              <AnswerFeedback
-                correct={quizAnswers[0] === 'A'}
-                explanation="정답은 A입니다. 가중치는 각 입력이 계산 결과에 얼마나 중요하게 반영될지 조절합니다."
-              />
-            )}
-          </fieldset>
-
-          <fieldset className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-            <legend className="px-1 text-lg font-black leading-7 text-slate-950">
-              문제 2. 편향의 역할로 가장 적절한 것은?
-            </legend>
-            <div className="mt-4 grid gap-3">
-              {[
-                ['A', '입력값의 단위를 바꾼다.'],
-                ['B', '전체 판단 기준을 조정한다.'],
-                ['C', '입력 개수를 늘린다.'],
-                ['D', '데이터 파일을 저장한다.'],
-              ].map(([key, text]) => (
-                <button
-                  key={key}
-                  type="button"
-                  aria-pressed={quizAnswers[1] === key}
-                  onClick={() => chooseQuiz(1, key as 'A' | 'B' | 'C' | 'D')}
-                  className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold leading-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                    quizAnswers[1] === key
-                      ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
-                      : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
-                  }`}
-                >
-                  {key}. {text}
-                </button>
-              ))}
-            </div>
-            <Button className="mt-4" onClick={() => submitQuiz(1)} disabled={!quizAnswers[1]}>
-              문제 2 제출
-            </Button>
-            {quizSubmitted[1] && (
-              <AnswerFeedback
-                correct={quizAnswers[1] === 'B'}
-                explanation="정답은 B입니다. 편향은 입력과 가중치의 계산에 더해져 전체 판단 기준을 조정합니다."
-              />
-            )}
-          </fieldset>
-
-          <fieldset className="rounded-2xl border border-slate-200 p-5 sm:p-6">
-            <legend className="px-1 text-lg font-black leading-7 text-slate-950">
-              문제 3. x1 = 2, x2 = 1, w1 = 2, w2 = 1, b = -4일 때 출력은?
-            </legend>
-            <p className="mt-3 rounded-xl bg-slate-100 p-4 font-bold tabular-nums text-slate-800">
-              가중합 z = 2 × 2 + 1 × 1 - 4 = 1
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {(['0', '1'] as const).map((answer) => (
-                <Button
-                  key={answer}
-                  variant={quizAnswers[2] === answer ? 'primary' : 'secondary'}
-                  aria-pressed={quizAnswers[2] === answer}
-                  onClick={() => chooseQuiz(2, answer)}
-                >
-                  출력 {answer}
-                </Button>
-              ))}
-            </div>
-            <Button className="mt-4" onClick={() => submitQuiz(2)} disabled={!quizAnswers[2]}>
-              문제 3 제출
-            </Button>
-            {quizSubmitted[2] && (
-              <AnswerFeedback
-                correct={quizAnswers[2] === '1'}
-                explanation="가중합 z = 1이고 1 ≥ 0이므로 계단 함수 적용 후 최종 출력은 1입니다."
-              />
-            )}
-          </fieldset>
-        </div>
-      </section>
-
-      {allSubmitted && !props.isComplete && (
-        <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status">
-          <CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
-          <p className="leading-7">
-            종합 계산과 세 확인 문제를 모두 제출했습니다. {priorStepsComplete
-              ? '화면 아래의 완료 버튼으로 Lesson 02를 완료하세요.'
-              : '완료되지 않은 앞 STEP의 핵심 활동을 마치면 완료 버튼이 활성화됩니다.'}
-          </p>
-        </div>
-      )}
-
-      {props.isComplete && (
-        <div className="mt-8 border-t border-emerald-200 pt-7">
-          <div className="flex items-start gap-3 text-emerald-900" role="status">
-            <CheckCircle2 className="mt-0.5 shrink-0" size={24} aria-hidden="true" />
-            <div>
-              <h3 className="text-xl font-black">Lesson 02 완료</h3>
-              <p className="mt-2 leading-7">홈의 전체 진행도에 이 차시 완료가 반영되었습니다.</p>
-            </div>
-          </div>
-          <div className="mt-7 rounded-2xl bg-indigo-50 p-5">
-            <p className="font-black text-indigo-900">Lesson 03으로 이어지는 질문</p>
-            <p className="mt-2 text-lg font-bold leading-7 text-slate-900">
-              지금은 계단 함수만 사용했습니다. 같은 가중합에 다른 활성화 함수를 사용하면 출력은 어떻게 달라질까요?
-            </p>
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-              <Link
-                to="/"
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:border-indigo-300 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Home에서 진행도 보기
-              </Link>
-              <Link
-                to="/lesson/03"
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                다음 차시 미리 보기
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </StepFrame>
-  )
+export function Lesson02Step7({ priorStepsComplete, onCompletionReadyChange, ...props }: Step7Props) {
+  const [weights, setWeights] = useState<[number, number]>([1, 1])
+  const [bias, setBias] = useState(-1.5)
+  const rows = truthTable(weights, bias)
+  const [viewedRows, setViewedRows] = useState<string[]>([])
+  const [gateGuess, setGateGuess] = useState<'AND' | 'OR' | null>(null)
+  const [gateCorrect, setGateCorrect] = useState(false)
+  const [constructed, setConstructed] = useState(false)
+  const [xorAttempts, setXorAttempts] = useState<number[]>([])
+  const [reason, setReason] = useState<string | null>(null)
+  const [reasonSubmitted, setReasonSubmitted] = useState(false)
+  const [quizAnswers, setQuizAnswers] = useState<(string | null)[]>(Array(finalQuiz.length).fill(null))
+  const [quizSubmitted, setQuizSubmitted] = useState<boolean[]>(Array(finalQuiz.length).fill(false))
+  const quizCorrect = quizAnswers.map((answer, index) => answer === finalQuiz[index].answer)
+  const ready = viewedRows.length === 4 && gateCorrect && constructed && xorAttempts.length >= 2 && reasonSubmitted && reason === finalQuiz[4].answer && quizSubmitted.every(Boolean) && quizCorrect.every(Boolean)
+  useEffect(() => { onCompletionReadyChange(ready) }, [onCompletionReadyChange, ready])
+  const updateSetting = (nextWeights: [number, number], nextBias: number) => { setWeights(nextWeights); setBias(nextBias) }
+  const xorPresets = [
+    { weights: [1, 1] as [number, number], bias: -0.5, label: 'OR형 직선' },
+    { weights: [1, 1] as [number, number], bias: -1.5, label: 'AND형 직선' },
+    { weights: [1, -1] as [number, number], bias: -0.5, label: '대각선 직선' },
+  ]
+  return <StepFrame {...props} step={7} intro="진리표를 계산하고 AND·OR를 설계한 뒤, XOR에서 다층 신경망이 필요한 이유를 찾습니다."><section aria-labelledby="truth-title"><h3 id="truth-title" className="text-xl font-black">1. 현재 설정의 네 입력 조합</h3><p className="mt-2 text-slate-600">w1={weights[0]}, w2={weights[1]}, b={bias}</p><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[34rem] border-collapse text-center"><thead><tr className="bg-slate-100"><th className="p-3">x1</th><th className="p-3">x2</th><th className="p-3">z</th><th className="p-3">출력</th><th className="p-3">확인</th></tr></thead><tbody>{rows.map((row) => { const key=`${row.x1}${row.x2}`; return <tr key={key} className="border-t border-slate-200"><td className="p-3">{row.x1}</td><td>{row.x2}</td><td>{formatNumber(row.z)}</td><td className="font-black">{row.output}</td><td><Button variant="secondary" onClick={() => setViewedRows((items) => items.includes(key) ? items : [...items, key])}>{viewedRows.includes(key) ? '✓ 확인함' : '계산 확인'}</Button></td></tr>})}</tbody></table></div></section><fieldset className="mt-8 rounded-2xl border border-slate-200 p-5"><legend className="text-xl font-black">2. 처음 설정은 AND일까, OR일까?</legend><div className="mt-4 grid grid-cols-2 gap-3"><Button variant={gateGuess === 'AND' ? 'primary' : 'secondary'} aria-pressed={gateGuess === 'AND'} onClick={() => { setGateGuess('AND'); setGateCorrect(false) }}>AND</Button><Button variant={gateGuess === 'OR' ? 'primary' : 'secondary'} aria-pressed={gateGuess === 'OR'} onClick={() => { setGateGuess('OR'); setGateCorrect(false) }}>OR</Button></div><Button className="mt-4" disabled={!gateGuess} onClick={() => setGateCorrect(gateGuess === 'AND')}>판단 제출</Button>{gateGuess ? <Feedback correct={gateCorrect}>{gateCorrect ? '처음 설정의 네 출력이 0,0,0,1이므로 AND입니다.' : '처음 설정 w1=1, w2=1, b=-1.5에서 언제 1이 나오는지 다시 확인하세요.'}</Feedback> : null}</fieldset><section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><h3 className="text-xl font-black text-indigo-950">3. OR 게이트 구성</h3><p className="mt-2 leading-7 text-slate-700">가중치나 편향을 바꾸어 출력 [0,1,1,1]을 만드세요. 가능한 조합은 하나가 아닙니다.</p>{(['w1','w2'] as const).map((label,index) => <label key={label} className="mt-4 block"><span className="flex justify-between font-bold"><span>{label}</span><output>{weights[index]}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-1} max={2} step={0.5} value={weights[index]} onChange={(event) => { const next=[...weights] as [number,number]; next[index]=Number(event.target.value); updateSetting(next,bias) }} /></label>)}<label className="mt-4 block"><span className="flex justify-between font-bold"><span>편향 b</span><output>{bias}</output></span><input className="mt-2 min-h-11 w-full" type="range" min={-2.5} max={1} step={0.5} value={bias} onChange={(event) => updateSetting(weights,Number(event.target.value))} /></label><Button className="mt-5" onClick={() => setConstructed(matchesTruthTable(weights,bias,[0,1,1,1]))}>OR 조건 검사</Button>{constructed ? <Feedback correct>실제 네 출력을 계산해 OR 조건을 만족했습니다.</Feedback> : null}</section><section className="mt-8"><h3 className="text-xl font-black">4. XOR을 직선 하나로 시도</h3><p className="mt-2 leading-7 text-slate-600">XOR 목표 출력은 [0,1,1,0]입니다. 서로 다른 직선 설정을 두 번 이상 확인하세요.</p><div className="mt-4 grid gap-3 sm:grid-cols-3">{xorPresets.map((preset,index) => <Button key={preset.label} variant="secondary" onClick={() => { updateSetting(preset.weights,preset.bias); setXorAttempts((items) => items.includes(index) ? items : [...items,index]) }}>{xorAttempts.includes(index) ? '✓ ' : ''}{preset.label}</Button>)}</div><p className="mt-3 rounded-xl bg-slate-100 p-4 font-semibold">시도 {xorAttempts.length} / 2 · 어떤 직선도 네 점을 모두 맞히지 못합니다.</p></section><fieldset className="mt-8"><legend className="text-xl font-black">5. 한 퍼셉트론으로 XOR이 어려운 이유</legend><div className="mt-4"><ChoiceButtons value={reason} options={finalQuiz[4].options.map((label) => ({ value: label, label }))} onChange={(value) => { setReason(value); setReasonSubmitted(false) }} /></div><Button className="mt-4" disabled={!reason} onClick={() => setReasonSubmitted(true)}>이유 제출</Button>{reasonSubmitted ? <Feedback correct={reason === finalQuiz[4].answer}>{reason === finalQuiz[4].answer ? '한 퍼셉트론은 직선 경계 하나만 만들 수 있습니다. 여러 퍼셉트론을 연결한 다층 신경망은 더 복잡한 경계를 만들 수 있습니다.' : finalQuiz[4].hint}</Feedback> : null}</fieldset><section className="mt-10" aria-labelledby="final-quiz-title"><h3 id="final-quiz-title" className="text-xl font-black">최종 확인 문제 5개</h3><div className="mt-5 grid gap-5">{finalQuiz.map((question,index) => <fieldset key={question.question} className="rounded-2xl border border-slate-200 p-5"><legend className="font-black leading-7">문제 {index+1}. {question.question}</legend><div className="mt-4"><ChoiceButtons value={quizAnswers[index]} options={question.options.map((label) => ({ value: label, label }))} onChange={(value) => { setQuizAnswers((items) => items.map((answer,item) => item===index ? value : answer)); setQuizSubmitted((items) => items.map((submittedValue,item) => item===index ? false : submittedValue)) }} /></div><Button className="mt-4" disabled={!quizAnswers[index]} onClick={() => setQuizSubmitted((items) => items.map((submittedValue,item) => item===index ? true : submittedValue))}>문제 {index+1} 제출</Button>{quizSubmitted[index] ? <Feedback correct={quizCorrect[index]}>{quizCorrect[index] ? '배운 원리를 새로운 조건에 올바르게 적용했습니다.' : question.hint}</Feedback> : null}</fieldset>)}</div></section>{ready && !props.isComplete ? <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status"><CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" /><p className="leading-7">모든 종합 활동을 마쳤습니다. {priorStepsComplete ? '화면 아래의 완료 버튼으로 Lesson 02를 완료하세요.' : '완료되지 않은 앞 STEP의 활동을 먼저 마치세요.'}</p></div> : null}{props.isComplete ? <div className="mt-8 border-t border-emerald-200 pt-7"><Completion>Lesson 02의 새 활동을 모두 완료했고 Home 진행도에 반영되었습니다.</Completion><div className="mt-7 rounded-2xl bg-indigo-50 p-5"><p className="font-black text-indigo-900">Lesson 03으로 이어지는 질문</p><p className="mt-2 text-lg font-bold leading-7">같은 가중합에 다른 활성화 함수를 사용하면 출력은 어떻게 달라질까요?</p><div className="mt-5 flex flex-col gap-3 sm:flex-row"><Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold">Home에서 진행도 보기</Link><Link to="/lesson/03" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white">Lesson 03으로<ArrowRight size={18} aria-hidden="true" /></Link></div></div></div> : null}</StepFrame>
 }

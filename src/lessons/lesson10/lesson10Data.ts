@@ -8,22 +8,29 @@ export const lesson10StepTitles = [
   '생성형 AI와 음성 인식 정리하기',
 ] as const
 
-export type GenerationCategory = 'decision' | 'generation'
+export type GenerationCategory = 'decision' | 'generation' | 'not-generation'
 
 export const GENERATION_SCENARIOS = [
   { id: 'cat-class', text: '사진이 고양이인지 판단한다.', answer: 'decision' },
   { id: 'cat-create', text: '새로운 고양이 그림을 만든다.', answer: 'generation' },
   { id: 'spam-class', text: '이메일이 스팸인지 판단한다.', answer: 'decision' },
   { id: 'music-create', text: '새로운 배경 음악을 만든다.', answer: 'generation' },
+  { id: 'continue', text: '앞 문맥에 이어질 새로운 문장을 만든다.', answer: 'generation' },
+  { id: 'summary', text: '입력 글의 핵심을 새 요약문으로 다시 구성한다.', answer: 'generation' },
+  { id: 'brightness', text: '사진의 밝기만 일정하게 조절한다.', answer: 'not-generation' },
+  { id: 'search', text: '저장된 문장 중 하나를 그대로 검색해 보여 준다.', answer: 'not-generation' },
+  { id: 'template', text: '정해진 양식의 이름 칸에 이름만 넣는다.', answer: 'not-generation' },
 ] as const
 
-export type GanRole = 'generator' | 'discriminator'
+export type GanRole = 'generator' | 'discriminator' | 'real-data' | 'feedback'
 
 export const GAN_ROLE_CARDS = [
   { id: 'make-new', text: '새로운 데이터를 만든다.', answer: 'generator' },
   { id: 'make-similar', text: '실제 데이터와 비슷한 결과를 만들려고 한다.', answer: 'generator' },
   { id: 'distinguish', text: '실제 데이터와 생성 데이터를 구분한다.', answer: 'discriminator' },
   { id: 'judge-better', text: '구분 결과를 통해 더 정확하게 판단하도록 학습한다.', answer: 'discriminator' },
+  { id: 'actual-reference', text: '감별자가 비교 기준으로 받는 실제 사례다.', answer: 'real-data' },
+  { id: 'improve-direction', text: '감별 판단이 생성자에게 다음 결과를 개선할 방향을 준다.', answer: 'feedback' },
 ] as const
 
 export const REAL_PATTERN = ['○', '●', '○', '●'] as const
@@ -62,7 +69,24 @@ export const RECOGNITION_CARDS = [
   { id: 'learn-data', text: '대량의 음성 데이터에서 패턴을 학습한다.', answer: 'deep-learning' },
   { id: 'pronunciation', text: '다양한 발음 차이를 데이터로 학습할 수 있다.', answer: 'deep-learning' },
   { id: 'unseen-rule', text: '정해진 규칙과 크게 다른 입력에 취약하다.', answer: 'rules' },
+  { id: 'noise-data', text: '소음과 여러 말하기 속도 사례를 데이터에서 학습할 수 있다.', answer: 'deep-learning' },
+  { id: 'repair-rules', text: '오류를 고칠 때 규칙 문장을 직접 수정하는 일이 중심이다.', answer: 'rules' },
 ] as const
+
+export const SPEECH_METHOD_SCENARIOS = [
+  { id: 'quiet-command', text: '조용한 교실에서 “시작·멈춤·다음”처럼 정해진 몇 개 명령만 인식한다.', answer: 'rules', limit: '명령 밖의 표현, 다른 말하기 방식에는 규칙을 더 작성해야 할 수 있다.' },
+  { id: 'daily-speech', text: '다양한 사람이 일상 문장을 자연스럽게 말한다.', answer: 'deep-learning', limit: '학습 데이터에 적은 발음·환경에서는 오류가 날 수 있다.' },
+  { id: 'noisy-term', text: '소음이 큰 공장에서 전문 용어를 인식한다.', answer: 'deep-learning', limit: '소음과 전문 용어가 포함된 충분한 학습·평가 데이터가 필요하다.' },
+] as const
+
+export const SERVICE_SCENARIOS = [
+  { id: 'voice-answer', text: '음성 질문을 받아 텍스트 답변을 만든다.', answer: ['음성 인식', '생성형 언어 모델'] },
+  { id: 'image-create', text: '설명을 받아 새로운 이미지를 만든다.', answer: ['이미지 생성 모델'] },
+  { id: 'call-summary', text: '통화 내용을 글로 바꾸고 핵심을 요약한다.', answer: ['음성 인식', '생성형 언어 모델'] },
+  { id: 'photo-class', text: '사진 속 객체 종류를 판단한다.', answer: ['이미지 분류'] },
+] as const
+
+export const TECHNOLOGY_CARDS = ['음성 인식', '자연어 처리', '생성형 언어 모델', '이미지 분류', '이미지 생성 모델', 'GAN', '규칙 기반 처리'] as const
 
 export type LanguageProcess = 'speech-recognition' | 'natural-language'
 

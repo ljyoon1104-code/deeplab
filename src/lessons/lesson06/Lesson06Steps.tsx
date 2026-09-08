@@ -360,17 +360,20 @@ export function Lesson06Step1(props: CommonStepProps) {
   )
 }
 
-type AdjustmentTarget = 'adjusted' | 'given'
+type AdjustmentTarget = 'adjusted' | 'given' | 'computed'
 
 export function Lesson06Step2(props: CommonStepProps) {
   const [answers, setAnswers] = useState<
     Record<string, AdjustmentTarget | undefined>
   >({})
   const [submitted, setSubmitted] = useState(false)
+  const [reason, setReason] = useState<'evidence' | 'shortcut' | null>(null)
+  const [reasonSubmitted, setReasonSubmitted] = useState(false)
   const allAnswered = adjustmentCards.every((card) => answers[card.id])
   const correct = adjustmentCards.every(
     (card) => answers[card.id] === card.answer,
   )
+  const reasonCorrect = reason === 'evidence'
 
   const choose = (id: string, target: AdjustmentTarget) => {
     setAnswers((current) => ({ ...current, [id]: target }))
@@ -380,14 +383,19 @@ export function Lesson06Step2(props: CommonStepProps) {
   const submit = () => {
     if (!allAnswered) return
     setSubmitted(true)
-    if (correct) props.onComplete()
   }
+
+  useEffect(() => {
+    if (submitted && correct && reasonSubmitted && reasonCorrect && !props.isComplete) {
+      props.onComplete()
+    }
+  }, [correct, props.isComplete, props.onComplete, reasonCorrect, reasonSubmitted, submitted])
 
   return (
     <StepFrame
       {...props}
       step={2}
-      intro="신경망이 학습하면서 조정하는 값과 학습 데이터로 주어진 값을 구분합니다."
+      intro="주어진 값, 순전파에서 계산되는 값, 학습하면서 조정되는 값을 구분합니다."
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
@@ -400,6 +408,12 @@ export function Lesson06Step2(props: CommonStepProps) {
           <h3 className="font-black text-emerald-950">주어진 데이터와 정답</h3>
           <p className="mt-2 leading-7 text-slate-700">
             입력값과 실제 정답인 데이터 라벨은 모델이 마음대로 바꾸지 않습니다.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:col-span-2">
+          <h3 className="font-black text-cyan-950">순전파와 비교로 계산되는 값</h3>
+          <p className="mt-2 leading-7 text-slate-700">
+            예측값과 Loss는 현재 입력과 모델 값에서 계산되는 결과입니다.
           </p>
         </div>
       </div>
@@ -417,10 +431,11 @@ export function Lesson06Step2(props: CommonStepProps) {
               <legend className="px-1 text-lg font-black text-slate-950">
                 {card.label}
               </legend>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {[
                   ['adjusted', '모델이 조정'],
                   ['given', '주어진 값'],
+                  ['computed', '계산된 결과'],
                 ].map(([key, label]) => (
                   <button
                     key={key}
@@ -448,16 +463,58 @@ export function Lesson06Step2(props: CommonStepProps) {
             correct={correct}
             explanation={
               correct
-                ? '신경망은 가중치 w1, w2와 편향 b를 조정하며 입력값 x1, x2와 실제 정답 y는 주어진 값으로 유지합니다.'
-                : 'w1, w2, b는 모델이 조정합니다. x1, x2와 데이터 라벨인 실제 정답 y는 주어진 값입니다.'
+                ? '입력과 정답은 주어지고, 가중치와 편향은 조정되며, 예측과 Loss는 그 값들에서 계산됩니다.'
+                : '입력·정답은 자료의 근거, 가중치·편향은 모델의 조정 대상, 예측·Loss는 계산 결과라는 차이를 살펴보세요.'
             }
           />
         )}
       </section>
 
+      <fieldset className="mt-8">
+        <legend className="text-xl font-black leading-snug text-slate-950">
+          왜 모델이 입력값과 실제 정답을 임의로 바꾸면 안 될까요?
+        </legend>
+        <div className="mt-4 grid gap-3">
+          {[
+            ['evidence', '입력과 정답은 모델이 배워야 할 실제 자료와 기준이기 때문이다.'],
+            ['shortcut', 'Loss 숫자만 작아 보이게 만들면 학습이 끝나기 때문이다.'],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={reason === key}
+              onClick={() => {
+                setReason(key as typeof reason)
+                setReasonSubmitted(false)
+              }}
+              className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                reason === key
+                  ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                  : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <Button className="mt-5" disabled={!reason} onClick={() => setReasonSubmitted(true)}>
+          이유 제출
+        </Button>
+        {reasonSubmitted && (
+          <AnswerFeedback
+            correct={reasonCorrect}
+            explanation={
+              reasonCorrect
+                ? '입력과 정답은 모델이 설명해야 할 자료입니다. 모델은 이 근거를 바꾸는 대신 자신의 가중치와 편향을 조정합니다.'
+                : 'Loss 숫자만 억지로 낮추는 것이 아니라, 주어진 자료와 정답을 설명하는 모델을 만들어야 합니다.'
+            }
+          />
+        )}
+      </fieldset>
+
       {props.isComplete && (
         <StepCompletionMessage>
-          수정할 가중치·편향과 바꾸지 않는 입력·정답을 올바르게 구분했습니다.
+          주어진 값, 계산 결과와 조정할 값을 구분하고 입력·정답을 유지해야 하는 이유를 판단했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -515,7 +572,7 @@ export function Lesson06Step3(props: CommonStepProps) {
           <div className="mt-3">
             <FlowChain
               label="입력에서 Loss까지 진행하는 순전파"
-              items={['입력', '가중합', '활성화 함수', '예측', 'Loss']}
+              items={['입력', '가중합', '활성화 함수', '예측', '실제값과 비교', 'Loss']}
             />
           </div>
         </section>
@@ -528,10 +585,11 @@ export function Lesson06Step3(props: CommonStepProps) {
               tone="rose"
               label="Loss에서 앞쪽 연결로 오차 정보를 전달하는 역전파"
               items={[
-                'Loss',
-                '출력 쪽',
-                '앞쪽 연결',
-                '가중치와 편향 수정',
+                'Loss의 오차 정보',
+                '출력 쪽 → 앞쪽',
+                '수정 방향 계산',
+                '경사하강법으로 값 수정',
+                '다시 순전파',
               ]}
             />
           </div>
@@ -612,11 +670,33 @@ export function Lesson06Step3(props: CommonStepProps) {
 export function Lesson06Step4(props: CommonStepProps) {
   const [choice, setChoice] = useState<'left' | 'right' | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [rateAnswers, setRateAnswers] = useState<Record<string, string>>({})
+  const [ratesSubmitted, setRatesSubmitted] = useState(false)
+  const rateSolutions: Record<string, string> = {
+    small: 'slow',
+    medium: 'balanced',
+    large: 'overshoot',
+    size: 'distance',
+  }
+  const allRatesAnswered = Object.keys(rateSolutions).every((id) => rateAnswers[id])
+  const ratesCorrect = Object.entries(rateSolutions).every(
+    ([id, answer]) => rateAnswers[id] === answer,
+  )
 
   const submit = () => {
     if (!choice) return
     setSubmitted(true)
-    if (choice === 'left') props.onComplete()
+  }
+
+  useEffect(() => {
+    if (submitted && choice === 'left' && ratesSubmitted && ratesCorrect && !props.isComplete) {
+      props.onComplete()
+    }
+  }, [choice, props.isComplete, props.onComplete, ratesCorrect, ratesSubmitted, submitted])
+
+  const chooseRate = (id: string, answer: string) => {
+    setRateAnswers((current) => ({ ...current, [id]: answer }))
+    setRatesSubmitted(false)
   }
 
   return (
@@ -710,11 +790,74 @@ export function Lesson06Step4(props: CommonStepProps) {
           경사하강법이 최솟값을 언제나 정확히 찾거나 한 번의 업데이트로 최적
           모델을 만든다는 뜻은 아닙니다.
         </p>
+
+        <div className="mt-6 space-y-5">
+          {[
+            {
+              id: 'small',
+              question: '학습률이 너무 작을 때 나타날 수 있는 변화는?',
+              options: [['slow', '한 번의 이동이 작아 학습이 느릴 수 있다.'], ['jump', '한 번에 멀리 이동한다.']],
+            },
+            {
+              id: 'medium',
+              question: '현재 상황에 적절한 학습률의 역할은?',
+              options: [['zero', '가중치 변화를 완전히 멈춘다.'], ['balanced', '방향과 이동 크기를 함께 고려해 조정한다.']],
+            },
+            {
+              id: 'large',
+              question: '학습률이 너무 클 때 가능한 일은?',
+              options: [['always', '언제나 반드시 실패한다.'], ['overshoot', 'Loss가 낮은 지점을 지나칠 수 있다.']],
+            },
+            {
+              id: 'size',
+              question: '같은 방향이어도 학습률에 따라 결과가 달라지는 이유는?',
+              options: [['distance', '한 번에 이동하는 거리가 달라지기 때문이다.'], ['label', '실제 정답이 자동으로 바뀌기 때문이다.']],
+            },
+          ].map((item) => (
+            <fieldset key={item.id} className="rounded-2xl border border-slate-200 p-5">
+              <legend className="px-1 font-black leading-7 text-slate-950">{item.question}</legend>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {item.options.map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={rateAnswers[item.id] === key}
+                    onClick={() => chooseRate(item.id, key)}
+                    className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                      rateAnswers[item.id] === key
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+        <Button
+          className="mt-5"
+          disabled={!allRatesAnswered}
+          onClick={() => setRatesSubmitted(true)}
+        >
+          학습률 판단 제출
+        </Button>
+        {ratesSubmitted && (
+          <AnswerFeedback
+            correct={ratesCorrect}
+            explanation={
+              ratesCorrect
+                ? '학습률은 이동 크기입니다. 너무 작으면 느릴 수 있고, 너무 크면 낮은 지점을 지나칠 수 있지만 결과는 문제와 현재 위치에 따라 달라집니다.'
+                : '학습률은 방향을 정답으로 바꾸는 값이 아니라, 정해진 방향으로 한 번에 얼마나 이동할지를 조절합니다.'
+            }
+          />
+        )}
       </section>
 
       {props.isComplete && (
         <StepCompletionMessage>
-          Loss가 작아지는 방향을 선택하고 학습률의 의미를 확인했습니다.
+          Loss가 작아지는 방향과 학습률에 따른 이동 크기의 차이를 판단했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -725,11 +868,26 @@ export function Lesson06Step5(props: CommonStepProps) {
   const [forwardRun, setForwardRun] = useState(false)
   const [trainingResult, setTrainingResult] =
     useState<TrainingStepResult | null>(null)
+  const [predictions, setPredictions] = useState<Record<string, string>>({})
+  const [predictionSubmitted, setPredictionSubmitted] = useState(false)
+  const predictionSolutions: Record<string, string> = {
+    output: 'up',
+    loss: 'down',
+    parameters: 'up',
+  }
+  const allPredicted = Object.keys(predictionSolutions).every((id) => predictions[id])
 
   const runTraining = () => {
+    if (!predictionSubmitted) return
     const result = trainOneStep(INITIAL_PARAMETERS)
     setTrainingResult(result)
     props.onComplete()
+  }
+
+  const choosePrediction = (id: string, answer: string) => {
+    setPredictions((current) => ({ ...current, [id]: answer }))
+    setPredictionSubmitted(false)
+    setTrainingResult(null)
   }
 
   const beforeValues = [
@@ -835,15 +993,64 @@ export function Lesson06Step5(props: CommonStepProps) {
         )}
       </section>
 
+      <section className="mt-9" aria-labelledby="before-training-prediction-title">
+        <h3 id="before-training-prediction-title" className="text-xl font-black text-slate-950">
+          2. 실행 전에 변화 예측
+        </h3>
+        <p className="mt-2 leading-7 text-slate-600">
+          실제 정답은 1입니다. 현재 예측 0.525가 정답에 가까워지려면 무엇이 어떻게 변해야 할지 먼저 기록하세요.
+        </p>
+        <div className="mt-5 space-y-5">
+          {[
+            { id: 'output', question: '예측값은?', options: [['up', '증가'], ['down', '감소']] },
+            { id: 'loss', question: 'Loss는?', options: [['up', '증가'], ['down', '감소']] },
+            { id: 'parameters', question: '이번 예제의 w1, w2, b는?', options: [['up', '모두 증가'], ['down', '모두 감소']] },
+          ].map((item) => (
+            <fieldset key={item.id} className="rounded-2xl border border-slate-200 p-5">
+              <legend className="px-1 font-black text-slate-950">{item.question}</legend>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {item.options.map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={predictions[item.id] === key}
+                    onClick={() => choosePrediction(item.id, key)}
+                    className={`min-h-14 rounded-xl border px-4 py-3 text-left font-bold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                      predictions[item.id] === key
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+          ))}
+        </div>
+        <Button
+          className="mt-5"
+          disabled={!allPredicted}
+          onClick={() => setPredictionSubmitted(true)}
+        >
+          변화 예상 기록
+        </Button>
+        {predictionSubmitted && !trainingResult && (
+          <p className="mt-4 rounded-xl bg-indigo-50 p-4 font-bold text-indigo-950" role="status">
+            예상을 기록했습니다. 이제 실제 1회 학습 결과와 비교하세요.
+          </p>
+        )}
+      </section>
+
       <section className="mt-9" aria-labelledby="one-training-title">
         <h3 id="one-training-title" className="text-xl font-black text-slate-950">
-          2. 실제 계산으로 한 번 학습
+          3. 실제 계산으로 한 번 학습
         </h3>
         <p className="mt-2 leading-7 text-slate-600">
           학생에게 미분식을 계산시키지 않지만, 버튼은 현재 예측과 정답에서 얻은
           실제 오차 정보를 이용해 가중치와 편향을 업데이트합니다.
         </p>
-        <Button className="mt-5" disabled={!forwardRun} onClick={runTraining}>
+        <Button className="mt-5" disabled={!forwardRun || !predictionSubmitted} onClick={runTraining}>
           <TrendingDown size={18} aria-hidden="true" />
           1회 학습
         </Button>
@@ -885,6 +1092,28 @@ export function Lesson06Step5(props: CommonStepProps) {
                 </div>
               ))}
             </div>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3" aria-live="polite">
+              {[
+                ['예측값 증가', predictions.output === predictionSolutions.output],
+                ['Loss 감소', predictions.loss === predictionSolutions.loss],
+                ['w1·w2·b 증가', predictions.parameters === predictionSolutions.parameters],
+              ].map(([label, matched]) => (
+                <div
+                  key={String(label)}
+                  className={`flex items-center gap-2 rounded-xl p-4 font-bold ${
+                    matched ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-950'
+                  }`}
+                >
+                  {matched ? <CheckCircle2 size={19} aria-hidden="true" /> : <CircleHelp size={19} aria-hidden="true" />}
+                  <span>{label}: {matched ? '예상과 같음' : '실제 값으로 다시 확인'}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 rounded-xl bg-slate-100 p-4 leading-7 text-slate-700">
+              실제 계산에서 예측은 {formatTrainingValue(trainingResult.before.prediction)}에서 {formatTrainingValue(trainingResult.after.prediction)}로,
+              Loss는 {formatTrainingValue(trainingResult.before.loss)}에서 {formatTrainingValue(trainingResult.after.loss)}로 변했습니다.
+              오차 정보가 음수이므로 이번 입력에서는 w1, w2와 b가 모두 증가했습니다.
+            </p>
           </>
         )}
       </section>
@@ -897,6 +1126,12 @@ export function Lesson06Step5(props: CommonStepProps) {
     </StepFrame>
   )
 }
+
+const learningRateConfigs = [
+  { id: 'small', label: '작은 학습률', rate: 0.05 },
+  { id: 'medium', label: '중간 학습률', rate: 0.5 },
+  { id: 'large', label: '큰 학습률', rate: 5 },
+] as const
 
 export function Lesson06Step6(props: CommonStepProps) {
   const initialSnapshot = useMemo(
@@ -913,11 +1148,37 @@ export function Lesson06Step6(props: CommonStepProps) {
   const [usedReset, setUsedReset] = useState(false)
   const [choice, setChoice] = useState<'A' | 'B' | 'C' | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [comparisonRun, setComparisonRun] = useState(false)
+  const [rateChoice, setRateChoice] = useState<'small' | 'medium' | 'large' | null>(null)
+  const [rateSubmitted, setRateSubmitted] = useState(false)
   const current = makeSnapshot(epoch, parameters)
   const graphHistory =
     history.length > 1 ? history : lastRunHistory ?? history
   const comparisonHistory =
     history.length > 1 ? history : lastRunHistory
+  const rateComparisons = useMemo(
+    () =>
+      learningRateConfigs.map((config) => {
+        const result = trainRepeatedly(
+          INITIAL_PARAMETERS,
+          0,
+          8,
+          TRAINING_EXAMPLE,
+          config.rate,
+        )
+        const computedHistory = [initialSnapshot, ...result.snapshots]
+        const hasIncrease = computedHistory
+          .slice(1)
+          .some((snapshot, index) => snapshot.loss > computedHistory[index].loss)
+        return {
+          ...config,
+          history: computedHistory,
+          last: computedHistory.at(-1)!,
+          hasIncrease,
+        }
+      }),
+    [initialSnapshot],
+  )
 
   const runEpochs = (requestedCount: number) => {
     const count = Math.min(requestedCount, 10 - epoch)
@@ -953,6 +1214,9 @@ export function Lesson06Step6(props: CommonStepProps) {
       usedReset &&
       submitted &&
       choice === 'A' &&
+      comparisonRun &&
+      rateSubmitted &&
+      rateChoice === 'small' &&
       !props.isComplete
     ) {
       props.onComplete()
@@ -964,6 +1228,9 @@ export function Lesson06Step6(props: CommonStepProps) {
     submitted,
     trainedAtLeastFive,
     usedReset,
+    comparisonRun,
+    rateChoice,
+    rateSubmitted,
   ])
 
   return (
@@ -1106,9 +1373,92 @@ export function Lesson06Step6(props: CommonStepProps) {
         </p>
       )}
 
+      <section className="mt-10 border-t border-slate-200 pt-8" aria-labelledby="rate-comparison-title">
+        <h3 id="rate-comparison-title" className="text-xl font-black text-slate-950">
+          같은 초기값에서 학습률 비교
+        </h3>
+        <p className="mt-2 leading-7 text-slate-600">
+          세 실험 모두 같은 초기값에서 8회 학습합니다. 버튼을 누르면 현재 계산 함수가 각 Epoch를 실제로 계산합니다.
+        </p>
+        <Button
+          className="mt-5"
+          onClick={() => {
+            setComparisonRun(true)
+            setRateSubmitted(false)
+          }}
+        >
+          <Play size={18} aria-hidden="true" />
+          세 학습률 실제 비교
+        </Button>
+
+        {comparisonRun && (
+          <>
+            <div className="mt-6 grid gap-5 xl:grid-cols-3">
+              {rateComparisons.map((comparison) => (
+                <div key={comparison.id} className="min-w-0">
+                  <LossHistoryGraph
+                    history={comparison.history}
+                    idSuffix={`rate-${comparison.id}`}
+                    title={`${comparison.label} ${comparison.rate}`}
+                  />
+                  <dl className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-3 text-sm">
+                    <div><dt className="font-bold text-slate-500">초기 Loss</dt><dd className="font-mono font-black">{formatTrainingValue(comparison.history[0].loss)}</dd></div>
+                    <div><dt className="font-bold text-slate-500">마지막 Loss</dt><dd className="font-mono font-black">{formatTrainingValue(comparison.last.loss)}</dd></div>
+                    <div><dt className="font-bold text-slate-500">마지막 예측</dt><dd className="font-mono font-black">{formatTrainingValue(comparison.last.prediction)}</dd></div>
+                    <div><dt className="font-bold text-slate-500">Loss 흔들림</dt><dd className="font-black">{comparison.hasIncrease ? '관찰됨' : '이번에는 없음'}</dd></div>
+                  </dl>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 rounded-xl bg-indigo-50 p-4 leading-7 text-indigo-950">
+              이 고정 예제에서는 세 학습률 모두 정답 1에 가까워지고 Loss가 감소합니다. 큰 학습률이 항상 실패하는 것은 아니며,
+              다른 데이터와 Loss 모양에서는 낮은 지점을 지나치거나 값이 흔들릴 수 있습니다.
+            </p>
+            <fieldset className="mt-7">
+              <legend className="text-lg font-black leading-7 text-slate-950">
+                8회 동안 Loss가 가장 천천히 감소한 설정은?
+              </legend>
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                {learningRateConfigs.map((config) => (
+                  <button
+                    key={config.id}
+                    type="button"
+                    aria-pressed={rateChoice === config.id}
+                    onClick={() => {
+                      setRateChoice(config.id)
+                      setRateSubmitted(false)
+                    }}
+                    className={`min-h-14 rounded-xl border px-4 py-3 text-left font-bold focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                      rateChoice === config.id
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
+                        : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
+                    }`}
+                  >
+                    {config.label} · {config.rate}
+                  </button>
+                ))}
+              </div>
+              <Button className="mt-5" disabled={!rateChoice} onClick={() => setRateSubmitted(true)}>
+                비교 결과 제출
+              </Button>
+              {rateSubmitted && (
+                <AnswerFeedback
+                  correct={rateChoice === 'small'}
+                  explanation={
+                    rateChoice === 'small'
+                      ? '학습률 0.05는 한 번의 변화가 작아 같은 8회 동안 Loss가 가장 천천히 감소했습니다.'
+                      : '세 그래프의 시작과 마지막 Loss 차이를 비교하세요. 한 번에 이동하는 크기가 가장 작은 설정을 찾아보세요.'
+                  }
+                />
+              )}
+            </fieldset>
+          </>
+        )}
+      </section>
+
       {props.isComplete && (
         <StepCompletionMessage>
-          최소 5회 반복 학습과 초기화를 실행하고 초기 Loss와 마지막 Loss를 비교했습니다.
+          반복 학습·초기화와 세 학습률의 실제 계산 결과를 비교했습니다.
         </StepCompletionMessage>
       )}
     </StepFrame>
@@ -1123,13 +1473,14 @@ interface Step7Props extends CommonStepProps {
 const shuffledLearningCards = [
   learningFlowCards[3],
   learningFlowCards[0],
-  learningFlowCards[6],
+  learningFlowCards[5],
   learningFlowCards[2],
-  learningFlowCards[8],
+  learningFlowCards[9],
   learningFlowCards[4],
   learningFlowCards[1],
   learningFlowCards[7],
-  learningFlowCards[5],
+  learningFlowCards[6],
+  learningFlowCards[8],
 ]
 
 export function Lesson06Step7({
@@ -1139,25 +1490,22 @@ export function Lesson06Step7({
 }: Step7Props) {
   const [order, setOrder] = useState<string[]>([])
   const [orderSubmitted, setOrderSubmitted] = useState(false)
-  const [quizAnswers, setQuizAnswers] = useState<Array<string | null>>([
-    null,
-    null,
-    null,
-    null,
-  ])
-  const [quizSubmitted, setQuizSubmitted] = useState([
-    false,
-    false,
-    false,
-    false,
-  ])
+  const [quizAnswers, setQuizAnswers] = useState<Array<string | null>>(
+    lesson06Quiz.map(() => null),
+  )
+  const [quizSubmitted, setQuizSubmitted] = useState<boolean[]>(
+    lesson06Quiz.map(() => false),
+  )
   const expectedOrder = learningFlowCards.map((card) => card.id)
   const orderCorrect =
     order.length === expectedOrder.length &&
     order.every((id, index) => id === expectedOrder[index])
   const allQuizSubmitted = quizSubmitted.every(Boolean)
+  const allQuizCorrect = lesson06Quiz.every(
+    (quiz, index) => quizSubmitted[index] && quizAnswers[index] === quiz.answer,
+  )
   const completionReady =
-    orderSubmitted && orderCorrect && allQuizSubmitted
+    orderSubmitted && orderCorrect && allQuizSubmitted && allQuizCorrect
 
   useEffect(() => {
     onCompletionReadyChange(completionReady)
@@ -1199,7 +1547,7 @@ export function Lesson06Step7({
           1. 딥러닝 학습 흐름 배열
         </h3>
         <p className="mt-2 leading-7 text-slate-600">
-          아홉 카드를 학습이 진행되는 순서대로 선택하세요.
+          열 카드를 학습이 진행되는 순서대로 선택하세요.
         </p>
         <div className="mt-5 grid gap-6 lg:grid-cols-2">
           <div>
@@ -1275,7 +1623,7 @@ export function Lesson06Step7({
             explanation={
               orderCorrect
                 ? '입력 데이터에서 예측과 Loss를 만들고, 역전파로 수정한 뒤 다시 학습하는 순서입니다.'
-                : '입력 → 가중합 → 활성화 함수 → 예측 → 실제값과 비교 → Loss → 역전파 → 가중치·편향 수정 → 반복 순서를 다시 확인하세요.'
+                : '자료 준비와 초기화가 먼저입니다. 그다음 예측·Loss·수정·반복을 거친 뒤 새로운 데이터 확인이 이어지는지 살펴보세요.'
             }
           />
         )}
@@ -1305,7 +1653,7 @@ export function Lesson06Step7({
 
       <section className="mt-10" aria-labelledby="lesson06-quiz-title">
         <h3 id="lesson06-quiz-title" className="text-xl font-black text-slate-950">
-          3. 확인 문제 4개
+          3. 확인 문제 {lesson06Quiz.length}개
         </h3>
         <p className="mt-2 leading-7 text-slate-600">
           오답은 해설을 읽고 답을 바꾸어 다시 제출할 수 있습니다.
@@ -1346,7 +1694,11 @@ export function Lesson06Step7({
               {quizSubmitted[index] && (
                 <AnswerFeedback
                   correct={quizAnswers[index] === quiz.answer}
-                  explanation={quiz.explanation}
+                  explanation={
+                    quizAnswers[index] === quiz.answer
+                      ? quiz.explanation
+                      : '이 선택이 예측을 만드는 과정인지, 수정 방향을 찾는 과정인지, 또는 새로운 데이터의 성능을 확인하는 과정인지 다시 구분해 보세요.'
+                  }
                 />
               )}
             </fieldset>
@@ -1380,7 +1732,7 @@ export function Lesson06Step7({
           <FlowChain
             tone="rose"
             label="Loss에서 역전파와 수정 후 다시 순전파하는 흐름"
-            items={['Loss', '역전파', 'w · b 수정', '다시 순전파']}
+            items={['Loss', '역전파', 'w · b 수정', '다시 순전파', '반복', '새 데이터 확인']}
           />
         </div>
         <p className="mt-4 font-bold leading-7 text-indigo-900">
@@ -1396,7 +1748,7 @@ export function Lesson06Step7({
         >
           <CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
           <p className="leading-7">
-            전체 학습 흐름 배열과 확인 문제 네 개 제출을 마쳤습니다.{' '}
+            전체 학습 흐름 배열과 확인 문제 {lesson06Quiz.length}개를 모두 맞혔습니다.{' '}
             {priorStepsComplete
               ? '화면 아래의 완료 버튼으로 Lesson 06을 완료하세요.'
               : '완료되지 않은 앞 STEP의 핵심 활동을 마치면 완료 버튼이 활성화됩니다.'}

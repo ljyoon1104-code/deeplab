@@ -3,9 +3,15 @@ import { formatTrainingValue } from './trainingMath'
 
 interface LossHistoryGraphProps {
   history: readonly TrainingSnapshot[]
+  idSuffix?: string
+  title?: string
 }
 
-export function LossHistoryGraph({ history }: LossHistoryGraphProps) {
+export function LossHistoryGraph({
+  history,
+  idSuffix = 'main',
+  title = 'Epoch별 Loss 변화',
+}: LossHistoryGraphProps) {
   const width = 680
   const height = 260
   const left = 58
@@ -32,7 +38,7 @@ export function LossHistoryGraph({ history }: LossHistoryGraphProps) {
     <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h3 className="text-lg font-black text-slate-950">Epoch별 Loss 변화</h3>
+          <h3 className="text-lg font-black text-slate-950">{title}</h3>
           <p className="mt-1 text-sm text-slate-600">
             버튼으로 실행한 실제 반복 계산 결과만 연결합니다.
           </p>
@@ -47,10 +53,10 @@ export function LossHistoryGraph({ history }: LossHistoryGraphProps) {
         className="mt-4 h-auto w-full"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-labelledby="loss-history-title loss-history-description"
+        aria-labelledby={`loss-history-title-${idSuffix} loss-history-description-${idSuffix}`}
       >
-        <title id="loss-history-title">학습 횟수에 따른 Loss 변화 그래프</title>
-        <desc id="loss-history-description">
+        <title id={`loss-history-title-${idSuffix}`}>{title} 그래프</title>
+        <desc id={`loss-history-description-${idSuffix}`}>
           초기값부터 현재까지 실제 계산한 Loss를 Epoch 순서로 연결한 그래프입니다.
         </desc>
         {[0, 0.5, 1].map((ratio) => {
@@ -153,4 +159,3 @@ export function LossHistoryGraph({ history }: LossHistoryGraphProps) {
     </div>
   )
 }
-

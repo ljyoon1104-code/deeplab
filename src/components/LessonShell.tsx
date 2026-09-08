@@ -40,9 +40,10 @@ export function LessonShell({
               <ArrowLeft size={18} aria-hidden="true" />
               전체 차시
             </Link>
-            <div className="inline-flex items-center gap-2 text-sm font-semibold text-indigo-700">
+            <div className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-indigo-700">
               <FlaskConical size={17} aria-hidden="true" />
-              Deep Learning Lab
+              <span className="hidden min-[390px]:inline">Deep Learning Lab</span>
+              <span className="min-[390px]:hidden">DL Lab</span>
             </div>
           </div>
 

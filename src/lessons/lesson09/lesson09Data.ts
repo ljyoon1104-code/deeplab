@@ -28,24 +28,26 @@ export const POOLING_INPUT = [
 
 export const CNN_FLOW = [
   '입력 이미지',
-  '합성곱 층',
-  '특성 맵',
-  '풀링 층',
-  '크기가 줄어든 특성 맵',
-  '완전연결 층',
-  '분류 결과',
+  '합성곱',
+  'ReLU',
+  '풀링',
+  'flatten',
+  '완전연결층',
+  'Softmax',
+  '클래스 예측',
 ] as const
 
 export type CnnFlowItem = (typeof CNN_FLOW)[number]
 
 export const CNN_FLOW_ROLES: Record<CnnFlowItem, string> = {
   '입력 이미지': '픽셀의 가로·세로 구조를 유지한 입력',
-  '합성곱 층': '작은 필터로 주변 픽셀 영역을 살펴봄',
-  '특성 맵': '필터 계산으로 찾아낸 특징의 위치와 정도를 담은 격자',
-  '풀링 층': '작은 영역의 대표값을 선택해 크기를 줄임',
-  '크기가 줄어든 특성 맵': '핵심 특징을 간단한 형태로 전달',
-  '완전연결 층': '찾아낸 특징을 종합',
-  '분류 결과': '각 클래스의 예측 결과 생성',
+  '합성곱': '작은 필터로 지역 패턴을 탐색',
+  ReLU: '음수 반응을 0으로 바꾸고 비선형성을 더함',
+  '풀링': '공간 크기를 줄이며 강한 반응을 남김',
+  flatten: '2차원 특성 맵을 한 줄 배열로 변환',
+  '완전연결층': '추출된 특징을 종합',
+  Softmax: '클래스별 확률을 생성',
+  '클래스 예측': '가장 높은 확률을 바탕으로 예측 결과를 선택',
 }
 
 export type VisionTask = 'classification' | 'localization' | 'detection' | 'segmentation'
@@ -78,14 +80,21 @@ export const VISION_SCENARIOS = [
   { id: 'one-car', text: '사진 속 하나의 자동차 위치를 사각형으로 표시한다.', answer: 'localization' },
   { id: 'road-boxes', text: '도로 사진에서 자동차와 사람을 모두 찾아 각각 상자로 표시한다.', answer: 'detection' },
   { id: 'pixel-regions', text: '사진의 모든 픽셀을 사람·도로·하늘 영역으로 구분한다.', answer: 'segmentation' },
+  { id: 'one-bird', text: '사진 속 새 한 마리의 종류와 위치를 하나의 상자로 표시한다.', answer: 'localization' },
+  { id: 'many-birds', text: '사진 속 여러 새의 종류와 각각의 위치를 모두 상자로 표시한다.', answer: 'detection' },
 ] as const
 
 export type NetworkMode = 'fully-connected' | 'cnn' | 'both'
 
 export const NETWORK_STATEMENTS = [
-  { id: 'flatten', text: '이미지를 한 줄의 입력 배열로 변환한다.', answer: 'fully-connected' },
-  { id: 'spatial', text: '이미지의 가로·세로 배치를 유지한다.', answer: 'cnn' },
+  { id: 'flatten-values', text: 'flatten 후에도 각 픽셀값 자체는 배열에 남는다.', answer: 'both' },
+  { id: 'neighbor', text: 'flatten하면 행과 열의 이웃 관계를 바로 보기 어려워진다.', answer: 'fully-connected' },
+  { id: 'spatial', text: '작은 필터가 이미지의 가로·세로 구조를 이용해 지역 영역을 본다.', answer: 'cnn' },
   { id: 'classify', text: '이미지 분류에 사용할 수 있다.', answer: 'both' },
-  { id: 'local', text: '가까운 픽셀 영역을 반복해서 살펴본다.', answer: 'cnn' },
-  { id: 'learn', text: '학습을 통해 예측 결과를 만든다.', answer: 'both' },
+  { id: 'move', text: '같은 필터를 여러 위치로 옮겨 같은 종류의 패턴을 찾는다.', answer: 'cnn' },
+] as const
+
+export const SECOND_CONVOLUTION_KERNEL = [
+  [0, 1],
+  [1, 0],
 ] as const

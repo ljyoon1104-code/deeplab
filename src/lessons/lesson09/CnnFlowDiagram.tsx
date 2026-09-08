@@ -3,12 +3,13 @@ import { CNN_FLOW_ROLES, type CnnFlowItem } from './lesson09Data'
 
 const tone: Record<CnnFlowItem, string> = {
   '입력 이미지': 'border-cyan-300 bg-cyan-50 text-cyan-950',
-  '합성곱 층': 'border-violet-300 bg-violet-50 text-violet-950',
-  '특성 맵': 'border-emerald-300 bg-emerald-50 text-emerald-950',
-  '풀링 층': 'border-amber-300 bg-amber-50 text-amber-950',
-  '크기가 줄어든 특성 맵': 'border-emerald-300 bg-emerald-50 text-emerald-950',
-  '완전연결 층': 'border-violet-300 bg-violet-50 text-violet-950',
-  '분류 결과': 'border-green-300 bg-green-50 text-green-950',
+  '합성곱': 'border-violet-300 bg-violet-50 text-violet-950',
+  ReLU: 'border-amber-300 bg-amber-50 text-amber-950',
+  '풀링': 'border-emerald-300 bg-emerald-50 text-emerald-950',
+  flatten: 'border-slate-300 bg-slate-50 text-slate-950',
+  '완전연결층': 'border-violet-300 bg-violet-50 text-violet-950',
+  Softmax: 'border-cyan-300 bg-cyan-50 text-cyan-950',
+  '클래스 예측': 'border-green-300 bg-green-50 text-green-950',
 }
 
 export default function CnnFlowDiagram({ flow }: { flow: readonly CnnFlowItem[] }) {

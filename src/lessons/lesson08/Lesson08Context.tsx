@@ -134,6 +134,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
 
   const mountedRef = useRef(true)
   const operationBusyRef = useRef(false)
+  const trainingRunRef = useRef(0)
   const cancelRequestedRef = useRef(false)
   const abortControllerRef = useRef<AbortController | null>(null)
   const trainingModelRef = useRef<TrainableModel | null>(null)
@@ -177,6 +178,9 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const startTraining = useCallback(async () => {
     if (operationBusyRef.current) return
     operationBusyRef.current = true
+    const runId = trainingRunRef.current + 1
+    trainingRunRef.current = runId
+    const isCurrentRun = () => mountedRef.current && trainingRunRef.current === runId
     cancelRequestedRef.current = false
     const controller = new AbortController()
     abortControllerRef.current = controller
@@ -186,7 +190,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
     let trainXs: import('@tensorflow/tfjs').Tensor2D | null = null
     let trainYs: import('@tensorflow/tfjs').Tensor2D | null = null
 
-    if (mountedRef.current) {
+    if (isCurrentRun()) {
       setError(null)
       setStatus('loading-data')
       setCurrentEpoch(0)
@@ -214,7 +218,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
       if (cancelRequestedRef.current || controller.signal.aborted) throw new DOMException('취소됨', 'AbortError')
 
-      if (mountedRef.current) setStatus('loading-engine')
+      if (isCurrentRun()) setStatus('loading-engine')
       let tf
       try {
         tf = await loadTensorFlow()
@@ -223,7 +227,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
       if (cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
 
-      if (mountedRef.current) {
+      if (isCurrentRun()) {
         setBackend(tf.getBackend() || 'unknown')
         setStatus('converting-data')
       }
@@ -241,7 +245,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       } catch (cause) {
         throw new OperationFailure('training', cause)
       }
-      if (mountedRef.current) setStatus('preparing-model')
+      if (isCurrentRun()) setStatus('preparing-model')
       await tf.nextFrame()
       try {
         const created = createTrainableModel(tf, selected.modelType)
@@ -254,13 +258,13 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
 
       const backendName = tf.getBackend() || 'unknown'
-      if (mountedRef.current) {
+      if (isCurrentRun()) {
         setBackend(backendName)
         setStatus('training')
       }
       const startedAt = performance.now()
       const elapsedTimer = window.setInterval(() => {
-        if (mountedRef.current) setElapsedMs(performance.now() - startedAt)
+        if (isCurrentRun()) setElapsedMs(performance.now() - startedAt)
       }, 200)
       let history: EpochMetric[]
       try {
@@ -271,7 +275,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
           trainYs,
           selected.epochs,
           (progress) => {
-            if (!mountedRef.current || cancelRequestedRef.current) return
+            if (!isCurrentRun() || cancelRequestedRef.current) return
             setCurrentEpoch(progress.currentEpoch)
             setBatchProgress(progress)
             setLiveMetric({
@@ -281,7 +285,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
             })
           },
           (metric) => {
-            if (!mountedRef.current || cancelRequestedRef.current) return
+            if (!isCurrentRun() || cancelRequestedRef.current) return
             setCurrentEpoch(metric.epoch)
             setLiveMetric(metric)
           },
@@ -293,7 +297,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
       const durationMs = performance.now() - startedAt
 
-      if (mountedRef.current) setStatus('summarizing')
+      if (isCurrentRun()) setStatus('summarizing')
       await tf.nextFrame()
 
       if (cancelRequestedRef.current || history.length !== selected.epochs) {
@@ -343,7 +347,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       trainingOptimizerRef.current = null
       nextModel = null
       nextOptimizer = null
-      if (mountedRef.current) {
+      if (isCurrentRun()) {
         setTrainingResult(result)
         setElapsedMs(durationMs)
         setExperiments(saveExperimentRecord(record))
@@ -355,7 +359,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       trainingModelRef.current = null
       trainingOptimizerRef.current = null
       const cancelled = cancelRequestedRef.current || (cause instanceof DOMException && cause.name === 'AbortError')
-      if (mountedRef.current) {
+      if (isCurrentRun()) {
         if (cancelled) {
           setStatus('cancelled')
         } else {
@@ -463,6 +467,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
     mountedRef.current = true
     return () => {
       mountedRef.current = false
+      trainingRunRef.current += 1
       cancelRequestedRef.current = true
       abortControllerRef.current?.abort()
       if (trainingModelRef.current) {

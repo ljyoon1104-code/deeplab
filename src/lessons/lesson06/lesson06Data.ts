@@ -19,27 +19,28 @@ export const lesson06Objectives = [
 
 export const adjustmentCards = [
   { id: 'x1', label: '입력값 x1', answer: 'given' },
-  { id: 'x2', label: '입력값 x2', answer: 'given' },
   { id: 'w1', label: '가중치 w1', answer: 'adjusted' },
-  { id: 'w2', label: '가중치 w2', answer: 'adjusted' },
   { id: 'bias', label: '편향 b', answer: 'adjusted' },
   { id: 'target', label: '실제 정답 y', answer: 'given' },
+  { id: 'prediction', label: '순전파의 예측값', answer: 'computed' },
+  { id: 'loss', label: '손실함수의 Loss', answer: 'computed' },
 ] as const satisfies ReadonlyArray<{
   id: string
   label: string
-  answer: 'adjusted' | 'given'
+  answer: 'adjusted' | 'given' | 'computed'
 }>
 
 export const learningFlowCards = [
-  { id: 'input', label: '입력 데이터' },
-  { id: 'weighted-sum', label: '가중치와 편향을 이용한 가중합' },
-  { id: 'activation', label: '활성화 함수' },
-  { id: 'prediction', label: '예측값' },
-  { id: 'compare', label: '실제값과 비교' },
-  { id: 'loss', label: 'Loss 계산' },
-  { id: 'backpropagation', label: '역전파' },
-  { id: 'update', label: '가중치와 편향 수정' },
-  { id: 'repeat', label: '반복 학습' },
+  { id: 'prepare', label: '입력 데이터와 실제 정답 준비' },
+  { id: 'initialize', label: '가중치와 편향 초기화' },
+  { id: 'forward', label: '순전파' },
+  { id: 'prediction', label: '예측값 생성' },
+  { id: 'loss', label: '손실함수로 Loss 계산' },
+  { id: 'backpropagation', label: '역전파로 수정 방향 계산' },
+  { id: 'update', label: '경사하강법으로 가중치와 편향 수정' },
+  { id: 'forward-again', label: '다시 순전파' },
+  { id: 'repeat', label: '정해진 횟수만큼 반복' },
+  { id: 'test', label: '새로운 데이터로 성능 확인' },
 ] as const
 
 export const lesson06Quiz = [
@@ -87,5 +88,37 @@ export const lesson06Quiz = [
     answer: 'A',
     explanation: '딥러닝은 순전파로 예측하고 Loss를 계산한 뒤, 역전파와 값 수정을 거쳐 이 과정을 반복하며 학습합니다.',
   },
+  {
+    question: '같은 방향으로 학습하더라도 학습률이 너무 크면 생길 수 있는 일은?',
+    options: [
+      ['A', '적절한 지점을 지나칠 수 있다.'],
+      ['B', '입력 데이터가 자동으로 삭제된다.'],
+      ['C', 'Loss가 언제나 정확히 0이 된다.'],
+      ['D', '정답 라벨이 바뀐다.'],
+    ],
+    answer: 'A',
+    explanation: '학습률은 한 번에 움직이는 크기이므로 너무 크면 Loss가 낮은 지점을 지나칠 수 있습니다. 크다고 언제나 실패한다는 뜻은 아닙니다.',
+  },
+  {
+    question: 'Loss 그래프가 전체적으로 내려가다가 마지막에 조금 올라갔다면?',
+    options: [
+      ['A', '전체 경향과 작은 흔들림을 함께 살펴본다.'],
+      ['B', '마지막 값 하나만 보고 학습이 모두 실패했다고 단정한다.'],
+      ['C', '그래프와 학습은 관계가 없다.'],
+      ['D', '정답 데이터를 바꾼다.'],
+    ],
+    answer: 'A',
+    explanation: '실제 학습의 Loss는 매번 똑같이 내려가지 않을 수 있으므로 전체 감소 경향과 작은 변화를 함께 해석해야 합니다.',
+  },
+  {
+    question: '학습에 사용한 Train 결과와 새로운 데이터 결과를 구분해야 하는 이유는?',
+    options: [
+      ['A', '새로운 데이터에도 배운 기준이 적용되는지 확인하기 위해'],
+      ['B', 'Train 결과를 숨기기 위해'],
+      ['C', '가중치를 입력 데이터로 바꾸기 위해'],
+      ['D', 'Epoch를 무조건 1로 만들기 위해'],
+    ],
+    answer: 'A',
+    explanation: '학습 데이터에서만 잘 맞는지, 처음 보는 데이터에도 성능이 유지되는지 구분해서 확인해야 합니다.',
+  },
 ] as const
-

@@ -1,1023 +1,147 @@
 import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  ChevronRight,
-  Circle,
-  CircleHelp,
-  Database,
-  Eye,
-  Info,
-  Layers3,
-  Link2,
-  RotateCcw,
-  Sparkles,
-  XCircle,
+  ArrowDown, ArrowLeft, ArrowRight, CheckCircle2, ChevronRight, Circle,
+  CircleHelp, Database, Layers3, Link2, Sparkles, XCircle,
 } from 'lucide-react'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { useLoadedLesson07Lab } from './Lesson07Context'
-import { makeOneHot, mnistSourceUrl } from './mnistLoader'
-import {
-  datasetSizeDescriptions,
-  lesson07Objectives,
-  lesson07StepTitles,
-  problemSolvingFlow,
-} from './lesson07Data'
+import { makeOneHot } from './mnistLoader'
+import { datasetSizeDescriptions, lesson07FinalQuiz, lesson07StepTitles } from './lesson07Data'
 import { MnistCanvas, MnistPixelGrid } from './MnistCanvas'
 import { MNIST_DATASET_SIZES, type MnistSample } from './mnistTypes'
 
-interface CommonStepProps {
-  active: boolean
-  isComplete: boolean
-  onComplete: () => void
-}
+interface CommonStepProps { active: boolean; isComplete: boolean; onComplete: () => void }
+interface StepFrameProps extends CommonStepProps { step: number; intro: string; children: ReactNode }
+type Result = 'idle' | 'incomplete' | 'incorrect' | 'correct'
 
-interface StepFrameProps extends CommonStepProps {
-  step: number
-  intro: string
-  children: ReactNode
-}
+const selectedClass = 'border-indigo-500 bg-indigo-50 text-indigo-950 shadow-sm'
+const normalClass = 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
 
 function StepFrame({ step, intro, active, isComplete, children }: StepFrameProps) {
   const titleId = active ? 'lesson-step-title' : `lesson07-step-${step}-title`
-
-  return (
-    <Card as="section" hidden={!active} aria-labelledby={titleId} className="overflow-hidden">
-      <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 px-5 py-6 sm:px-8 sm:py-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="text-sm font-black tracking-[0.15em] text-indigo-700">STEP {step}</span>
-          <span
-            className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold ${
-              isComplete
-                ? 'bg-emerald-100 text-emerald-800'
-                : 'bg-white text-slate-600 ring-1 ring-slate-200'
-            }`}
-          >
-            {isComplete ? <CheckCircle2 size={17} aria-hidden="true" /> : <Circle size={14} aria-hidden="true" />}
-            {isComplete ? '활동 완료' : '활동 필요'}
-          </span>
-        </div>
-        <h2
-          id={titleId}
-          tabIndex={active ? -1 : undefined}
-          className="step-focus-target mt-4 text-2xl font-black leading-snug tracking-tight text-slate-950 focus:outline-none sm:text-3xl"
-        >
-          {lesson07StepTitles[step - 1]}
-        </h2>
-        <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
-      </div>
-      <div className="px-5 py-7 sm:px-8 sm:py-9">{children}</div>
-    </Card>
-  )
-}
-
-function LabBadges() {
-  return (
-    <div className="flex flex-wrap gap-2" aria-label="실습 데이터 배지">
-      <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-2 text-sm font-black text-indigo-800">
-        <Database size={17} aria-hidden="true" />
-        MNIST DATA LAB
-      </span>
-      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-black text-emerald-800">
-        <CheckCircle2 size={17} aria-hidden="true" />
-        REAL MNIST
-      </span>
+  return <Card as="section" hidden={!active} aria-labelledby={titleId} className="overflow-hidden">
+    <div className="border-b border-slate-200 bg-gradient-to-r from-indigo-50 via-white to-cyan-50 px-5 py-6 sm:px-8 sm:py-8">
+      <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-sm font-black tracking-[0.15em] text-indigo-700">STEP {step}</span><span className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold ${isComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-white text-slate-600 ring-1 ring-slate-200'}`}>{isComplete ? <CheckCircle2 size={17} aria-hidden="true" /> : <Circle size={14} aria-hidden="true" />}{isComplete ? '활동 완료' : '활동 필요'}</span></div>
+      <h2 id={titleId} tabIndex={active ? -1 : undefined} className="step-focus-target mt-4 text-2xl font-black leading-snug tracking-tight text-slate-950 focus:outline-none sm:text-3xl">{lesson07StepTitles[step - 1]}</h2>
+      <p className="mt-3 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
     </div>
-  )
+    <div className="px-5 py-7 sm:px-8 sm:py-9">{children}</div>
+  </Card>
 }
 
-function StepCompletionMessage({ children }: { children: ReactNode }) {
-  return (
-    <div className="mt-7 flex items-start gap-3 border-t border-emerald-200 pt-5 text-emerald-900" role="status">
-      <CheckCircle2 className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
-      <p className="font-semibold leading-7">{children}</p>
-    </div>
-  )
+function LabBadges() { return <div className="flex flex-wrap gap-2"><span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 px-4 py-2 text-sm font-black text-indigo-800"><Database size={17} aria-hidden="true" />MNIST DATA LAB</span><span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-black text-emerald-800"><CheckCircle2 size={17} aria-hidden="true" />REAL MNIST</span></div> }
+function StepCompletionMessage({ children }: { children: ReactNode }) { return <div className="mt-7 flex items-start gap-3 border-t border-emerald-200 pt-5 text-emerald-900" role="status"><CheckCircle2 className="mt-0.5 shrink-0" size={21} aria-hidden="true" /><p className="font-semibold leading-7">{children}</p></div> }
+function Feedback({ result, correct, incomplete, incorrect }: { result: Result; correct: ReactNode; incomplete: ReactNode; incorrect: ReactNode }) {
+  if (result === 'idle') return null
+  const ok = result === 'correct'
+  return <div className={`mt-5 flex items-start gap-3 rounded-2xl p-5 ${ok ? 'bg-emerald-50 text-emerald-950' : 'bg-amber-50 text-amber-950'}`} role="status">{ok ? <CheckCircle2 className="mt-0.5 shrink-0" size={22} aria-hidden="true" /> : <CircleHelp className="mt-0.5 shrink-0" size={22} aria-hidden="true" />}<p className="leading-7">{ok ? correct : result === 'incomplete' ? incomplete : incorrect}</p></div>
 }
+function Choice({ selected, onClick, children, disabled = false }: { selected: boolean; onClick: () => void; children: ReactNode; disabled?: boolean }) { return <button type="button" disabled={disabled} aria-pressed={selected} onClick={onClick} className={`flex min-h-12 w-full items-start gap-3 rounded-xl border px-4 py-3 text-left font-semibold leading-6 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${selected ? selectedClass : normalClass}`}>{selected ? <CheckCircle2 className="mt-0.5 shrink-0 text-indigo-700" size={19} aria-hidden="true" /> : <Circle className="mt-0.5 shrink-0 text-slate-400" size={18} aria-hidden="true" />}<span>{children}</span></button> }
+function FlowArrow() { return <><ArrowDown className="mx-auto shrink-0 text-cyan-700 md:hidden" size={20} aria-hidden="true" /><ArrowRight className="mx-auto hidden shrink-0 text-cyan-700 md:block" size={20} aria-hidden="true" /></> }
+function FlowChain({ items, label }: { items: readonly string[]; label: string }) { return <div className="grid items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 md:grid-flow-col md:auto-cols-fr" aria-label={label}>{items.map((item, index) => <div className="contents" key={`${item}-${index}`}><div className="flex min-h-16 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 py-3 text-center font-black leading-6 text-indigo-950">{item}</div>{index < items.length - 1 ? <FlowArrow /> : null}</div>)}</div> }
 
-function FlowArrow() {
-  return (
-    <>
-      <ArrowDown className="mx-auto shrink-0 text-cyan-700 md:hidden" size={20} aria-hidden="true" />
-      <ArrowRight className="mx-auto hidden shrink-0 text-cyan-700 md:block" size={20} aria-hidden="true" />
-    </>
-  )
-}
-
-function FlowChain({ items, label }: { items: readonly string[]; label: string }) {
-  return (
-    <div
-      className="grid items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4 md:grid-flow-col md:auto-cols-fr"
-      aria-label={label}
-    >
-      {items.map((item, index) => (
-        <div className="contents" key={`${item}-${index}`}>
-          <div className="flex min-h-16 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 py-3 text-center font-black leading-6 text-indigo-950">
-            {item}
-          </div>
-          {index < items.length - 1 ? <FlowArrow /> : null}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function SampleGallery({
-  samples,
-  selectedSampleId,
-  onSelect,
-}: {
-  samples: readonly MnistSample[]
-  selectedSampleId: string | null
-  onSelect: (sample: MnistSample) => void
-}) {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-      {samples.map((sample) => {
-        const selected = sample.id === selectedSampleId
-        return (
-          <button
-            key={sample.id}
-            type="button"
-            aria-pressed={selected}
-            aria-label={`label ${sample.label}, sample ${sample.id} 선택`}
-            onClick={() => onSelect(sample)}
-            className={`min-w-0 rounded-2xl border p-3 text-left transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-              selected
-                ? 'border-indigo-500 bg-indigo-50 shadow-sm'
-                : 'border-slate-200 bg-white hover:border-indigo-300'
-            }`}
-          >
-            <MnistCanvas sample={sample} size={112} className="mx-auto w-full" />
-            <span className="mt-3 flex items-center justify-between gap-2">
-              <strong className="text-lg text-slate-950">Label {sample.label}</strong>
-              {selected ? <CheckCircle2 className="shrink-0 text-indigo-600" size={18} aria-hidden="true" /> : null}
-            </span>
-            <span className="mt-1 block truncate font-mono text-xs text-slate-500" title={sample.id}>
-              {sample.id}
-            </span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-function LabelFilters() {
-  const { selectedLabel, setSelectedLabel } = useLoadedLesson07Lab()
-  const filters: Array<'all' | number> = ['all', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-  return (
-    <div className="flex max-w-full flex-wrap gap-2" role="group" aria-label="숫자 label 필터">
-      {filters.map((filter) => (
-        <button
-          key={filter}
-          type="button"
-          aria-pressed={selectedLabel === filter}
-          onClick={() => setSelectedLabel(filter)}
-          className={`flex min-h-11 min-w-11 items-center justify-center rounded-xl border px-3 font-black focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-            selectedLabel === filter
-              ? 'border-indigo-600 bg-indigo-600 text-white'
-              : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-300'
-          }`}
-        >
-          {filter === 'all' ? '전체' : filter}
-        </button>
-      ))}
-    </div>
-  )
-}
+function SampleGallery({ samples, selectedSampleId, onSelect }: { samples: readonly MnistSample[]; selectedSampleId: string | null; onSelect: (sample: MnistSample) => void }) { return <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">{samples.map((sample) => <button key={sample.id} type="button" aria-pressed={sample.id === selectedSampleId} aria-label={`label ${sample.label}, sample ${sample.id} 선택`} onClick={() => onSelect(sample)} className={`min-w-0 rounded-2xl border p-3 text-left transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${sample.id === selectedSampleId ? selectedClass : normalClass}`}><MnistCanvas sample={sample} size={112} className="mx-auto w-full" /><span className="mt-3 flex items-center justify-between gap-2"><strong className="text-lg text-slate-950">Label {sample.label}</strong>{sample.id === selectedSampleId ? <CheckCircle2 className="shrink-0 text-indigo-600" size={18} aria-hidden="true" /> : null}</span><span className="mt-1 block truncate font-mono text-xs text-slate-500">{sample.id}</span></button>)}</div> }
+function LabelFilters() { const { selectedLabel, setSelectedLabel } = useLoadedLesson07Lab(); const filters: Array<'all' | number> = ['all', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; return <div className="flex max-w-full flex-wrap gap-2" role="group" aria-label="숫자 label 필터">{filters.map((filter) => <button key={filter} type="button" aria-pressed={selectedLabel === filter} onClick={() => setSelectedLabel(filter)} className={`flex min-h-11 min-w-11 items-center justify-center rounded-xl border px-3 font-black focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${selectedLabel === filter ? 'border-indigo-600 bg-indigo-600 text-white' : normalClass}`}>{filter === 'all' ? '전체' : filter}</button>)}</div> }
 
 function PixelInformation({ sample, index }: { sample: MnistSample; index: number }) {
-  const pixel = sample.pixels[index]
-  const row = Math.floor(index / 28)
-  const column = index % 28
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5" aria-live="polite">
-      <div className="flex flex-wrap items-center gap-4">
-        <span
-          className="size-16 shrink-0 rounded-xl border border-slate-300 shadow-inner"
-          style={{ backgroundColor: `rgb(${pixel} ${pixel} ${pixel})` }}
-          aria-label={`픽셀 밝기 ${pixel}`}
-        />
-        <dl className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
-          <div>
-            <dt className="text-xs font-bold text-slate-500">행 좌표</dt>
-            <dd className="mt-1 font-mono text-lg font-black">{row + 1}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-bold text-slate-500">열 좌표</dt>
-            <dd className="mt-1 font-mono text-lg font-black">{column + 1}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-bold text-slate-500">내부 index</dt>
-            <dd className="mt-1 font-mono text-lg font-black">{index}</dd>
-          </div>
-          <div>
-            <dt className="text-xs font-bold text-slate-500">원본 픽셀값</dt>
-            <dd className="mt-1 font-mono text-lg font-black">{pixel}</dd>
-          </div>
-        </dl>
-      </div>
-      <p className="mt-4 text-sm leading-6 text-slate-600">
-        행과 열은 화면에서 1부터 세고, 코드는 0부터 시작하는 <strong>내부 index {index}</strong>를 사용합니다.
-        사람이 말하는 배열 위치는 {index + 1}번째입니다.
-      </p>
-    </div>
-  )
+  const pixel = sample.pixels[index]; const row = Math.floor(index / 28); const column = index % 28
+  return <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5" aria-live="polite"><div className="flex flex-wrap items-center gap-4"><span className="size-16 shrink-0 rounded-xl border border-slate-300 shadow-inner" style={{ backgroundColor: `rgb(${pixel} ${pixel} ${pixel})` }} aria-label={`픽셀 밝기 ${pixel}`} /><dl className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:grid-cols-4"><div><dt className="text-xs font-bold text-slate-500">행 (0부터)</dt><dd className="mt-1 font-mono text-lg font-black">{row}</dd></div><div><dt className="text-xs font-bold text-slate-500">열 (0부터)</dt><dd className="mt-1 font-mono text-lg font-black">{column}</dd></div><div><dt className="text-xs font-bold text-slate-500">index</dt><dd className="mt-1 font-mono text-lg font-black">{index}</dd></div><div><dt className="text-xs font-bold text-slate-500">원본 픽셀값</dt><dd className="mt-1 font-mono text-lg font-black">{pixel}</dd></div></dl></div><p className="mt-4 text-sm leading-6 text-slate-600"><strong>index = row × 28 + column</strong>입니다. 화면에서 보이는 {row + 1}행 {column + 1}열은 사람이 세기 위한 표현이고, 계산은 0부터 시작합니다.</p></div>
 }
+function parseDecimal(value: string) { const parsed = Number(value.trim().replace(',', '.')); return Number.isFinite(parsed) ? parsed : null }
+function sameIds(first: string[], second: string[]) { return first.length === second.length && first.every((id) => second.includes(id)) }
 
 export function Lesson07Step1(props: CommonStepProps) {
-  const {
-    datasetSize,
-    setDatasetSize,
-    requestDataset,
-    dataset,
-    metadata,
-    loadedDatasetSize,
-  } = useLoadedLesson07Lab()
-  const [balanceChoice, setBalanceChoice] = useState<'A' | 'B' | 'C' | null>(null)
-  const distribution = useMemo(() => {
-    const counts = Array.from({ length: 10 }, () => 0)
-    dataset?.samples.forEach((sample) => {
-      counts[sample.label] += 1
-    })
-    return counts
-  }, [dataset])
-  const loadedCurrentSelection = loadedDatasetSize === datasetSize
-  const maxCount = Math.max(...distribution, 1)
-
-  return (
-    <StepFrame
-      {...props}
-      step={1}
-      intro="전체 딥러닝 문제 해결 흐름에서 실제 데이터를 불러오고 전처리를 시작합니다."
-    >
-      <LabBadges />
-      <p className="mt-4 font-bold leading-7 text-emerald-900">
-        MNIST 전체 데이터 중 숫자 0~9를 균형 있게 추출한 실제 sample입니다.
-      </p>
-
-      <section className="mt-8" aria-labelledby="lesson07-flow-title">
-        <h3 id="lesson07-flow-title" className="text-xl font-black text-slate-950">딥러닝 문제 해결의 전체 흐름</h3>
-        <div className="mt-5"><FlowChain items={problemSolvingFlow} label="딥러닝 문제 해결의 여섯 단계" /></div>
-        <p className="mt-4 leading-7 text-slate-600">
-          Lesson 07은 실제 데이터를 탐색하고 모델의 입력과 정답을 준비합니다. 실제 학습과 성능 평가는 Lesson 08에서 진행합니다.
-        </p>
-      </section>
-
-      <section className="mt-9" aria-labelledby="lesson07-objectives-title">
-        <h3 id="lesson07-objectives-title" className="text-xl font-black text-slate-950">이번 차시에서 알아볼 것</h3>
-        <ul className="mt-4 grid gap-3 md:grid-cols-2">
-          {lesson07Objectives.map((objective, index) => (
-            <li key={objective} className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 leading-7 text-slate-700">
-              <span className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-black text-indigo-700">{index + 1}</span>
-              {objective}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="mt-9" aria-labelledby="dataset-loader-title">
-        <h3 id="dataset-loader-title" className="text-xl font-black text-slate-950">Dataset Loader</h3>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <p className="text-sm font-bold text-slate-500">원본 MNIST</p>
-            <p className="mt-2 font-black">Train {metadata.original.train.count.toLocaleString()}</p>
-            <p className="mt-1 font-black">Test {metadata.original.test.count.toLocaleString()}</p>
-          </div>
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-            <p className="text-sm font-bold text-indigo-700">이번 수업용 Train subset</p>
-            <p className="mt-2 text-2xl font-black text-indigo-950">{datasetSize.toLocaleString()}개</p>
-            <p className="mt-1 text-sm text-slate-600">500 / 1,000 / 2,000 / 5,000 중 선택</p>
-          </div>
-          <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
-            <p className="text-sm font-bold text-cyan-800">Lesson 08 평가용 Test subset</p>
-            <p className="mt-2 text-2xl font-black text-cyan-950">{metadata.testSubsetCount.toLocaleString()}개</p>
-          </div>
-        </div>
-
-        <fieldset className="mt-6">
-          <legend className="font-black text-slate-900">사용할 Train subset을 선택하세요</legend>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {MNIST_DATASET_SIZES.map((size) => (
-              <button
-                key={size}
-                type="button"
-                role="radio"
-                aria-checked={datasetSize === size}
-                onClick={() => setDatasetSize(size)}
-                className={`min-h-24 rounded-2xl border p-4 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-                  datasetSize === size
-                    ? 'border-indigo-500 bg-indigo-50 text-indigo-950'
-                    : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
-                }`}
-              >
-                <span className="block text-xl font-black">{size.toLocaleString()}개</span>
-                <span className="mt-1 block text-sm font-semibold text-slate-600">{datasetSizeDescriptions[size]}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
-        <Button className="mt-5" onClick={() => void requestDataset(datasetSize)}>
-          <Database size={18} aria-hidden="true" />
-          선택한 데이터 불러오기
-        </Button>
-      </section>
-
-      <section className="mt-9" aria-labelledby="loaded-dataset-title">
-        <div className="flex items-center gap-3">
-          <CheckCircle2 className="text-emerald-600" size={24} aria-hidden="true" />
-          <h3 id="loaded-dataset-title" className="text-xl font-black text-slate-950">
-            {dataset.count.toLocaleString()}장의 실제 MNIST 데이터를 불러왔습니다.
-          </h3>
-        </div>
-        {!loadedCurrentSelection ? (
-          <p className="mt-3 rounded-xl bg-amber-50 p-4 font-bold text-amber-950">
-            화면의 선택은 {datasetSize.toLocaleString()}개이고 현재 데이터는 {loadedDatasetSize?.toLocaleString()}개입니다. 선택한 데이터를 불러오세요.
-          </p>
-        ) : null}
-        <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {[
-            ['현재 sample', `${dataset.count.toLocaleString()}개`],
-            ['이미지 크기', `${dataset.imageWidth}×${dataset.imageHeight}`],
-            ['픽셀 수', `${dataset.samples[0].pixels.length}개`],
-            ['클래스', '0~9'],
-            ['픽셀 범위', `${dataset.pixelRange[0]}~${dataset.pixelRange[1]}`],
-          ].map(([label, value]) => (
-            <div key={label} className="rounded-xl bg-slate-100 p-4">
-              <dt className="text-xs font-bold text-slate-500">{label}</dt>
-              <dd className="mt-1 font-black text-slate-950">{value}</dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="mt-6 rounded-2xl border border-slate-200 p-5">
-          <p className="font-black text-slate-900">실제 samples에서 계산한 숫자별 분포</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {distribution.map((count, label) => (
-              <div key={label} className="grid grid-cols-[2rem_minmax(0,1fr)_3.5rem] items-center gap-3">
-                <span className="font-black text-indigo-800">{label}</span>
-                <span className="h-3 overflow-hidden rounded-full bg-slate-200">
-                  <span className="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500" style={{ width: `${(count / maxCount) * 100}%` }} />
-                </span>
-                <span className="text-right font-mono font-bold text-slate-700">{count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <fieldset className="mt-9">
-        <legend className="text-lg font-black leading-7 text-slate-950">왜 숫자별 데이터 개수를 비슷하게 준비했을까요?</legend>
-        <div className="mt-4 grid gap-3">
-          {[
-            ['A', '각 숫자를 고르게 경험하도록 하기 위해'],
-            ['B', '모든 픽셀값을 똑같이 만들기 위해'],
-            ['C', '숫자 label을 없애기 위해'],
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              aria-pressed={balanceChoice === key}
-              onClick={() => setBalanceChoice(key as 'A' | 'B' | 'C')}
-              className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold ${
-                balanceChoice === key ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-white hover:border-indigo-300'
-              }`}
-            >
-              {key}. {label}
-            </button>
-          ))}
-        </div>
-        {balanceChoice ? (
-          <p className={`mt-4 flex items-start gap-2 rounded-xl p-4 font-semibold leading-6 ${balanceChoice === 'A' ? 'bg-emerald-50 text-emerald-950' : 'bg-rose-50 text-rose-950'}`} role="status">
-            {balanceChoice === 'A' ? <CheckCircle2 className="mt-0.5 shrink-0" size={20} aria-hidden="true" /> : <XCircle className="mt-0.5 shrink-0" size={20} aria-hidden="true" />}
-            {balanceChoice === 'A'
-              ? '맞습니다. 특정 숫자만 지나치게 많이 학습되는 것을 줄이고 각 숫자를 고르게 경험하게 합니다.'
-              : '픽셀이나 label을 바꾸는 것이 아니라 숫자 0~9의 sample 수를 비슷하게 준비한 이유를 생각해 보세요.'}
-          </p>
-        ) : null}
-      </fieldset>
-
-      <Button className="mt-6" disabled={!loadedCurrentSelection} onClick={props.onComplete}>
-        <Eye size={18} aria-hidden="true" />
-        실제 sample 수와 분포 확인 완료
-      </Button>
-
-      {props.isComplete ? <StepCompletionMessage>실제 fetch 결과에서 sample 수와 숫자 0~9 분포를 확인했습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const { datasetSize, setDatasetSize, requestDataset, dataset, metadata, loadedDatasetSize } = useLoadedLesson07Lab()
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [result, setResult] = useState<Result>('idle')
+  const distribution = useMemo(() => { const counts = Array.from({ length: 10 }, () => 0); dataset.samples.forEach((sample) => { counts[sample.label] += 1 }); return counts }, [dataset])
+  const loadedCurrent = loadedDatasetSize === datasetSize; const maxCount = Math.max(...distribution, 1)
+  const questions = [
+    ['balanced', '현재 숫자별 개수가 같은 데이터인가요?', [['yes', '예, 숫자 0~9가 같은 수로 추출되었습니다.'], ['no', '아니요, 특정 숫자만 많습니다.']], 'yes'],
+    ['bias', '특정 숫자만 지나치게 많으면 생길 수 있는 문제는?', [['bias', '그 숫자에 치우친 판단을 배울 수 있다.'], ['pixels', '모든 픽셀 위치가 사라진다.']], 'bias'],
+    ['more', '데이터가 많아지면 정확도가 반드시 높아지나요?', [['no', '아니요. 데이터 품질과 모델·학습 조건도 함께 영향을 준다.'], ['yes', '예, 표본 수만 많으면 반드시 높아진다.']], 'no'],
+    ['roles', 'Train과 Test의 역할은 같은가요?', [['different', '아니요. Train은 학습, Test는 학습하지 않은 데이터 평가에 쓴다.'], ['same', '예, 둘 다 학습 중 가중치를 바꾸는 데 쓴다.']], 'different'],
+  ] as const
+  const submit = () => { if (!loadedCurrent || questions.some(([id]) => !answers[id])) return setResult('incomplete'); if (questions.every(([id,,, answer]) => answers[id] === answer)) { setResult('correct'); props.onComplete() } else setResult('incorrect') }
+  return <StepFrame {...props} step={1} intro="실제 Train subset의 크기와 분포를 읽고, 균형·Train·Test의 의미를 판단합니다."><LabBadges />
+    <section className="mt-7"><h3 className="text-xl font-black text-slate-950">Dataset Loader</h3><div className="mt-5 grid gap-4 sm:grid-cols-3"><div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><p className="text-sm font-bold text-slate-500">원본 MNIST</p><p className="mt-2 font-black">Train {metadata.original.train.count.toLocaleString()}</p><p className="mt-1 font-black">Test {metadata.original.test.count.toLocaleString()}</p></div><div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><p className="text-sm font-bold text-indigo-700">현재 Train subset</p><p className="mt-2 text-2xl font-black text-indigo-950">{datasetSize.toLocaleString()}개</p><p className="mt-1 text-sm text-slate-600">현재 선택</p></div><div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5"><p className="text-sm font-bold text-cyan-800">평가용 Test subset</p><p className="mt-2 text-2xl font-black text-cyan-950">{metadata.testSubsetCount.toLocaleString()}개</p><p className="mt-1 text-sm text-slate-600">학습에는 섞지 않음</p></div></div>
+      <fieldset className="mt-6"><legend className="font-black text-slate-900">사용할 Train subset</legend><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{MNIST_DATASET_SIZES.map((size) => <button key={size} type="button" role="radio" aria-checked={datasetSize === size} onClick={() => setDatasetSize(size)} className={`min-h-20 rounded-2xl border p-4 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${datasetSize === size ? selectedClass : normalClass}`}><span className="block text-xl font-black">{size.toLocaleString()}개</span><span className="mt-1 block text-sm font-semibold text-slate-600">{datasetSizeDescriptions[size]}</span></button>)}</div></fieldset><Button className="mt-5" onClick={() => void requestDataset(datasetSize)}><Database size={18} aria-hidden="true" />선택한 데이터 불러오기</Button></section>
+    <section className="mt-8"><h3 className="text-xl font-black text-slate-950">현재 실제 데이터의 구조</h3><dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">{[['전체 표본 수', `${dataset.count.toLocaleString()}개`], ['클래스 수', '10개 (0~9)'], ['표본 하나', `${dataset.samples[0].pixels.length} pixels`], ['이미지 크기', `${dataset.imageWidth}×${dataset.imageHeight}`]].map(([label, value]) => <div key={label} className="rounded-xl bg-slate-100 p-4"><dt className="text-xs font-bold text-slate-500">{label}</dt><dd className="mt-1 font-black text-slate-950">{value}</dd></div>)}</dl><div className="mt-6 rounded-2xl border border-slate-200 p-5"><p className="font-black text-slate-900">실제 sample에서 계산한 숫자별 분포</p><div className="mt-4 grid gap-3 sm:grid-cols-2">{distribution.map((count, label) => <div key={label} className="grid grid-cols-[2rem_minmax(0,1fr)_3.5rem] items-center gap-3"><span className="font-black text-indigo-800">{label}</span><span className="h-3 overflow-hidden rounded-full bg-slate-200"><span className="block h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500" style={{ width: `${count / maxCount * 100}%` }} /></span><span className="text-right font-mono font-bold">{count}</span></div>)}</div></div></section>
+    <section className="mt-8 space-y-5" aria-label="데이터 분포 판단">{questions.map(([id, question, options]) => <fieldset key={id} className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black leading-7 text-slate-950">{question}</legend><div className="mt-3 grid gap-3">{options.map(([idOption, text]) => <Choice key={idOption} selected={answers[id] === idOption} onClick={() => { setAnswers((current) => ({ ...current, [id]: idOption })); setResult('idle') }}>{text}</Choice>)}</div></fieldset>)}</section><Button className="mt-6" onClick={submit}>분포 해석 제출</Button><Feedback result={result} incomplete="현재 선택한 subset을 불러오고 네 판단에 모두 답한 뒤 제출하세요." incorrect="분포가 균형인 이유와 Train·Test의 역할을 다시 비교해 보세요." correct="정확합니다. 균형은 특정 숫자에 대한 치우침을 줄이고, Test는 학습에 쓰지 않은 평가용 데이터입니다." />{props.isComplete && <StepCompletionMessage>실제 {dataset.count.toLocaleString()}개 표본과 784 픽셀 구조, 숫자별 분포를 해석했습니다.</StepCompletionMessage>}</StepFrame>
 }
 
 export function Lesson07Step2(props: CommonStepProps) {
-  const {
-    dataset,
-    selectedSampleId,
-    selectedLabel,
-    selectSample,
-    markExploredLabel,
-    exploredLabels,
-  } = useLoadedLesson07Lab()
-  const [page, setPage] = useState(0)
-  const pageSize = 10
-  const filteredSamples = useMemo(
-    () => dataset!.samples.filter((sample) => selectedLabel === 'all' || sample.label === selectedLabel),
-    [dataset, selectedLabel],
-  )
-  const pageCount = Math.max(1, Math.ceil(filteredSamples.length / pageSize))
-  const visibleSamples = filteredSamples.slice(page * pageSize, page * pageSize + pageSize)
-
+  const { dataset, selectedSampleId, selectedLabel, selectSample, markExploredLabel, exploredLabels } = useLoadedLesson07Lab()
+  const [page, setPage] = useState(0); const [seen, setSeen] = useState<Record<string, number>>({}); const [shapeChoices, setShapeChoices] = useState<string[]>([]); const [misconception, setMisconception] = useState<string | null>(null); const [shapeCorrect, setShapeCorrect] = useState(false); const [result, setResult] = useState<Result>('idle')
+  const filtered = useMemo(() => dataset.samples.filter((sample) => selectedLabel === 'all' || sample.label === selectedLabel), [dataset, selectedLabel]); const visible = filtered.slice(page * 10, page * 10 + 10); const pageCount = Math.max(1, Math.ceil(filtered.length / 10)); const seenLabelCounts = Object.values(seen).reduce<Record<number, number>>((counts, label) => ({ ...counts, [label]: (counts[label] ?? 0) + 1 }), {}); const sameLabelTwo = Object.values(seenLabelCounts).some((count) => count >= 2); const requiredShapes = ['thickness', 'tilt', 'position', 'size', 'stroke']
   useEffect(() => setPage(0), [selectedLabel, dataset])
-  useEffect(() => {
-    if (exploredLabels.size >= 3 && !props.isComplete) props.onComplete()
-  }, [exploredLabels, props.isComplete, props.onComplete])
-
-  const chooseSample = (sample: MnistSample) => {
-    selectSample(sample.id)
-    markExploredLabel(sample.label)
-  }
-
-  return (
-    <StepFrame {...props} step={2} intro="실제 손글씨를 label로 필터링하고 서로 다른 사람이 쓴 모양을 비교합니다.">
-      <LabBadges />
-      <section className="mt-7" aria-labelledby="digit-filter-title">
-        <h3 id="digit-filter-title" className="text-xl font-black text-slate-950">숫자 필터</h3>
-        <p className="mt-2 leading-7 text-slate-600">필터를 고른 뒤 실제 sample 카드를 눌러 탐색 기록을 남기세요.</p>
-        <div className="mt-4"><LabelFilters /></div>
-      </section>
-
-      <section className="mt-7" aria-labelledby="sample-gallery-title">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 id="sample-gallery-title" className="text-xl font-black text-slate-950">실제 MNIST sample</h3>
-            <p className="mt-1 text-sm text-slate-600">한 번에 {visibleSamples.length}장만 표시합니다. 전체 {filteredSamples.length.toLocaleString()}장</p>
-          </div>
-          <span className="rounded-full bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">{page + 1} / {pageCount}쪽</span>
-        </div>
-        <div className="mt-5">
-          <SampleGallery samples={visibleSamples} selectedSampleId={selectedSampleId} onSelect={chooseSample} />
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Button variant="secondary" disabled={page === 0} onClick={() => setPage((current) => Math.max(0, current - 1))}>
-            <ArrowLeft size={18} aria-hidden="true" /> 이전 sample
-          </Button>
-          <Button onClick={() => setPage((current) => (current + 1) % pageCount)}>
-            다른 sample 보기 <ChevronRight size={18} aria-hidden="true" />
-          </Button>
-        </div>
-      </section>
-
-      <div className="mt-7 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-indigo-50 p-4 font-bold leading-7 text-indigo-950">같은 숫자라도 사람마다 획의 굵기, 기울기와 모양이 다릅니다.</div>
-        <div className="rounded-xl bg-slate-100 p-4">
-          <p className="text-sm font-bold text-slate-600">실제 sample을 선택한 label</p>
-          <p className="mt-2 font-mono text-lg font-black text-slate-950">{[...exploredLabels].sort((a, b) => a - b).join(', ') || '아직 없음'} ({exploredLabels.size}/3종)</p>
-        </div>
-      </div>
-      {props.isComplete ? <StepCompletionMessage>서로 다른 숫자 label의 실제 sample을 3종 이상 선택했습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const choose = (sample: MnistSample) => { selectSample(sample.id); markExploredLabel(sample.label); setSeen((current) => ({ ...current, [sample.id]: sample.label })); setResult('idle') }
+  const toggle = (id: string) => { setShapeChoices((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]); setShapeCorrect(false); setResult('idle') }
+  const submit = () => { const correct = sameLabelTwo && exploredLabels.size >= 3 && sameIds(shapeChoices, requiredShapes) && misconception === 'false'; if (!sameLabelTwo || exploredLabels.size < 3 || !misconception || shapeChoices.length === 0) return setResult('incomplete'); if (correct) { setResult('correct'); setShapeCorrect(true); props.onComplete() } else setResult('incorrect') }
+  return <StepFrame {...props} step={2} intro="실제 MNIST 그림을 비교해 같은 label도 하나의 고정된 픽셀 배열이 아니라는 점을 확인합니다."><LabBadges /><section className="mt-7"><h3 className="text-xl font-black text-slate-950">숫자 필터와 실제 sample 갤러리</h3><p className="mt-2 leading-7 text-slate-600">같은 label에서 서로 다른 실제 이미지 2개를 선택하고, 서로 다른 label도 3종 이상 선택하세요.</p><div className="mt-4"><LabelFilters /></div><div className="mt-5"><SampleGallery samples={visible} selectedSampleId={selectedSampleId} onSelect={choose} /></div><div className="mt-5 flex flex-wrap gap-3"><Button variant="secondary" disabled={page === 0} onClick={() => setPage((current) => Math.max(0, current - 1))}><ArrowLeft size={18} aria-hidden="true" />이전 sample</Button><Button onClick={() => setPage((current) => (current + 1) % pageCount)}>다른 sample 보기 <ChevronRight size={18} aria-hidden="true" /></Button><span className="self-center text-sm font-bold text-slate-600">{page + 1}/{pageCount}쪽 · {filtered.length.toLocaleString()}장</span></div></section>
+    <div className="mt-7 grid gap-3 sm:grid-cols-2"><div className={`rounded-xl p-4 font-bold leading-7 ${sameLabelTwo ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-600'}`}>{sameLabelTwo ? <CheckCircle2 className="mr-2 inline" size={19} aria-hidden="true" /> : <Circle className="mr-2 inline" size={17} aria-hidden="true" />}같은 label의 실제 표본 2개 비교</div><div className={`rounded-xl p-4 font-bold leading-7 ${exploredLabels.size >= 3 ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-600'}`}>서로 다른 label {exploredLabels.size}/3종: {[...exploredLabels].sort((a,b) => a-b).join(', ') || '아직 없음'}</div></div>
+    <fieldset className="mt-8 rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">같은 숫자에서 실제로 달라질 수 있는 요소를 모두 고르세요</legend><div className="mt-4 grid gap-3 sm:grid-cols-2">{[['thickness','획 두께'],['tilt','기울기'],['position','위치'],['size','크기'],['stroke','일부 획의 모양'],['filename','배경에 적힌 파일명']].map(([id, text]) => <Choice key={id} selected={shapeChoices.includes(id)} onClick={() => toggle(id)}>{text}</Choice>)}</div></fieldset>
+    <fieldset className="mt-6 rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">“숫자 7은 모두 완전히 같은 픽셀 배열이다.”</legend><div className="mt-4 grid gap-3"><Choice selected={misconception === 'false'} onClick={() => { setMisconception('false'); setResult('idle') }}>틀립니다. 같은 label이라도 사람이 쓴 모양과 위치가 다를 수 있습니다.</Choice><Choice selected={misconception === 'true'} onClick={() => { setMisconception('true'); setResult('idle') }}>맞습니다. label이 같으면 모든 pixel이 같습니다.</Choice></div></fieldset><Button className="mt-6" onClick={submit}>모양 차이 판단 제출</Button><Feedback result={result} incomplete="같은 label 2개, 서로 다른 label 3종을 실제로 선택하고 두 판단을 마친 뒤 제출하세요." incorrect="파일명은 이미지 형태의 특징이 아닙니다. 실제 손글씨에서 달라질 수 있는 모양 요소를 다시 고르세요." correct="좋습니다. label은 같아도 획·기울기·위치·크기가 달라질 수 있으므로 모델은 다양한 실제 표본에서 패턴을 배워야 합니다." />{props.isComplete && shapeCorrect && <StepCompletionMessage>같은 label의 변형과 서로 다른 숫자 label을 실제 MNIST 표본으로 비교했습니다.</StepCompletionMessage>}</StepFrame>
 }
 
 export function Lesson07Step3(props: CommonStepProps) {
-  const {
-    selectedSample,
-    selectedPixelIndex,
-    selectPixel,
-    markInspectedPixel,
-    inspectedPixelIndexes,
-  } = useLoadedLesson07Lab()
-  const [showValues, setShowValues] = useState(false)
-  const sample = selectedSample!
-  const sawDark = [...inspectedPixelIndexes].some((index) => sample.pixels[index] <= 32)
-  const sawBright = [...inspectedPixelIndexes].some((index) => sample.pixels[index] >= 128)
-
-  useEffect(() => {
-    if (inspectedPixelIndexes.size >= 5 && sawDark && sawBright && !props.isComplete) props.onComplete()
-  }, [inspectedPixelIndexes, props.isComplete, props.onComplete, sawBright, sawDark])
-
-  const inspectPixel = (index: number) => {
-    selectPixel(index)
-    markInspectedPixel(index)
-  }
-
-  return (
-    <StepFrame {...props} step={3} intro="현재 선택한 실제 sample을 확대하여 한 칸의 위치와 밝기값을 직접 확인합니다.">
-      <LabBadges />
-      <div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(17rem,0.9fr)]">
-        <section aria-labelledby="pixel-grid-title">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h3 id="pixel-grid-title" className="text-xl font-black text-slate-950">28×28 픽셀 격자</h3>
-              <p className="mt-1 font-mono text-sm text-slate-500">Label {sample.label} · {sample.id}</p>
-            </div>
-            <Button variant="secondary" aria-pressed={showValues} onClick={() => setShowValues((value) => !value)}>
-              픽셀값 표시 {showValues ? 'ON' : 'OFF'}
-            </Button>
-          </div>
-          <div className="mt-5 flex justify-center">
-            <MnistPixelGrid sample={sample} selectedIndex={selectedPixelIndex} onSelect={inspectPixel} showSelectedValue={showValues} ariaLabel="확대된 실제 MNIST 픽셀 격자" />
-          </div>
-        </section>
-
-        <section aria-labelledby="pixel-observation-title">
-          <h3 id="pixel-observation-title" className="text-xl font-black text-slate-950">선택한 픽셀</h3>
-          <div className="mt-5"><PixelInformation sample={sample} index={selectedPixelIndex} /></div>
-          <dl className="mt-5 grid grid-cols-3 gap-3">
-            {[
-              ['Label', String(sample.label)],
-              ['Pixels', `${sample.pixels.length}개`],
-              ['Range', '0~255'],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-xl bg-slate-100 p-3 text-center">
-                <dt className="text-xs font-bold text-slate-500">{label}</dt>
-                <dd className="mt-1 font-black">{value}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-5 space-y-3">
-            {[
-              [inspectedPixelIndexes.size >= 5, `서로 다른 픽셀 ${Math.min(inspectedPixelIndexes.size, 5)}/5개`],
-              [sawDark, '0에 가까운 검은 배경 픽셀'],
-              [sawBright, '값이 큰 밝은 숫자 획 픽셀'],
-            ].map(([done, label]) => (
-              <div key={String(label)} className={`flex items-center gap-2 rounded-xl p-3 font-bold ${done ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-600'}`}>
-                {done ? <CheckCircle2 size={19} aria-hidden="true" /> : <Circle size={17} aria-hidden="true" />}
-                {label}
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-      <p className="mt-7 rounded-xl bg-indigo-50 p-4 font-bold leading-7 text-indigo-950">이것은 그림 파일처럼 보이지만 AI에게는 행 우선 순서로 놓인 784개의 숫자입니다.</p>
-      {props.isComplete ? <StepCompletionMessage>서로 다른 실제 픽셀과 검은 배경·밝은 획 값을 모두 관찰했습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const { selectedSample, selectedPixelIndex, selectPixel, markInspectedPixel, inspectedPixelIndexes } = useLoadedLesson07Lab(); const sample = selectedSample
+  const [answers, setAnswers] = useState({ coordinate: '', row: '', column: '' }); const [brightness, setBrightness] = useState<string | null>(null); const [submitted, setSubmitted] = useState(false)
+  const coordinateTarget = (selectedPixelIndex + 137) % 784; const targetRow = Math.floor(coordinateTarget / 28); const targetColumn = coordinateTarget % 28; const sawDark = [...inspectedPixelIndexes].some((index) => sample.pixels[index] <= 32); const sawBright = [...inspectedPixelIndexes].some((index) => sample.pixels[index] >= 128)
+  const answerCorrect = Number(answers.coordinate) === targetRow * 28 + targetColumn && Number(answers.row) === Math.floor(coordinateTarget / 28) && Number(answers.column) === coordinateTarget % 28; const ready = inspectedPixelIndexes.size >= 5 && sawDark && sawBright && brightness === 'low' && submitted && answerCorrect
+  useEffect(() => { if (ready && !props.isComplete) props.onComplete() }, [props.isComplete, props.onComplete, ready])
+  const inspect = (index: number) => { selectPixel(index); markInspectedPixel(index); setSubmitted(false) }
+  return <StepFrame {...props} step={3} intro="실제 28×28 표본의 픽셀을 선택하고, 0부터 시작하는 row·column·index를 양방향으로 계산합니다."><LabBadges /><div className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(17rem,0.9fr)]"><section><h3 className="text-xl font-black text-slate-950">실제 28×28 픽셀 격자</h3><p className="mt-2 font-mono text-sm text-slate-500">Label {sample.label} · {sample.id}</p><p className="mt-2 leading-7 text-slate-600">서로 다른 실제 칸 5개를 눌러 검은 배경과 밝은 획을 모두 찾아보세요.</p><div className="mt-5 flex justify-center"><MnistPixelGrid sample={sample} selectedIndex={selectedPixelIndex} onSelect={inspect} ariaLabel="좌표를 계산할 실제 MNIST 픽셀 격자" /></div></section><section><h3 className="text-xl font-black text-slate-950">선택한 실제 픽셀</h3><div className="mt-5"><PixelInformation sample={sample} index={selectedPixelIndex} /></div><div className="mt-5 space-y-3">{[[inspectedPixelIndexes.size >= 5, `서로 다른 실제 픽셀 ${Math.min(5, inspectedPixelIndexes.size)}/5개`],[sawDark,'0에 가까운 어두운 배경값 확인'],[sawBright,'값이 큰 밝은 획 확인']].map(([done,label]) => <div key={String(label)} className={`rounded-xl p-3 font-bold ${done ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-600'}`}>{done ? '✓ ' : '○ '}{label}</div>)}</div></section></div>
+    <section className="mt-8 grid gap-5 lg:grid-cols-2"><fieldset className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">좌표 → index</legend><p className="mt-2 leading-7 text-slate-600">0부터 세는 row {targetRow}, column {targetColumn}의 index는? <strong>index = row × 28 + column</strong></p><input value={answers.coordinate} onChange={(event) => { setAnswers((current) => ({ ...current, coordinate: event.target.value })); setSubmitted(false) }} inputMode="numeric" aria-label="좌표에서 index 계산 답" className="mt-4 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-mono font-bold" /></fieldset><fieldset className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">index → 좌표</legend><p className="mt-2 leading-7 text-slate-600">index {coordinateTarget}의 row와 column을 0부터 시작해 입력하세요. <strong>row=floor(index÷28), column=나머지</strong></p><div className="mt-4 grid grid-cols-2 gap-3"><input value={answers.row} onChange={(event) => { setAnswers((current) => ({ ...current, row: event.target.value })); setSubmitted(false) }} inputMode="numeric" aria-label="index의 row 답" placeholder="row" className="min-h-11 min-w-0 rounded-xl border border-slate-300 px-3 font-mono font-bold" /><input value={answers.column} onChange={(event) => { setAnswers((current) => ({ ...current, column: event.target.value })); setSubmitted(false) }} inputMode="numeric" aria-label="index의 column 답" placeholder="column" className="min-h-11 min-w-0 rounded-xl border border-slate-300 px-3 font-mono font-bold" /></div></fieldset></section>
+    <fieldset className="mt-6 rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">배경과 획의 밝기 비교</legend><p className="mt-2 leading-7 text-slate-600">실제 격자에서 관찰한 값을 바탕으로 옳은 설명을 고르세요.</p><div className="mt-4 grid gap-3"><Choice selected={brightness === 'low'} onClick={() => { setBrightness('low'); setSubmitted(false) }}>어두운 배경 픽셀값은 0에 가깝고, 밝은 숫자 획 픽셀값은 더 크다.</Choice><Choice selected={brightness === 'same'} onClick={() => { setBrightness('same'); setSubmitted(false) }}>배경과 숫자 획의 모든 픽셀값은 같다.</Choice></div></fieldset><Button className="mt-6" onClick={() => setSubmitted(true)} disabled={!answers.coordinate || !answers.row || !answers.column || !brightness}>좌표 계산 제출</Button>{submitted && <Feedback result={answerCorrect && brightness === 'low' ? 'correct' : 'incorrect'} incomplete="" incorrect={`다시 계산해 보세요. row ${targetRow}, column ${targetColumn}의 index는 ${targetRow * 28 + targetColumn}입니다. index ${coordinateTarget}의 좌표도 나눗셈과 나머지로 구합니다.`} correct="계산이 맞습니다. 실제 픽셀의 위치는 flatten한 뒤에도 row·column과 index로 서로 찾을 수 있습니다." />}{props.isComplete && <StepCompletionMessage>실제 픽셀 5개와 밝기 차이를 관찰하고 좌표·index 계산을 완성했습니다.</StepCompletionMessage>}</StepFrame>
 }
 
 export function Lesson07Step4(props: CommonStepProps) {
-  const { selectedSample, selectedPixelIndex, selectPixel } = useLoadedLesson07Lab()
-  const sample = selectedSample!
-  const [flattened, setFlattened] = useState(false)
-  const [linkedFromImage, setLinkedFromImage] = useState(false)
-  const [linkedFromArray, setLinkedFromArray] = useState(false)
-  const [answer, setAnswer] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const answerCorrect = submitted && Number(answer) === 784
-  const row = Math.floor(selectedPixelIndex / 28)
-  const rowStart = row * 28
-  const visibleIndexes = Array.from({ length: 28 }, (_, offset) => rowStart + offset)
-  const ready = flattened && linkedFromImage && linkedFromArray && answerCorrect
-
-  useEffect(() => {
-    if (ready && !props.isComplete) props.onComplete()
-  }, [props.isComplete, props.onComplete, ready])
-
-  return (
-    <StepFrame {...props} step={4} intro="28×28 이미지를 행 우선 순서로 읽어 DNN이 받을 784개 입력으로 펼칩니다.">
-      <LabBadges />
-      <div className="mt-7"><FlowChain items={['28행 × 28열 이미지', '첫 번째 행', '두 번째 행', '…', '784개 픽셀 배열']} label="MNIST 이미지를 행 우선 배열로 펼치는 과정" /></div>
-      <Button className="mt-6" onClick={() => setFlattened(true)}>
-        <Layers3 size={18} aria-hidden="true" /> 펼쳐 보기
-      </Button>
-
-      {flattened ? (
-        <div className="mt-7 grid gap-7 lg:grid-cols-2">
-          <section aria-labelledby="flatten-image-title">
-            <h3 id="flatten-image-title" className="text-lg font-black text-slate-950">28×28 PIXEL IMAGE</h3>
-            <p className="mt-2 text-sm text-slate-600">이미지 칸을 누르면 같은 배열 위치가 강조됩니다.</p>
-            <div className="mt-4 flex justify-center">
-              <MnistPixelGrid
-                sample={sample}
-                selectedIndex={selectedPixelIndex}
-                onSelect={(index) => {
-                  selectPixel(index)
-                  setLinkedFromImage(true)
-                }}
-                ariaLabel="flatten과 연결된 MNIST 픽셀 격자"
-              />
-            </div>
-          </section>
-
-          <section aria-labelledby="flatten-array-title">
-            <h3 id="flatten-array-title" className="text-lg font-black text-slate-950">FLATTENED INPUT</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">전체 배열은 실제로 {sample.pixels.length}개입니다. 화면에는 선택한 {row + 1}행의 28개 값을 보여줍니다.</p>
-            <div className="mt-4 rounded-2xl bg-slate-100 p-4">
-              <p className="font-mono text-sm font-bold text-slate-700">pixels[{rowStart}] … pixels[{rowStart + 27}]</p>
-              <div className="mt-3 grid grid-cols-[repeat(7,minmax(0,1fr))] gap-1 sm:grid-cols-[repeat(14,minmax(0,1fr))]">
-                {visibleIndexes.map((index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    aria-pressed={selectedPixelIndex === index}
-                    aria-label={`배열 위치 ${index + 1}, 값 ${sample.pixels[index]}`}
-                    onClick={() => {
-                      selectPixel(index)
-                      setLinkedFromArray(true)
-                    }}
-                    className={`min-h-12 min-w-0 rounded-md px-0.5 py-1 text-center font-mono text-[10px] font-bold focus-visible:outline-2 focus-visible:outline-indigo-600 sm:text-xs ${
-                      selectedPixelIndex === index ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 hover:bg-indigo-100'
-                    }`}
-                  >
-                    <span className="block opacity-70">{index + 1}</span>
-                    <span className="block">{sample.pixels[index]}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 font-mono text-sm leading-7 text-indigo-950">
-              [{sample.pixels.slice(0, 12).join(', ')}, …, {sample.pixels.slice(-8).join(', ')}]
-            </div>
-            <div className="mt-4"><PixelInformation sample={sample} index={selectedPixelIndex} /></div>
-          </section>
-        </div>
-      ) : null}
-
-      <fieldset className="mt-8">
-        <legend className="text-lg font-black text-slate-950">28 × 28 = ?</legend>
-        <div className="mt-4 flex max-w-sm flex-col gap-3 sm:flex-row">
-          <input
-            type="number"
-            inputMode="numeric"
-            value={answer}
-            onChange={(event) => {
-              setAnswer(event.target.value)
-              setSubmitted(false)
-            }}
-            aria-label="28 곱하기 28의 답"
-            className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 px-4 font-mono text-lg font-bold focus:border-indigo-500 focus:outline-none focus:ring-3 focus:ring-indigo-100"
-          />
-          <Button disabled={!answer} onClick={() => setSubmitted(true)}>입력 관계 확인</Button>
-        </div>
-        {submitted ? (
-          <p className={`mt-4 flex items-center gap-2 font-bold ${answerCorrect ? 'text-emerald-800' : 'text-rose-800'}`} role="status">
-            {answerCorrect ? <CheckCircle2 size={20} aria-hidden="true" /> : <XCircle size={20} aria-hidden="true" />}
-            {answerCorrect ? '28 × 28 = 784, 모델 입력 노드 수도 784개입니다.' : '28개 열이 28행 있으므로 다시 계산해 보세요.'}
-          </p>
-        ) : null}
-      </fieldset>
-
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
-        {[
-          [flattened, '실제 flatten 결과'],
-          [linkedFromImage && linkedFromArray, '이미지 ↔ 배열 연결'],
-          [answerCorrect, '입력 노드 784개'],
-        ].map(([done, label]) => (
-          <div key={String(label)} className={`flex items-center gap-2 rounded-xl p-4 font-bold ${done ? 'bg-emerald-50 text-emerald-900' : 'bg-slate-100 text-slate-600'}`}>
-            {done ? <CheckCircle2 size={19} aria-hidden="true" /> : <Circle size={17} aria-hidden="true" />}{label}
-          </div>
-        ))}
-      </div>
-      {props.isComplete ? <StepCompletionMessage>실제 이미지 픽셀과 행 우선 배열 위치를 양방향으로 연결하고 784개 입력 관계를 확인했습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const { selectedSample, selectedPixelIndex, selectPixel } = useLoadedLesson07Lab(); const sample = selectedSample; const [flattened, setFlattened] = useState(false); const [fromImage, setFromImage] = useState(false); const [fromArray, setFromArray] = useState(false); const [answers, setAnswers] = useState<Record<string,string>>({}); const [result, setResult] = useState<Result>('idle'); const row = Math.floor(selectedPixelIndex / 28); const start = row * 28; const indexes = Array.from({ length: 28 }, (_, offset) => start + offset)
+  const questions = [['next','첫 행 다음에는 무엇이 이어지나요?', [['row2','두 번째 행의 28개 값'],['last','마지막 행만 반복']], 'row2'],['preserve','flatten 뒤에도 특정 픽셀의 위치를 다시 찾을 수 있나요?', [['yes','예. 같은 행 우선 식으로 index와 좌표를 오갈 수 있다.'],['no','아니요. 위치 정보가 사라진다.']], 'yes'],['order','행 우선과 열 우선을 섞으면?', [['wrong','이미지 칸과 배열 index의 연결이 달라져 잘못 해석된다.'],['same','언제나 같은 배열이 된다.']], 'wrong'],['length','28×28의 배열 길이는?', [['784','784'],['728','728']], '784']] as const
+  const submit = () => { if (!flattened || !fromImage || !fromArray || questions.some(([id]) => !answers[id])) return setResult('incomplete'); if (questions.every(([id,,,answer]) => answers[id] === answer)) { setResult('correct'); props.onComplete() } else setResult('incorrect') }
+  return <StepFrame {...props} step={4} intro="행 우선 flatten은 이미지의 순서를 정해 784개 배열로 바꾸며, 같은 규칙을 쓰면 위치를 다시 찾을 수 있습니다."><LabBadges /><div className="mt-7"><FlowChain items={['28×28 실제 이미지','첫 번째 행 28개','두 번째 행 28개','…','784개 배열']} label="행 우선 flatten 흐름" /></div><Button className="mt-6" onClick={() => setFlattened(true)}><Layers3 size={18} aria-hidden="true" />실제 flatten 펼쳐 보기</Button>{flattened && <div className="mt-7 grid gap-7 lg:grid-cols-2"><section><h3 className="text-lg font-black">이미지 → 배열</h3><p className="mt-2 text-sm text-slate-600">실제 이미지 칸을 누르면 같은 index를 강조합니다.</p><div className="mt-4 flex justify-center"><MnistPixelGrid sample={sample} selectedIndex={selectedPixelIndex} onSelect={(index) => { selectPixel(index); setFromImage(true); setResult('idle') }} ariaLabel="flatten 이미지에서 배열 위치 찾기" /></div></section><section><h3 className="text-lg font-black">배열 → 이미지</h3><p className="mt-2 text-sm leading-6 text-slate-600">현재 {row}행의 실제 28개 배열값입니다. 배열 index를 눌러 이미지 칸을 찾으세요.</p><div className="mt-4 grid grid-cols-7 gap-1 rounded-2xl bg-slate-100 p-3 sm:grid-cols-14">{indexes.map((index) => <button key={index} type="button" aria-pressed={selectedPixelIndex === index} onClick={() => { selectPixel(index); setFromArray(true); setResult('idle') }} className={`min-h-11 rounded-md px-1 font-mono text-[10px] font-bold focus-visible:outline-2 focus-visible:outline-indigo-600 ${selectedPixelIndex === index ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 hover:bg-indigo-100'}`}><span className="block opacity-70">{index}</span>{sample.pixels[index]}</button>)}</div><div className="mt-4"><PixelInformation sample={sample} index={selectedPixelIndex} /></div></section></div>}
+    <section className="mt-8 space-y-5">{questions.map(([id, question, options]) => <fieldset key={id} className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black leading-7 text-slate-950">{question}</legend><div className="mt-3 grid gap-3">{options.map(([optionId, text]) => <Choice key={optionId} selected={answers[id] === optionId} onClick={() => { setAnswers((current) => ({ ...current, [id]: optionId })); setResult('idle') }}>{text}</Choice>)}</div></fieldset>)}</section><Button className="mt-6" onClick={submit}>flatten 해석 제출</Button><Feedback result={result} incomplete="실제 flatten을 실행하고 이미지→배열, 배열→이미지 연결과 네 판단을 모두 마치세요." incorrect="행 우선은 첫 행 28개 뒤에 둘째 행 28개가 이어지는 약속입니다. 이 약속이 바뀌면 같은 index가 다른 이미지 칸을 가리킵니다." correct="정확합니다. flatten은 위치를 없애는 것이 아니라, 행 우선이라는 약속으로 2차원 위치를 1차원 index에 연결합니다." />{props.isComplete && <StepCompletionMessage>실제 이미지와 784개 행 우선 배열을 양방향으로 연결했습니다.</StepCompletionMessage>}</StepFrame>
 }
 
 export function Lesson07Step5(props: CommonStepProps) {
-  const {
-    selectedSample,
-    selectedPixelIndex,
-    selectPixel,
-    markNormalizedComparison,
-    normalizedComparedIndexes,
-    normalizedInput,
-    normalizeCurrentSample,
-  } = useLoadedLesson07Lab()
-  const sample = selectedSample!
-  const [mode, setMode] = useState<'original' | 'normalized'>('original')
-  const normalizedReady = normalizedInput?.sampleId === sample.id && normalizedInput.values.length === 784
-  const selectedOriginal = sample.pixels[selectedPixelIndex]
-  const selectedNormalized = selectedOriginal / 255
-
-  useEffect(() => {
-    if (normalizedComparedIndexes.size >= 5 && normalizedReady && !props.isComplete) props.onComplete()
-  }, [normalizedComparedIndexes, normalizedReady, props.isComplete, props.onComplete])
-
-  const comparePixel = (index: number) => {
-    selectPixel(index)
-    markNormalizedComparison(index)
-  }
-
-  const previewValues =
-    mode === 'original'
-      ? sample.pixels
-      : normalizedReady
-        ? normalizedInput.values
-        : sample.pixels.map((pixel) => pixel / 255)
-
-  return (
-    <StepFrame {...props} step={5} intro="현재 실제 sample의 원본 배열은 보존하고, 255로 나눈 새로운 0~1 배열을 만듭니다.">
-      <LabBadges />
-      <div className="mt-7 flex flex-wrap gap-2" role="group" aria-label="픽셀값 표시 범위">
-        {[
-          ['original', '원본 0~255'],
-          ['normalized', '정규화 0~1'],
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            type="button"
-            aria-pressed={mode === key}
-            onClick={() => setMode(key as 'original' | 'normalized')}
-            className={`min-h-11 rounded-xl border px-4 font-bold ${mode === key ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-200 bg-white text-slate-700'}`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-6 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.85fr)]">
-        <section aria-labelledby="normalize-grid-title">
-          <h3 id="normalize-grid-title" className="text-xl font-black text-slate-950">실제 픽셀 선택</h3>
-          <p className="mt-2 leading-7 text-slate-600">서로 다른 픽셀을 눌러 원본값과 계산된 정규화 값을 비교하세요.</p>
-          <div className="mt-5 flex justify-center">
-            <MnistPixelGrid sample={sample} selectedIndex={selectedPixelIndex} onSelect={comparePixel} ariaLabel="정규화 값을 비교할 실제 MNIST 픽셀 격자" />
-          </div>
-        </section>
-        <section aria-labelledby="normalization-result-title">
-          <h3 id="normalization-result-title" className="text-xl font-black text-slate-950">선택 픽셀 계산</h3>
-          <div className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-center">
-            <p className="font-mono text-lg font-black text-indigo-950">normalized = pixel / 255</p>
-            <p className="mt-4 font-mono text-2xl font-black text-slate-950">{selectedOriginal} ÷ 255 = {selectedNormalized.toFixed(3)}</p>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-slate-100 p-4 text-center">
-              <p className="text-sm font-bold text-slate-500">원본값</p>
-              <p className="mt-1 font-mono text-2xl font-black">{selectedOriginal}</p>
-            </div>
-            <div className="rounded-xl bg-emerald-50 p-4 text-center">
-              <p className="text-sm font-bold text-emerald-700">정규화값</p>
-              <p className="mt-1 font-mono text-2xl font-black">{selectedNormalized.toFixed(3)}</p>
-            </div>
-          </div>
-          <p className="mt-4 text-sm leading-6 text-slate-600">현재 보기: {mode === 'original' ? `원본 ${selectedOriginal}` : `정규화 ${selectedNormalized.toFixed(3)}`}</p>
-          <p className="mt-3 rounded-xl bg-slate-100 p-4 font-bold text-slate-800">비교한 서로 다른 픽셀 {Math.min(normalizedComparedIndexes.size, 5)}/5개</p>
-        </section>
-      </div>
-
-      <section className="mt-8" aria-labelledby="normalize-all-title">
-        <h3 id="normalize-all-title" className="text-xl font-black text-slate-950">784개 전체 입력</h3>
-        <Button className="mt-4" onClick={normalizeCurrentSample}>
-          <Sparkles size={18} aria-hidden="true" /> 전체 입력 정규화
-        </Button>
-        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-black text-slate-950">{normalizedReady ? '새 정규화 배열' : '현재 원본 배열'}</p>
-            <span className="rounded-full bg-white px-3 py-1 text-sm font-bold text-slate-700">길이 {previewValues.length}</span>
-          </div>
-          <p className="mt-4 break-words font-mono text-sm leading-7 text-slate-700">
-            [{previewValues.slice(0, 14).map((value) => typeof value === 'number' && mode === 'normalized' ? value.toFixed(3) : value).join(', ')}, …, {previewValues.slice(-8).map((value) => typeof value === 'number' && mode === 'normalized' ? value.toFixed(3) : value).join(', ')}]
-          </p>
-          {normalizedReady ? (
-            <p className="mt-4 flex items-center gap-2 font-bold text-emerald-800" role="status"><CheckCircle2 size={20} aria-hidden="true" /> 원본 배열은 유지하고 0~1 범위의 유한한 숫자 784개를 새로 만들었습니다.</p>
-          ) : null}
-        </div>
-      </section>
-      {props.isComplete ? <StepCompletionMessage>실제 픽셀 5개 이상을 비교하고 별도의 784개 정규화 배열을 만들었습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const { selectedSample, selectedPixelIndex, selectPixel, normalizedInput, normalizeCurrentSample } = useLoadedLesson07Lab(); const sample = selectedSample; const [answers, setAnswers] = useState({ zero: '', full: '', middle: '', actual: '' }); const [concepts, setConcepts] = useState<Record<string,string>>({}); const [result, setResult] = useState<Result>('idle'); const expectedActual = sample.pixels[selectedPixelIndex] / 255; const normalizedReady = normalizedInput?.sampleId === sample.id && normalizedInput.values.length === 784 && normalizedInput.values.every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
+  const near = (input: string, expected: number) => { const value = parseDecimal(input); return value !== null && Math.abs(value - expected) <= 0.002 }
+  const submit = () => { const valuesCorrect = near(answers.zero,0) && near(answers.full,1) && near(answers.middle,128/255) && near(answers.actual,expectedActual); const conceptsCorrect = concepts.position === 'no' && concepts.label === 'no' && concepts.overwrite === 'no' && concepts.reason === 'range'; if (Object.values(answers).some((answer) => !answer.trim()) || Object.keys(concepts).length < 4 || !normalizedReady) return setResult('incomplete'); if (valuesCorrect && conceptsCorrect) { setResult('correct'); props.onComplete() } else setResult('incorrect') }
+  return <StepFrame {...props} step={5} intro="원본 실제 픽셀값을 255로 나눠 별도의 0~1 INPUT 배열을 계산하고, 정규화가 바꾸지 않는 것도 구분합니다."><LabBadges /><section className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.9fr)]"><div><h3 className="text-xl font-black">현재 실제 픽셀 선택</h3><div className="mt-5 flex justify-center"><MnistPixelGrid sample={sample} selectedIndex={selectedPixelIndex} onSelect={(index) => { selectPixel(index); setResult('idle') }} ariaLabel="정규화 계산용 실제 픽셀 격자" /></div></div><div><h3 className="text-xl font-black">실제 값 계산</h3><div className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-center"><p className="font-mono font-black text-indigo-950">normalized = pixel / 255</p><p className="mt-4 font-mono text-2xl font-black">{sample.pixels[selectedPixelIndex]} ÷ 255 = {expectedActual.toFixed(3)}</p></div><div className="mt-4"><PixelInformation sample={sample} index={selectedPixelIndex} /></div></div></section>
+    <fieldset className="mt-8 rounded-2xl border border-slate-200 p-5"><legend className="px-1 text-lg font-black text-slate-950">값을 직접 계산하세요</legend><p className="mt-2 text-sm leading-6 text-slate-600">소수점 쉼표와 앞뒤 공백도 사용할 수 있습니다. 128은 약 0.502입니다.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[['zero','0 →'],['full','255 →'],['middle','128 →'],['actual',`현재 실제값 ${sample.pixels[selectedPixelIndex]} →`]].map(([id,label]) => <label key={id} className="rounded-xl bg-slate-100 p-3 font-bold text-slate-800"><span>{label}</span><input value={answers[id as keyof typeof answers]} onChange={(event) => { setAnswers((current) => ({ ...current, [id]: event.target.value })); setResult('idle') }} inputMode="decimal" aria-label={`${label} 정규화 값`} className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-mono" /></label>)}</div></fieldset>
+    <section className="mt-8"><h3 className="text-xl font-black text-slate-950">정규화의 의미 판단</h3><div className="mt-4 grid gap-5 lg:grid-cols-2">{[['position','정규화가 픽셀 위치를 바꾸나요?',[['no','아니요. 배열의 순서는 유지한다.'],['yes','예. 밝은 픽셀을 다른 칸으로 옮긴다.']]],['label','정규화가 label을 바꾸나요?',[['no','아니요. 실제 label은 그대로다.'],['yes','예. 0~1 사이 label로 바꾼다.']]],['overwrite','정규화가 원본 0~255 배열을 직접 덮어쓰나요?',[['no','아니요. 원본을 보존하고 새 배열을 만든다.'],['yes','예. 원본 pixel을 모두 지운다.']]],['reason','값 범위를 맞추는 이유로 알맞은 것은?',[['range','모델 입력 값을 같은 범위로 다루기 위해서'],['shape','이미지의 모양과 label을 바꾸기 위해서']]]].map(([id,q,options]) => <fieldset key={id as string} className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black leading-7 text-slate-950">{q as string}</legend><div className="mt-3 grid gap-3">{(options as string[][]).map(([option,text]) => <Choice key={option} selected={concepts[id as string] === option} onClick={() => { setConcepts((current) => ({ ...current, [id as string]: option })); setResult('idle') }}>{text}</Choice>)}</div></fieldset>)}</div></section>
+    <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><h3 className="text-xl font-black text-indigo-950">784개 전체 INPUT</h3><Button className="mt-4" onClick={normalizeCurrentSample}><Sparkles size={18} aria-hidden="true" />전체 784개 정규화</Button><p className="mt-4 break-words font-mono text-sm leading-7 text-indigo-950">{normalizedReady ? `[${normalizedInput.values.slice(0, 12).map((value) => value.toFixed(3)).join(', ')}, …] · 길이 ${normalizedInput.values.length}` : '버튼을 눌러 실제 sample의 새 정규화 배열을 만드세요.'}</p></section><Button className="mt-6" onClick={submit}>정규화 제출</Button><Feedback result={result} incomplete="기준값 3개, 현재 실제 픽셀, 네 개념 판단과 전체 784개 정규화를 모두 마치세요." incorrect="0÷255=0, 255÷255=1, 128÷255≈0.502입니다. 정규화는 위치·label·원본 배열을 바꾸지 않습니다." correct="정확합니다. 원본 값과 위치는 보존하고, 계산에 쓸 0~1 범위의 새 INPUT 배열을 만들었습니다." />{props.isComplete && <StepCompletionMessage>기준값과 실제 픽셀을 같은 식으로 계산하고 784개 정규화 INPUT을 만들었습니다.</StepCompletionMessage>}</StepFrame>
 }
 
 export function Lesson07Step6(props: CommonStepProps) {
-  const {
-    dataset,
-    selectedSample,
-    selectedSampleId,
-    selectedLabel,
-    selectSample,
-    markOneHotLabel,
-    oneHotLabels,
-  } = useLoadedLesson07Lab()
-  const sample = selectedSample!
-  const oneHot = makeOneHot(sample.label)
-  const visibleSamples = useMemo(
-    () => dataset!.samples.filter((item) => selectedLabel === 'all' || item.label === selectedLabel).slice(0, 10),
-    [dataset, selectedLabel],
-  )
-
-  useEffect(() => {
-    const vectorValid = oneHot.length === 10 && oneHot[sample.label] === 1 && oneHot.reduce<number>((sum, value) => sum + value, 0) === 1
-    if (oneHotLabels.size >= 3 && vectorValid && !props.isComplete) props.onComplete()
-  }, [oneHotLabels, props.isComplete, props.onComplete, sample.label])
-
-  const chooseSample = (nextSample: MnistSample) => {
-    selectSample(nextSample.id)
-    markOneHotLabel(nextSample.label)
-  }
-
-  return (
-    <StepFrame {...props} step={6} intro="현재 실제 sample의 label을 정답 위치만 1인 길이 10의 원-핫 벡터로 바꿉니다.">
-      <LabBadges />
-      <div className="mt-7"><LabelFilters /></div>
-      <div className="mt-5"><SampleGallery samples={visibleSamples} selectedSampleId={selectedSampleId} onSelect={chooseSample} /></div>
-
-      <section className="mt-8" aria-labelledby="one-hot-title">
-        <h3 id="one-hot-title" className="text-xl font-black text-slate-950">Image → Label → One-hot</h3>
-        <div className="mt-5 grid items-center gap-4 md:grid-cols-[minmax(8rem,0.6fr)_auto_minmax(7rem,0.5fr)_auto_minmax(0,1.5fr)]">
-          <div className="rounded-2xl bg-slate-950 p-4 text-center"><MnistCanvas sample={sample} size={140} className="mx-auto" /><p className="mt-3 font-mono text-xs text-slate-300">{sample.id}</p></div>
-          <FlowArrow />
-          <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 text-center"><p className="text-sm font-bold text-indigo-700">실제 Label</p><p className="mt-2 text-4xl font-black text-indigo-950">{sample.label}</p></div>
-          <FlowArrow />
-          <div className="min-w-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-sm font-bold text-emerald-800">길이 10의 원-핫 정답</p>
-            <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-10">
-              {oneHot.map((value, index) => (
-                <div key={index} className={`rounded-lg p-2 text-center font-mono font-black ${value === 1 ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600'}`}>
-                  <span className="block text-[10px] opacity-70">{index}</span>{value}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="mt-7 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5"><p className="font-black text-emerald-900">원-핫 벡터</p><p className="mt-2 leading-7 text-slate-700">실제 정답을 나타냅니다. 1의 위치가 현재 실제 label {sample.label}과 같습니다.</p></div>
-        <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5"><p className="font-black text-cyan-900">Softmax</p><p className="mt-2 leading-7 text-slate-700">모델이 예측한 클래스별 확률입니다. 아직 모델을 학습하지 않았으므로 이 차시에서는 예측 확률을 만들지 않습니다.</p></div>
-      </div>
-      <p className="mt-5 rounded-xl bg-slate-100 p-4 font-bold text-slate-800">원-핫을 확인한 서로 다른 실제 label: {[...oneHotLabels].sort((a, b) => a - b).join(', ') || '아직 없음'} ({oneHotLabels.size}/3종)</p>
-      {props.isComplete ? <StepCompletionMessage>서로 다른 실제 label 3종 이상에서 원-핫의 1 위치가 label과 일치함을 확인했습니다.</StepCompletionMessage> : null}
-    </StepFrame>
-  )
+  const { dataset, selectedSample, selectedSampleId, selectSample, markOneHotLabel, oneHotLabels } = useLoadedLesson07Lab(); const sample = selectedSample; const [indexAnswer,setIndexAnswer] = useState(''); const [kindAnswer,setKindAnswer] = useState<string | null>(null); const [result,setResult] = useState<Result>('idle'); const oneHot = makeOneHot(sample.label); const representatives = useMemo(() => Array.from({ length: 10 }, (_, label) => dataset.samples.find((item) => item.label === label)).filter((item): item is MnistSample => Boolean(item)), [dataset])
+  const vectorValid = oneHot.length === 10 && oneHot[sample.label] === 1 && oneHot.filter((value) => value === 1).length === 1; const submit = () => { if (oneHotLabels.size < 3 || !indexAnswer || !kindAnswer) return setResult('incomplete'); if (Number(indexAnswer) === sample.label && kindAnswer === 'target' && vectorValid) { setResult('correct'); props.onComplete() } else setResult('incorrect') }
+  const choose = (next: MnistSample) => { selectSample(next.id); markOneHotLabel(next.label); setResult('idle') }
+  return <StepFrame {...props} step={6} intro="실제 label을 길이 10의 원-핫 TARGET으로 바꾸고, 이 정답 배열과 Softmax 예측 확률을 구분합니다."><LabBadges /><section className="mt-7"><h3 className="text-xl font-black">서로 다른 실제 label 3종 확인</h3><p className="mt-2 leading-7 text-slate-600">아래는 현재 dataset에서 실제로 찾은 label별 sample입니다. 3종 이상 선택하세요.</p><div className="mt-5"><SampleGallery samples={representatives} selectedSampleId={selectedSampleId} onSelect={choose} /></div><p className="mt-4 rounded-xl bg-slate-100 p-4 font-bold text-slate-800">확인한 실제 label: {[...oneHotLabels].sort((a,b) => a-b).join(', ') || '아직 없음'} ({oneHotLabels.size}/3종)</p></section>
+    <section className="mt-8"><h3 className="text-xl font-black text-slate-950">현재 실제 sample의 TARGET</h3><div className="mt-5 grid items-center gap-4 md:grid-cols-[10rem_auto_minmax(0,1fr)]"><div className="rounded-2xl bg-slate-950 p-4 text-center"><MnistCanvas sample={sample} size={136} className="mx-auto" /><p className="mt-3 text-white">Label {sample.label}</p></div><FlowArrow /><div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5"><p className="font-black text-emerald-900">원-핫 Target · 길이 {oneHot.length}</p><div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-10">{oneHot.map((value,index) => <div key={index} className={`rounded-lg p-2 text-center font-mono font-black ${value === 1 ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600'}`}><span className="block text-[10px] opacity-70">{index}</span>{value}</div>)}</div><p className="mt-4 leading-7 text-slate-700">값 1은 정확히 하나이며 실제 label {sample.label} 위치에만 있습니다.</p></div></div></section>
+    <section className="mt-8 grid gap-5 lg:grid-cols-2"><fieldset className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black text-slate-950">label → 원-핫 위치</legend><p className="mt-2 leading-7 text-slate-600">현재 label {sample.label}이면 1이 있는 index는?</p><input value={indexAnswer} onChange={(event) => { setIndexAnswer(event.target.value); setResult('idle') }} inputMode="numeric" aria-label="원-핫 1 위치 답" className="mt-4 min-h-11 w-full rounded-xl border border-slate-300 px-3 font-mono font-bold" /></fieldset><fieldset className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black text-slate-950">두 배열 구분</legend><p className="mt-2 leading-7 text-slate-600">원-핫 Target은 무엇인가요?</p><div className="mt-3 grid gap-3"><Choice selected={kindAnswer === 'target'} onClick={() => { setKindAnswer('target'); setResult('idle') }}>실제 정답을 나타내는 배열</Choice><Choice selected={kindAnswer === 'softmax'} onClick={() => { setKindAnswer('softmax'); setResult('idle') }}>모델이 예측한 클래스별 확률</Choice></div></fieldset></section><div className="mt-6 grid gap-4 md:grid-cols-2"><div className="rounded-2xl bg-emerald-50 p-5"><p className="font-black text-emerald-900">원-핫 TARGET</p><p className="mt-2 leading-7 text-slate-700">실제 정답입니다. 모델이 학습 중 비교할 기준입니다.</p></div><div className="rounded-2xl bg-cyan-50 p-5"><p className="font-black text-cyan-900">Softmax 출력</p><p className="mt-2 leading-7 text-slate-700">모델이 낸 클래스별 확률입니다. 이 차시에는 실제 모델 예측으로 표시하지 않습니다.</p></div></div><Button className="mt-6" onClick={submit}>TARGET 해석 제출</Button><Feedback result={result} incomplete="서로 다른 실제 label 3종을 확인하고, 현재 label의 1 위치와 배열 역할을 모두 답하세요." incorrect="원-핫은 실제 label 위치만 1입니다. Softmax는 모델의 예측 확률이고 Target은 실제 정답입니다." correct="정확합니다. 현재 실제 label에서 만든 길이 10 원-핫 배열은 모델 예측이 아니라 정답 TARGET입니다." />{props.isComplete && <StepCompletionMessage>서로 다른 실제 label 3종에서 원-핫 Target의 1 위치를 확인했습니다.</StepCompletionMessage>}</StepFrame>
 }
 
-interface Step7Props extends CommonStepProps {
-  priorStepsComplete: boolean
-  onCompletionReadyChange: (ready: boolean) => void
-}
-
-type SourceId = 'pixels' | 'one-hot'
-type TargetId = 'INPUT' | 'TARGET'
+interface Step7Props extends CommonStepProps { priorStepsComplete: boolean; onCompletionReadyChange: (ready: boolean) => void }
+type SourceId = 'pixels' | 'onehot'; type TargetId = 'INPUT' | 'TARGET'
 
 export function Lesson07Step7({ priorStepsComplete, onCompletionReadyChange, ...props }: Step7Props) {
-  const { selectedSample, normalizedInput, metadata, dataset } = useLoadedLesson07Lab()
-  const sample = selectedSample!
-  const oneHot = makeOneHot(sample.label)
-  const [selectedSource, setSelectedSource] = useState<SourceId | null>(null)
-  const [connections, setConnections] = useState<Partial<Record<SourceId, TargetId>>>({})
-  const [submitted, setSubmitted] = useState(false)
-  const normalizedReady = normalizedInput?.sampleId === sample.id && normalizedInput.values.length === 784
-  const allConnected = Boolean(connections.pixels && connections['one-hot'])
-  const correct = connections.pixels === 'INPUT' && connections['one-hot'] === 'TARGET'
-  const completionReady = submitted && correct && normalizedReady
-
-  useEffect(() => {
-    onCompletionReadyChange(completionReady)
-  }, [completionReady, onCompletionReadyChange])
-
-  const connectTo = (target: TargetId) => {
-    if (!selectedSource) return
-    setConnections((current) => {
-      const next = { ...current }
-      const otherSource: SourceId = selectedSource === 'pixels' ? 'one-hot' : 'pixels'
-      if (next[otherSource] === target) delete next[otherSource]
-      next[selectedSource] = target
-      return next
-    })
-    setSelectedSource(null)
-    setSubmitted(false)
-  }
-
-  return (
-    <StepFrame {...props} step={7} intro="실제 sample에서 만든 입력과 정답을 DNN 학습 준비 흐름의 올바른 위치에 연결합니다.">
-      <LabBadges />
-      <div className="mt-7 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="input-data-flow-title">
-          <h3 id="input-data-flow-title" className="text-xl font-black text-indigo-950">입력 데이터</h3>
-          <div className="mt-5"><FlowChain items={['실제 MNIST 28×28 이미지', '원본 픽셀 784개', '0~1 정규화', 'DNN 입력 784']} label="실제 MNIST 입력 데이터 준비 흐름" /></div>
-        </section>
-        <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5" aria-labelledby="target-data-flow-title">
-          <h3 id="target-data-flow-title" className="text-xl font-black text-emerald-950">정답 데이터</h3>
-          <div className="mt-5"><FlowChain items={['실제 label', '길이 10의 원-핫 벡터', '학습 정답 TARGET']} label="실제 MNIST 정답 데이터 준비 흐름" /></div>
-        </section>
-      </div>
-
-      <section className="mt-9" aria-labelledby="actual-sample-summary-title">
-        <h3 id="actual-sample-summary-title" className="text-xl font-black text-slate-950">현재 실제 sample에서 만든 값</h3>
-        <div className="mt-5 grid gap-5 md:grid-cols-[11rem_minmax(0,1fr)]">
-          <div className="rounded-2xl bg-slate-950 p-4 text-center"><MnistCanvas sample={sample} size={140} className="mx-auto" /><p className="mt-3 text-white">Label <strong>{sample.label}</strong></p><p className="mt-1 truncate font-mono text-xs text-slate-300">{sample.id}</p></div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className={`rounded-2xl p-5 ${normalizedReady ? 'bg-indigo-50' : 'bg-amber-50'}`}>
-              <p className="text-sm font-bold text-slate-600">INPUT 후보</p>
-              <p className="mt-2 font-black text-slate-950">정규화된 픽셀 {normalizedInput?.values.length ?? 0}개</p>
-              <p className="mt-2 font-mono text-sm text-slate-600">{normalizedReady ? `[${normalizedInput.values.slice(0, 5).map((value) => value.toFixed(3)).join(', ')}, …]` : 'STEP 5에서 전체 입력을 정규화하세요.'}</p>
-            </div>
-            <div className="rounded-2xl bg-emerald-50 p-5">
-              <p className="text-sm font-bold text-emerald-700">TARGET 후보</p>
-              <p className="mt-2 font-black text-slate-950">길이 {oneHot.length}의 원-핫 벡터</p>
-              <p className="mt-2 break-words font-mono text-sm text-slate-600">[{oneHot.join(', ')}]</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-9" aria-labelledby="model-structure-title">
-        <h3 id="model-structure-title" className="text-xl font-black text-slate-950">Lesson 08에서 사용할 모델 구조</h3>
-        <div className="mt-5"><FlowChain items={['입력층 784', '은닉층 100 + ReLU', '은닉층 50 + ReLU', '출력층 10 + Softmax']} label="MNIST 분류 DNN 구조" /></div>
-        <p className="mt-4 rounded-xl bg-slate-100 p-4 font-bold text-slate-800">손실함수: CCEE</p>
-        <p className="mt-3 text-sm leading-6 text-slate-600">이번 STEP에서는 model.fit(), Loss와 Accuracy를 실행하지 않습니다.</p>
-      </section>
-
-      <section className="mt-9" aria-labelledby="input-target-connection-title">
-        <h3 id="input-target-connection-title" className="text-xl font-black text-slate-950">INPUT과 TARGET 연결</h3>
-        <p className="mt-2 leading-7 text-slate-600">왼쪽 데이터 카드를 고른 뒤 들어갈 영역을 누르세요.</p>
-        <div className="mt-5 grid gap-6 lg:grid-cols-2">
-          <div>
-            <p className="font-black text-slate-800">1. 연결할 데이터</p>
-            <div className="mt-3 grid gap-3">
-              {[
-                ['pixels', '정규화된 784개 픽셀값'],
-                ['one-hot', '길이 10의 원-핫 벡터'],
-              ].map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  disabled={id === 'pixels' && !normalizedReady}
-                  aria-pressed={selectedSource === id}
-                  onClick={() => setSelectedSource(id as SourceId)}
-                  className={`min-h-16 rounded-xl border px-4 py-3 text-left font-bold focus-visible:outline-3 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${selectedSource === id ? 'border-indigo-500 bg-indigo-50' : 'border-slate-200 bg-white'}`}
-                >
-                  {label}
-                  {connections[id as SourceId] ? <span className="mt-1 block text-sm text-indigo-700">현재 연결: {connections[id as SourceId]}</span> : null}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="font-black text-slate-800">2. DNN의 위치</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {(['INPUT', 'TARGET'] as const).map((target) => {
-                const connectedSource = (Object.entries(connections) as Array<[SourceId, TargetId]>).find(([, value]) => value === target)?.[0]
-                return (
-                  <button
-                    key={target}
-                    type="button"
-                    disabled={!selectedSource}
-                    onClick={() => connectTo(target)}
-                    className="min-h-28 rounded-2xl border-2 border-dashed border-cyan-400 bg-cyan-50 p-4 text-center focus-visible:outline-3 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-50"
-                  >
-                    <span className="text-lg font-black text-cyan-950">{target}</span>
-                    <span className="mt-2 block text-sm font-semibold text-slate-600">{connectedSource ? (connectedSource === 'pixels' ? '정규화 픽셀 784개' : '원-핫 벡터 10개') : '데이터를 선택해 연결'}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Button disabled={!allConnected} onClick={() => setSubmitted(true)}><Link2 size={18} aria-hidden="true" /> 연결 확인</Button>
-          <Button variant="ghost" onClick={() => { setConnections({}); setSelectedSource(null); setSubmitted(false) }}><RotateCcw size={18} aria-hidden="true" /> 초기화</Button>
-        </div>
-        {submitted ? (
-          <div className={`mt-5 flex items-start gap-3 rounded-xl p-5 ${correct ? 'bg-emerald-50 text-emerald-950' : 'bg-rose-50 text-rose-950'}`} role="status">
-            {correct ? <CheckCircle2 className="mt-0.5 shrink-0" size={22} aria-hidden="true" /> : <XCircle className="mt-0.5 shrink-0" size={22} aria-hidden="true" />}
-            <div><p className="font-black">{correct ? '실제 MNIST 데이터의 학습 준비가 완료되었습니다.' : '두 데이터의 역할을 다시 확인하세요.'}</p><p className="mt-1 leading-6">{correct ? '정규화된 픽셀은 모델 입력, 원-핫 벡터는 예측과 비교할 실제 정답입니다.' : '784개 픽셀값은 INPUT으로, 실제 label에서 만든 원-핫 벡터는 TARGET으로 연결합니다.'}</p></div>
-          </div>
-        ) : null}
-      </section>
-
-      {completionReady && !props.isComplete ? (
-        <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status">
-          <CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" />
-          <p className="leading-7">INPUT과 TARGET 연결을 마쳤습니다. {priorStepsComplete ? '화면 아래의 완료 버튼으로 Lesson 07을 완료하세요.' : '완료되지 않은 앞 STEP의 실제 데이터 활동을 마치면 완료 버튼이 활성화됩니다.'}</p>
-        </div>
-      ) : null}
-
-      <details className="mt-9 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-        <summary className="flex min-h-11 cursor-pointer items-center gap-2 font-black text-slate-900 focus-visible:outline-3 focus-visible:outline-indigo-600"><Info size={20} aria-hidden="true" /> 데이터 정보</summary>
-        <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-          <div><dt className="text-sm font-bold text-slate-500">Dataset</dt><dd className="mt-1 font-black">{metadata.datasetName}</dd></div>
-          <div><dt className="text-sm font-bold text-slate-500">Original</dt><dd className="mt-1 leading-7">{metadata.sources.originalDataset.creators.join(', ')}<br />{metadata.sources.originalDataset.note}</dd></div>
-          <div><dt className="text-sm font-bold text-slate-500">CSV conversion</dt><dd className="mt-1 font-black">{metadata.sources.csvConversion.converter} · {metadata.sources.csvConversion.name}</dd></div>
-          <div><dt className="text-sm font-bold text-slate-500">이번 실습</dt><dd className="mt-1 leading-7">원본 MNIST Train과 Test에서 숫자 0~9를 균형 있게 추출한 교육용 subset</dd></div>
-          <div><dt className="text-sm font-bold text-slate-500">전체 Train / Test</dt><dd className="mt-1 font-black">{metadata.original.train.count.toLocaleString()} / {metadata.original.test.count.toLocaleString()}</dd></div>
-          <div><dt className="text-sm font-bold text-slate-500">이미지와 픽셀</dt><dd className="mt-1 font-black">{metadata.image.width}×{metadata.image.height} grayscale · {metadata.pixelRange[0]}~{metadata.pixelRange[1]}</dd></div>
-        </dl>
-        <p className="mt-5 text-sm text-slate-600">현재 불러온 Train subset: {dataset.count.toLocaleString()}개</p>
-        <a href={mnistSourceUrl()} target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-11 items-center font-bold text-indigo-700 underline decoration-2 underline-offset-4 focus-visible:outline-3 focus-visible:outline-indigo-600">SOURCE.md 열기</a>
-      </details>
-
-      <section className="mt-9 rounded-2xl bg-gradient-to-br from-indigo-950 to-cyan-900 p-6 text-white sm:p-8" aria-labelledby="next-lab-title">
-        <p className="text-sm font-black tracking-[0.18em] text-cyan-200">NEXT LAB</p>
-        <h3 id="next-lab-title" className="mt-2 text-2xl font-black">실제 신경망을 학습시켜 보자</h3>
-        <p className="mt-4 max-w-3xl leading-7 text-indigo-100">다음 차시에서는 지금 준비한 실제 MNIST 데이터를 이용해 브라우저에서 실제 딥러닝 모델을 학습합니다.</p>
-        <ul className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-          {['실제 Loss', '실제 Accuracy', '실제 Test 예측', '오분류 이미지 분석', '직접 숫자를 그려 예측'].map((item) => <li key={item} className="rounded-xl bg-white/10 p-3 text-sm font-bold">{item}</li>)}
-        </ul>
-      </section>
-
-      {props.isComplete ? (
-        <div className="mt-8 border-t border-emerald-200 pt-7">
-          <div className="flex items-start gap-3 text-emerald-900" role="status"><CheckCircle2 className="mt-0.5 shrink-0" size={24} aria-hidden="true" /><div><h3 className="text-xl font-black">Lesson 07 완료</h3><p className="mt-2 leading-7">홈의 전체 진행도에 이 차시 완료가 반영되었습니다.</p></div></div>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:border-indigo-300 focus-visible:outline-3 focus-visible:outline-indigo-600">Home에서 진행도 보기</Link>
-            <Link to="/lesson/08" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 focus-visible:outline-3 focus-visible:outline-indigo-600">Lesson 08 미리 보기 <ArrowRight size={18} aria-hidden="true" /></Link>
-          </div>
-        </div>
-      ) : null}
-    </StepFrame>
-  )
+  const { selectedSample, normalizedInput, dataset } = useLoadedLesson07Lab(); const sample = selectedSample; const oneHot = makeOneHot(sample.label); const other = dataset.samples.find((item) => item.label !== sample.label) ?? sample; const malformed = oneHot.map((value,index) => index === (sample.label + 1) % 10 ? 1 : value); const normalizedReady = normalizedInput?.sampleId === sample.id && normalizedInput.values.length === 784
+  const [selectedSource,setSelectedSource] = useState<SourceId | null>(null); const [connections,setConnections] = useState<Partial<Record<SourceId,TargetId>>>({}); const [wrongChoices,setWrongChoices] = useState<string[]>([]); const [reason,setReason] = useState<string | null>(null); const [pairSubmitted,setPairSubmitted] = useState(false); const [quizAnswers,setQuizAnswers] = useState<Record<string,string>>({}); const [quizSubmitted,setQuizSubmitted] = useState<string[]>([])
+  const correctConnection = connections.pixels === 'INPUT' && connections.onehot === 'TARGET'; const validWrongIds = ['mismatch','raw','multiple','short']; const wrongCorrect = sameIds(wrongChoices, validWrongIds) && reason === 'validation'; const allQuizCorrect = lesson07FinalQuiz.every((question) => { const selected = question.options.find(([id]) => id === quizAnswers[question.id]); return quizSubmitted.includes(question.id) && selected?.[2] })
+  const completionReady = normalizedReady && pairSubmitted && correctConnection && wrongCorrect && priorStepsComplete && allQuizCorrect
+  useEffect(() => { onCompletionReadyChange(completionReady) }, [completionReady, onCompletionReadyChange])
+  const connect = (target: TargetId) => { if (!selectedSource) return; setConnections((current) => ({ ...current, [selectedSource]: target })); setSelectedSource(null); setPairSubmitted(false) }
+  const toggleWrong = (id: string) => { setWrongChoices((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]); setPairSubmitted(false) }
+  const submitPair = () => setPairSubmitted(true)
+  const chooseQuiz = (questionId: string, optionId: string) => { setQuizAnswers((current) => ({ ...current, [questionId]: optionId })); setQuizSubmitted((current) => current.filter((id) => id !== questionId)) }
+  return <StepFrame {...props} step={7} intro="현재 실제 sample에서 만든 INPUT과 TARGET을 한 쌍으로 구성하고, 학습에 사용할 수 없는 쌍을 근거로 찾아냅니다."><LabBadges /><div className="mt-7 grid gap-5 lg:grid-cols-2"><section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><h3 className="text-xl font-black text-indigo-950">INPUT 흐름</h3><div className="mt-4"><FlowChain items={['실제 이미지','28×28 픽셀','flatten','정규화 INPUT']} label="실제 이미지에서 INPUT까지 흐름" /></div></section><section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5"><h3 className="text-xl font-black text-emerald-950">TARGET 흐름</h3><div className="mt-4"><FlowChain items={['실제 label','원-핫 TARGET']} label="실제 label에서 TARGET까지 흐름" /></div></section></div>
+    <section className="mt-8 rounded-2xl border border-slate-200 p-5"><h3 className="text-xl font-black text-slate-950">현재 실제 sample 한 쌍</h3><div className="mt-5 grid gap-5 md:grid-cols-[10rem_minmax(0,1fr)]"><div className="rounded-2xl bg-slate-950 p-4 text-center"><MnistCanvas sample={sample} size={136} className="mx-auto" /><p className="mt-3 text-white">Label {sample.label}</p><p className="mt-1 truncate font-mono text-xs text-slate-300">{sample.id}</p></div><div className="grid gap-3 sm:grid-cols-2"><div className={`rounded-2xl p-5 ${normalizedReady ? 'bg-indigo-50' : 'bg-amber-50'}`}><p className="text-sm font-bold">INPUT 후보</p><p className="mt-2 font-black">정규화된 실제 픽셀 {normalizedInput?.values.length ?? 0}개</p><p className="mt-2 break-words font-mono text-sm">{normalizedReady ? `[${normalizedInput.values.slice(0,5).map((value) => value.toFixed(3)).join(', ')}, …]` : 'STEP 5에서 만들어야 합니다.'}</p></div><div className="rounded-2xl bg-emerald-50 p-5"><p className="text-sm font-bold text-emerald-700">TARGET 후보</p><p className="mt-2 font-black">실제 label {sample.label}의 원-핫 10개</p><p className="mt-2 break-words font-mono text-sm">[{oneHot.join(', ')}]</p></div></div></div></section>
+    <section className="mt-8" aria-labelledby="connection-title"><h3 id="connection-title" className="text-xl font-black text-slate-950">실제 한 쌍 연결</h3><p className="mt-2 leading-7 text-slate-600">데이터 카드를 고른 뒤 INPUT 또는 TARGET에 연결하세요.</p><div className="mt-5 grid gap-5 lg:grid-cols-2"><div className="grid gap-3"><Choice selected={selectedSource === 'pixels'} disabled={!normalizedReady} onClick={() => setSelectedSource('pixels')}>정규화된 실제 픽셀 784개</Choice><Choice selected={selectedSource === 'onehot'} onClick={() => setSelectedSource('onehot')}>현재 실제 label의 원-핫 10개</Choice></div><div className="grid gap-3 sm:grid-cols-2">{(['INPUT','TARGET'] as const).map((target) => <Button key={target} variant="secondary" disabled={!selectedSource} className="min-h-24 h-auto text-center" onClick={() => connect(target)}><span><span className="block text-lg font-black">{target}</span><span className="mt-1 block text-xs">{Object.entries(connections).find(([,value]) => value === target)?.[0] === 'pixels' ? '정규화 픽셀 784개' : Object.entries(connections).find(([,value]) => value === target)?.[0] === 'onehot' ? '원-핫 10개' : '카드를 선택'}</span></span></Button>)}</div></div></section>
+    <section className="mt-8"><h3 className="text-xl font-black text-slate-950">학습에 쓰면 안 되는 쌍을 모두 고르세요</h3><p className="mt-2 leading-7 text-slate-600">현재 실제 sample과 비교해 길이·값 범위·정답 연결을 검사합니다.</p><div className="mt-4 grid gap-3">{[['correct',`현재 sample의 정규화 784개 + label ${sample.label} 원-핫 TARGET`],['mismatch',`현재 sample의 정규화 784개 + 다른 실제 sample(label ${other.label})의 원-핫`],['raw',`원본 0~255 실제 픽셀 784개를 “정규화 INPUT”이라고 표시`],['multiple',`값 1이 ${malformed.filter((value) => value === 1).length}개인 원-핫 TARGET`],['short',`길이 ${normalizedInput?.values.slice(0,783).length ?? 783}인 INPUT`]].map(([id,text]) => <Choice key={id as string} selected={wrongChoices.includes(id as string)} onClick={() => toggleWrong(id as string)}>{text as string}</Choice>)}</div><fieldset className="mt-6 rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black text-slate-950">잘못된 쌍의 공통 이유</legend><div className="mt-3 grid gap-3"><Choice selected={reason === 'validation'} onClick={() => { setReason('validation'); setPairSubmitted(false) }}>INPUT은 정규화된 길이 784 배열이어야 하고, TARGET은 같은 sample의 실제 label에서 만든 1 하나의 원-핫이어야 한다.</Choice><Choice selected={reason === 'any'} onClick={() => { setReason('any'); setPairSubmitted(false) }}>입력과 정답은 서로 다른 sample이어도 되고 길이도 중요하지 않다.</Choice></div></fieldset><Button className="mt-6" onClick={submitPair} disabled={!connections.pixels || !connections.onehot || wrongChoices.length === 0 || !reason}><Link2 size={18} aria-hidden="true" />한 쌍 검증 제출</Button>{pairSubmitted && <Feedback result={correctConnection && wrongCorrect && normalizedReady ? 'correct' : 'incorrect'} incomplete="" incorrect="정규화 배열은 INPUT, 현재 sample의 실제 label 원-핫은 TARGET입니다. 정답이 다른 sample이거나, 값 범위·길이·원-핫 규칙이 틀린 쌍은 사용할 수 없습니다." correct="정확합니다. 실제 이미지에서 만든 INPUT과 같은 sample의 TARGET이 함께 있어야 신경망이 예측과 정답을 비교할 수 있습니다." />}</section>
+    <section className="mt-10 border-t border-slate-200 pt-8"><div className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-xl font-black text-slate-950">마지막 확인 문제</h3><p className="mt-2 leading-7 text-slate-600">각 문제는 오답 후 선택을 고쳐 다시 제출할 수 있습니다.</p></div><span className="rounded-full bg-indigo-100 px-3 py-1.5 text-sm font-black text-indigo-800">{lesson07FinalQuiz.filter((question) => quizSubmitted.includes(question.id) && question.options.find(([id]) => id === quizAnswers[question.id])?.[2]).length}/{lesson07FinalQuiz.length} 정답</span></div><div className="mt-5 space-y-5">{lesson07FinalQuiz.map((question,index) => { const submitted = quizSubmitted.includes(question.id); const selected = question.options.find(([id]) => id === quizAnswers[question.id]); return <fieldset key={question.id} className="rounded-2xl border border-slate-200 p-5"><legend className="px-1 font-black leading-7 text-slate-950">문제 {index + 1}. {question.question}</legend><div className="mt-4 grid gap-3">{question.options.map(([id,text]) => <Choice key={id} selected={quizAnswers[question.id] === id} onClick={() => chooseQuiz(question.id,id)}>{text}</Choice>)}</div><Button className="mt-4" disabled={!quizAnswers[question.id]} onClick={() => setQuizSubmitted((current) => current.includes(question.id) ? current : [...current, question.id])}>답안 확인</Button>{submitted && <div className={`mt-4 flex items-start gap-3 rounded-xl p-4 ${selected?.[2] ? 'bg-emerald-50 text-emerald-950' : 'bg-amber-50 text-amber-950'}`} role="status">{selected?.[2] ? <CheckCircle2 className="mt-0.5 shrink-0" size={20} aria-hidden="true" /> : <XCircle className="mt-0.5 shrink-0" size={20} aria-hidden="true" />}<p className="leading-7">{selected?.[2] ? `정답입니다. ${question.explanation}` : `다시 생각해 보세요. ${question.explanation}`}</p></div>}</fieldset> })}</div></section>
+    {completionReady && !props.isComplete && <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status"><CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" /><p className="leading-7">실제 INPUT·TARGET 한 쌍과 확인 문제를 모두 통과했습니다. 화면 아래의 완료 버튼으로 Lesson 07을 완료하세요.</p></div>}{props.isComplete && <div className="mt-8 border-t border-emerald-200 pt-7"><StepCompletionMessage>실제 MNIST INPUT과 TARGET을 준비했습니다.</StepCompletionMessage><div className="mt-6 rounded-2xl bg-indigo-50 p-5"><p className="font-black text-indigo-900">Lesson 08로 이어지는 질문</p><p className="mt-2 text-lg font-bold leading-7 text-slate-900">준비한 INPUT과 TARGET으로 신경망은 어떻게 학습할까요?</p><div className="mt-5 flex flex-col gap-3 sm:flex-row"><Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:border-indigo-300 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Home에서 진행도 보기</Link><Link to="/lesson/08" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Lesson 08 미리 보기 <ArrowRight size={18} aria-hidden="true" /></Link></div></div></div>}</StepFrame>
 }

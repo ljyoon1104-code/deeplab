@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from 'react'
 import { LoaderCircle } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
+import { centerByBrightness, MNIST_PIXEL_COUNT } from './drawingPreprocess'
 
 interface PreparedDrawing {
   normalized: number[]
@@ -76,13 +77,15 @@ function prepareDrawing(canvas: HTMLCanvasElement): PreparedDrawing | null {
   )
   const pixels = resultContext.getImageData(0, 0, 28, 28).data
   const normalized: number[] = []
-  const previewPixels: number[] = []
-  for (let index = 0; index < 784; index += 1) {
+  for (let index = 0; index < MNIST_PIXEL_COUNT; index += 1) {
     const value = pixels[index * 4] / 255
     normalized.push(value)
-    previewPixels.push(Math.round(value * 255))
   }
-  return { normalized, previewPixels }
+
+  // 기하학적 중앙 배치 뒤 밝은 획의 실제 중심을 28×28 중앙으로 옮긴다.
+  const centered = centerByBrightness(normalized)
+  const previewPixels = centered.pixels.map((value) => Math.round(value * 255))
+  return { normalized: centered.pixels, previewPixels }
 }
 
 export default function DrawingCanvas({

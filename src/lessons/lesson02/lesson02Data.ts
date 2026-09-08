@@ -1,11 +1,11 @@
 export const lesson02StepTitles = [
-  '인공 뉴런은 어떻게 판단할까',
-  '퍼셉트론을 이루는 값',
-  '가중치를 적용해 보자',
-  '편향까지 더하면',
-  '계산 결과를 최종 판단으로 바꾸기',
-  '가중치와 편향을 바꾸면 결과도 바뀔까',
-  '퍼셉트론 계산 완성하기',
+  '인공 뉴런의 판단 과정',
+  '안내된 2입력 퍼셉트론 계산',
+  '독립적인 3입력 계산',
+  '값이 바뀌면 출력은 어떻게 달라지는가',
+  '목표 출력에 맞는 값 설계',
+  '2차원 분류와 결정 경계',
+  'AND·OR·XOR 종합 활동',
 ] as const
 
 export const lesson02Objectives = [
@@ -95,7 +95,8 @@ export const formatNumber = (value: number) =>
   Number.isInteger(value) ? String(value) : String(Number(value.toFixed(2)))
 
 export const parseStudentNumber = (value: string) => {
-  if (value.trim() === '') return null
-  const parsed = Number(value)
+  const normalized = value.trim().replace(',', '.')
+  if (normalized === '') return null
+  const parsed = Number(normalized)
   return Number.isFinite(parsed) ? parsed : null
 }

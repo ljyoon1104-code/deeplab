@@ -11,12 +11,16 @@ interface Lesson11Activity {
   nlpAssignments: StringMap
   combinedUseConfirmed: boolean
   indexAssignments: StringMap
+  indexReverseCorrect: boolean
+  unregisteredWordCorrect: boolean
   indexImportanceConfirmed: boolean
   selectedOneHotWord: string
   oneHotWordsViewed: string[]
   oneHotLengthAnswer: string
   oneHotLengthSubmitted: boolean
   oneHotLengthCorrect: boolean
+  oneHotInvalidVectorCorrect: boolean
+  oneHotInvalidVectorAnswer: string
   oneHotLimitsConfirmed: boolean
   embeddingViewed: boolean
   embeddingPair: string
@@ -29,10 +33,17 @@ interface Lesson11Activity {
   frequencyMeaningAnswer: string
   frequencyMeaningSubmitted: boolean
   frequencyMeaningCorrect: boolean
+  frequencyCountAnswer: string
+  frequencyCountCorrect: boolean
+  frequencyRatioAnswer: string
+  frequencyRatioCorrect: boolean
   frequencyConfirmed: boolean
   contextAssignments: StringMap
+  contextOrderNegationCorrect: boolean
+  contextOrderNegationAnswer: string
   contextFlowConfirmed: boolean
   perspectivesConfirmed: boolean
+  representationAssignments: StringMap
   quizAnswers: StringMap
   quizSubmitted: number[]
   quizCorrect: number[]
@@ -48,11 +59,11 @@ const STORAGE_KEY = 'deep-learning-lab:lesson11:activity:v1'
 const initialActivity: Lesson11Activity = {
   step1Answer: '', step1Submitted: false, step1Correct: false, speechNlpConfirmed: false,
   nlpAssignments: {}, combinedUseConfirmed: false,
-  indexAssignments: {}, indexImportanceConfirmed: false,
-  selectedOneHotWord: '좋은', oneHotWordsViewed: [], oneHotLengthAnswer: '', oneHotLengthSubmitted: false, oneHotLengthCorrect: false, oneHotLimitsConfirmed: false,
+  indexAssignments: {}, indexReverseCorrect: false, unregisteredWordCorrect: false, indexImportanceConfirmed: false,
+  selectedOneHotWord: '좋은', oneHotWordsViewed: [], oneHotLengthAnswer: '', oneHotLengthSubmitted: false, oneHotLengthCorrect: false, oneHotInvalidVectorCorrect: false, oneHotInvalidVectorAnswer: '', oneHotLimitsConfirmed: false,
   embeddingViewed: false, embeddingPair: '', embeddingPairCorrect: false, embeddingAnswer: '', embeddingSubmitted: false, embeddingCorrect: false, embeddingComparisonConfirmed: false,
-  frequencyTopics: {}, frequencyMeaningAnswer: '', frequencyMeaningSubmitted: false, frequencyMeaningCorrect: false, frequencyConfirmed: false,
-  contextAssignments: {}, contextFlowConfirmed: false, perspectivesConfirmed: false,
+  frequencyTopics: {}, frequencyMeaningAnswer: '', frequencyMeaningSubmitted: false, frequencyMeaningCorrect: false, frequencyCountAnswer: '', frequencyCountCorrect: false, frequencyRatioAnswer: '', frequencyRatioCorrect: false, frequencyConfirmed: false,
+  contextAssignments: {}, contextOrderNegationCorrect: false, contextOrderNegationAnswer: '', contextFlowConfirmed: false, perspectivesConfirmed: false, representationAssignments: {},
   quizAnswers: {}, quizSubmitted: [], quizCorrect: [],
 }
 
@@ -71,11 +82,11 @@ function loadActivity(): Lesson11Activity {
       ...initialActivity,
       step1Answer: text(value.step1Answer), step1Submitted: bool(value.step1Submitted), step1Correct: bool(value.step1Correct), speechNlpConfirmed: bool(value.speechNlpConfirmed),
       nlpAssignments: stringMap(value.nlpAssignments), combinedUseConfirmed: bool(value.combinedUseConfirmed),
-      indexAssignments: stringMap(value.indexAssignments), indexImportanceConfirmed: bool(value.indexImportanceConfirmed),
-      selectedOneHotWord: text(value.selectedOneHotWord) || '좋은', oneHotWordsViewed: strings(value.oneHotWordsViewed), oneHotLengthAnswer: text(value.oneHotLengthAnswer), oneHotLengthSubmitted: bool(value.oneHotLengthSubmitted), oneHotLengthCorrect: bool(value.oneHotLengthCorrect), oneHotLimitsConfirmed: bool(value.oneHotLimitsConfirmed),
+      indexAssignments: stringMap(value.indexAssignments), indexReverseCorrect: bool(value.indexReverseCorrect), unregisteredWordCorrect: bool(value.unregisteredWordCorrect), indexImportanceConfirmed: bool(value.indexImportanceConfirmed),
+      selectedOneHotWord: text(value.selectedOneHotWord) || '좋은', oneHotWordsViewed: strings(value.oneHotWordsViewed), oneHotLengthAnswer: text(value.oneHotLengthAnswer), oneHotLengthSubmitted: bool(value.oneHotLengthSubmitted), oneHotLengthCorrect: bool(value.oneHotLengthCorrect), oneHotInvalidVectorCorrect: bool(value.oneHotInvalidVectorCorrect), oneHotInvalidVectorAnswer: text(value.oneHotInvalidVectorAnswer), oneHotLimitsConfirmed: bool(value.oneHotLimitsConfirmed),
       embeddingViewed: bool(value.embeddingViewed), embeddingPair: text(value.embeddingPair), embeddingPairCorrect: bool(value.embeddingPairCorrect), embeddingAnswer: text(value.embeddingAnswer), embeddingSubmitted: bool(value.embeddingSubmitted), embeddingCorrect: bool(value.embeddingCorrect), embeddingComparisonConfirmed: bool(value.embeddingComparisonConfirmed),
-      frequencyTopics: stringMap(value.frequencyTopics), frequencyMeaningAnswer: text(value.frequencyMeaningAnswer), frequencyMeaningSubmitted: bool(value.frequencyMeaningSubmitted), frequencyMeaningCorrect: bool(value.frequencyMeaningCorrect), frequencyConfirmed: bool(value.frequencyConfirmed),
-      contextAssignments: stringMap(value.contextAssignments), contextFlowConfirmed: bool(value.contextFlowConfirmed), perspectivesConfirmed: bool(value.perspectivesConfirmed),
+      frequencyTopics: stringMap(value.frequencyTopics), frequencyMeaningAnswer: text(value.frequencyMeaningAnswer), frequencyMeaningSubmitted: bool(value.frequencyMeaningSubmitted), frequencyMeaningCorrect: bool(value.frequencyMeaningCorrect), frequencyCountAnswer: text(value.frequencyCountAnswer), frequencyCountCorrect: bool(value.frequencyCountCorrect), frequencyRatioAnswer: text(value.frequencyRatioAnswer), frequencyRatioCorrect: bool(value.frequencyRatioCorrect), frequencyConfirmed: bool(value.frequencyConfirmed),
+      contextAssignments: stringMap(value.contextAssignments), contextOrderNegationCorrect: bool(value.contextOrderNegationCorrect), contextOrderNegationAnswer: text(value.contextOrderNegationAnswer), contextFlowConfirmed: bool(value.contextFlowConfirmed), perspectivesConfirmed: bool(value.perspectivesConfirmed), representationAssignments: stringMap(value.representationAssignments),
       quizAnswers: stringMap(value.quizAnswers), quizSubmitted: numbers(value.quizSubmitted), quizCorrect: numbers(value.quizCorrect),
     }
   } catch {

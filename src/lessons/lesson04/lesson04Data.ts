@@ -1,8 +1,8 @@
 export const lesson04StepTitles = [
   '퍼셉트론을 여러 개 연결하면',
   '인공신경망에는 어떤 층이 있을까',
-  '입력층은 무엇을 받을까',
-  '은닉층에서는 무엇이 일어날까',
+  '작은 신경망을 따라 계산해 보자',
+  '작은 신경망을 스스로 계산해 보자',
   '출력층은 어떤 결과를 만들까',
   '은닉층이 여러 개라면',
   '인공신경망을 완성해 보자',
@@ -67,6 +67,13 @@ export const hiddenProcessCards = [
 ] as const
 
 export const outputCases = [
+  {
+    id: 'temperature',
+    title: '내일 기온을 숫자로 예측',
+    type: '회귀',
+    output: '연속적인 수치 출력',
+    activation: '출력값을 그대로 사용',
+  },
   {
     id: 'spam',
     title: '스팸 메일인가 아닌가',

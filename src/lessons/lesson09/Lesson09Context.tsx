@@ -49,8 +49,8 @@ const initialActivity: Lesson09Activity = {
   poolSelections: {},
   poolingConfirmed: false,
   cnnFlow: [
-    '입력 이미지', '풀링 층', '합성곱 층', '특성 맵',
-    '완전연결 층', '크기가 줄어든 특성 맵', '분류 결과',
+    '입력 이미지', '풀링', '합성곱', 'ReLU',
+    '완전연결층', 'flatten', 'Softmax', '클래스 예측',
   ],
   flowCorrect: false,
   quizAnswers: {},

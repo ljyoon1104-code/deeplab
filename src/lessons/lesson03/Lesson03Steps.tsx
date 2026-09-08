@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
 import { ActivationGraph } from './ActivationGraph'
 import {
+  percentagesThatSumTo100,
   relu,
   sigmoid,
   softmax,
@@ -297,7 +298,7 @@ export function Lesson03Step1(props: CommonStepProps) {
   const submit = () => {
     if (!choice) return
     setSubmitted(true)
-    props.onComplete()
+    if (choice === 'A') props.onComplete()
   }
 
   return (
@@ -374,7 +375,7 @@ export function Lesson03Step1(props: CommonStepProps) {
           explanation={
             choice === 'A'
               ? '활성화 함수는 가중합을 받아 다음 출력값으로 변환하는 함수입니다.'
-              : '정답은 A입니다. 데이터 파일이나 학습 횟수가 아니라 활성화 함수가 가중합을 다음 출력값으로 변환합니다.'
+              : '가중합 z 바로 다음에 놓여 출력 형태를 바꾸는 요소를 Signal Flow에서 다시 확인하세요.'
           }
         />
       )}
@@ -388,11 +389,11 @@ export function Lesson03Step1(props: CommonStepProps) {
 
 export function Lesson03Step2(props: CommonStepProps) {
   const [answers, setAnswers] = useState<Array<0 | 1 | null>>([null, null, null, null])
-  const allJudged = answers.every((answer) => answer !== null)
+  const allCorrect = answers.every((answer, index) => answer === stepExamples[index].output)
 
   useEffect(() => {
-    if (!props.isComplete && allJudged) props.onComplete()
-  }, [allJudged, props])
+    if (!props.isComplete && allCorrect) props.onComplete()
+  }, [allCorrect, props])
 
   return (
     <StepFrame
@@ -442,11 +443,9 @@ export function Lesson03Step2(props: CommonStepProps) {
                 {answer !== null && (
                   <AnswerFeedback
                     correct={correct}
-                    explanation={
-                      example.z < 0
-                        ? `${example.z}은 0보다 작으므로 출력은 0입니다.`
-                        : `${example.z}은 0 이상이므로 출력은 1입니다.`
-                    }
+                    explanation={correct
+                      ? `${example.z < 0 ? 'z<0' : 'z≥0'} 조건을 정확히 적용했습니다.`
+                      : 'z가 0보다 작은지, 아니면 0을 포함한 이상인지 규칙에서 다시 확인하세요.'}
                   />
                 )}
               </fieldset>
@@ -463,24 +462,36 @@ export function Lesson03Step2(props: CommonStepProps) {
 }
 
 export function Lesson03Step3(props: CommonStepProps) {
-  const [z, setZ] = useState(0)
-  const [observedValues, setObservedValues] = useState<number[]>([])
+  const challenges = [-3, 0, 2] as const
+  const [challengeIndex, setChallengeIndex] = useState(0)
+  const [prediction, setPrediction] = useState<number | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [solved, setSolved] = useState<number[]>([])
+  const z = challenges[challengeIndex]
   const output = relu(z)
+  const correct = prediction === output
 
   useEffect(() => {
-    if (!props.isComplete && observedValues.length >= 3) props.onComplete()
-  }, [observedValues.length, props])
+    if (!props.isComplete && solved.length === challenges.length) props.onComplete()
+  }, [props, solved.length])
 
-  const observe = (value: number) => {
-    setZ(value)
-    setObservedValues((current) => (current.includes(value) ? current : [...current, value]))
+  const submit = () => {
+    if (prediction === null) return
+    setSubmitted(true)
+    if (correct) setSolved((current) => current.includes(z) ? current : [...current, z])
+  }
+
+  const chooseChallenge = (index: number) => {
+    setChallengeIndex(index)
+    setPrediction(null)
+    setSubmitted(false)
   }
 
   return (
     <StepFrame
       {...props}
       step={3}
-      intro="ReLU에 가중합을 넣어 음수와 0, 양수가 각각 어떤 출력으로 바뀌는지 직접 조작해 봅니다."
+      intro="그래프를 보기 전에 음수, 0, 양수의 ReLU 출력을 먼저 예측하고 변화 방향을 설명합니다."
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.75fr)_minmax(19rem,1.15fr)] lg:items-start">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="relu-control-title">
@@ -488,18 +499,21 @@ export function Lesson03Step3(props: CommonStepProps) {
             <h3 id="relu-control-title" className="text-xl font-black text-slate-950">ReLU 조작</h3>
             <SlidersHorizontal className="text-cyan-700" size={24} aria-hidden="true" />
           </div>
-          <div className="mt-5">
-            <RangeControl id="relu-z" label="가중합 z" value={z} onChange={observe} />
-          </div>
-          <div className="mt-5">
-            <PresetButtons values={[-3, -1, 0, 2, 5]} current={z} onSelect={observe} />
-          </div>
+          <div className="mt-5"><PresetButtons values={challenges} current={z} onSelect={(value) => chooseChallenge(challenges.indexOf(value as -3 | 0 | 2))} /></div>
+          <fieldset className="mt-6">
+            <legend className="font-black">ReLU({z})의 출력을 예측하세요.</legend>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {[0, 2, 3].map((value) => <Button key={value} variant={prediction === value ? 'primary' : 'secondary'} aria-pressed={prediction === value} onClick={() => { setPrediction(value); setSubmitted(false) }}>{value}</Button>)}
+            </div>
+            <Button className="mt-4 w-full" disabled={prediction === null} onClick={submit}>예측 제출</Button>
+          </fieldset>
+          {submitted && <AnswerFeedback correct={correct} explanation={correct ? `${z < 0 ? '음수는 0으로 바뀌고' : z === 0 ? '0에서는 출력도 0이며' : '양수는 그대로 전달되어'} ReLU(${z})=${output}입니다.` : '음수는 0, 0과 양수는 입력값 그대로라는 규칙을 다시 적용해 보세요.'} />}
           <div className="mt-6 rounded-2xl bg-cyan-50 p-5" aria-live="polite">
             <p className="text-sm font-black text-cyan-800">현재 ReLU 출력</p>
             <p className="mt-2 text-3xl font-black tabular-nums text-slate-950">ReLU({z}) = {output}</p>
             <p className="mt-2 leading-6 text-slate-700">{z < 0 ? '음수이므로 0으로 바뀝니다.' : '0 이상이므로 입력값을 그대로 보냅니다.'}</p>
           </div>
-          <p className="mt-4 text-sm font-bold text-indigo-700">서로 다른 값 {observedValues.length} / 3 관찰</p>
+          <p className="mt-4 text-sm font-bold text-indigo-700">맞게 예측한 영역 {solved.length} / 3</p>
         </section>
 
         <div>
@@ -512,42 +526,56 @@ export function Lesson03Step3(props: CommonStepProps) {
       </div>
 
       {props.isComplete && (
-        <StepCompletionMessage>ReLU에 서로 다른 가중합을 세 번 이상 넣어 출력 변화를 관찰했습니다.</StepCompletionMessage>
+        <StepCompletionMessage>음수, 0, 양수의 ReLU 출력을 모두 먼저 예측하고 그래프에서 확인했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
 }
 
 export function Lesson03Step4(props: CommonStepProps) {
-  const [z, setZ] = useState(0)
+  const challenges = [-2, 0, 2] as const
+  const [z, setZ] = useState<number>(-2)
+  const [prediction, setPrediction] = useState<'below' | 'equal' | 'above' | null>(null)
+  const [submitted, setSubmitted] = useState(false)
   const [zones, setZones] = useState<Zone[]>([])
+  const [direction, setDirection] = useState<'increase' | 'decrease' | null>(null)
+  const [directionSubmitted, setDirectionSubmitted] = useState(false)
   const output = sigmoid(z)
+  const expected = z < 0 ? 'below' : z > 0 ? 'above' : 'equal'
+  const correct = prediction === expected
+  const ready = zones.length === 3 && directionSubmitted && direction === 'increase'
 
   useEffect(() => {
-    if (!props.isComplete && zones.length === 3) props.onComplete()
-  }, [props, zones.length])
+    if (!props.isComplete && ready) props.onComplete()
+  }, [props, ready])
 
-  const observe = (value: number) => {
+  const chooseZ = (value: number) => {
     setZ(value)
-    const zone = getZone(value)
-    setZones((current) => (current.includes(zone) ? current : [...current, zone]))
+    setPrediction(null)
+    setSubmitted(false)
+  }
+
+  const submit = () => {
+    if (!prediction) return
+    setSubmitted(true)
+    if (correct) {
+      const zone = getZone(z)
+      setZones((current) => current.includes(zone) ? current : [...current, zone])
+    }
   }
 
   return (
     <StepFrame
       {...props}
       step={4}
-      intro="Sigmoid는 어떤 가중합을 넣어도 0과 1 사이로 바꿉니다. 슬라이더와 그래프의 점을 함께 움직여 봅니다."
+      intro="복잡한 지수 계산 대신 출력이 0.5보다 큰지 작은지 먼저 예측하고, 판단의 방향을 해석합니다."
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.75fr)_minmax(19rem,1.15fr)] lg:items-start">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="sigmoid-control-title">
           <h3 id="sigmoid-control-title" className="text-xl font-black text-slate-950">Sigmoid 조작</h3>
-          <div className="mt-5">
-            <RangeControl id="sigmoid-z" label="가중합 z" value={z} onChange={observe} />
-          </div>
-          <div className="mt-5">
-            <PresetButtons values={[-5, -2, 0, 2, 5]} current={z} onSelect={observe} />
-          </div>
+          <div className="mt-5"><PresetButtons values={challenges} current={z} onSelect={chooseZ} /></div>
+          <fieldset className="mt-6"><legend className="font-black">Sigmoid({z})는 0.5와 비교하면?</legend><div className="mt-3 grid gap-3 sm:grid-cols-3">{([{ value: 'below', label: '0.5보다 작다' }, { value: 'equal', label: '0.5이다' }, { value: 'above', label: '0.5보다 크다' }] as const).map((option) => <Button key={option.value} variant={prediction === option.value ? 'primary' : 'secondary'} aria-pressed={prediction === option.value} onClick={() => { setPrediction(option.value); setSubmitted(false) }}>{option.label}</Button>)}</div><Button className="mt-4 w-full" disabled={!prediction} onClick={submit}>예측 제출</Button></fieldset>
+          {submitted && <AnswerFeedback correct={correct} explanation={correct ? `z=${z}일 때 내부 계산값은 ${output.toPrecision(8)}이고, 화면 표시값은 ${output.toFixed(2)}입니다.` : 'z가 음수이면 0.5보다 작고, 0이면 0.5, 양수이면 0.5보다 큽니다.'} />}
           <div className="mt-6 rounded-2xl bg-emerald-50 p-5" aria-live="polite">
             <p className="text-sm font-black text-emerald-800">현재 Sigmoid 출력</p>
             <p className="mt-2 text-3xl font-black tabular-nums text-slate-950">{output.toFixed(2)}</p>
@@ -570,6 +598,8 @@ export function Lesson03Step4(props: CommonStepProps) {
         <div className="mt-4"><ZoneProgress zones={zones} /></div>
       </section>
 
+      <fieldset className="mt-7 rounded-2xl border border-slate-200 p-5"><legend className="font-black">z가 -2에서 2로 커지면 Sigmoid 출력은?</legend><div className="mt-4 grid grid-cols-2 gap-3"><Button variant={direction === 'increase' ? 'primary' : 'secondary'} aria-pressed={direction === 'increase'} onClick={() => { setDirection('increase'); setDirectionSubmitted(false) }}>커진다</Button><Button variant={direction === 'decrease' ? 'primary' : 'secondary'} aria-pressed={direction === 'decrease'} onClick={() => { setDirection('decrease'); setDirectionSubmitted(false) }}>작아진다</Button></div><Button className="mt-4" disabled={!direction} onClick={() => setDirectionSubmitted(true)}>변화 방향 제출</Button>{directionSubmitted && <AnswerFeedback correct={direction === 'increase'} explanation={direction === 'increase' ? 'z가 커질수록 출력은 1에 가까워져 정답 1 쪽 판단이 강해집니다.' : 'S자 그래프가 왼쪽에서 오른쪽으로 올라가는 방향인지 확인하세요.'} />}</fieldset>
+
       <div className="mt-7 grid gap-3 sm:grid-cols-5">
         {[-5, -2, 0, 2, 5].map((value) => (
           <div key={value} className="rounded-xl border border-slate-200 bg-white p-4 text-center">
@@ -585,7 +615,7 @@ export function Lesson03Step4(props: CommonStepProps) {
       </p>
 
       {props.isComplete && (
-        <StepCompletionMessage>Sigmoid 슬라이더로 음수, 0, 양수 가중합을 모두 확인했습니다.</StepCompletionMessage>
+        <StepCompletionMessage>Sigmoid의 세 영역과 출력 변화 방향을 예측하고 판단의 의미를 해석했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
@@ -594,10 +624,17 @@ export function Lesson03Step4(props: CommonStepProps) {
 export function Lesson03Step5(props: CommonStepProps) {
   const [z, setZ] = useState(0)
   const [zones, setZones] = useState<Zone[]>([])
+  const comparisonTargets = ['계단 함수', 'ReLU', 'Sigmoid', 'Sigmoid', 'ReLU']
+  const [comparisonAnswers, setComparisonAnswers] = useState<string[]>(Array(5).fill(''))
+  const [comparisonSubmitted, setComparisonSubmitted] = useState(false)
+  const [interpretation, setInterpretation] = useState<'same' | 'different' | null>(null)
+  const [interpretationSubmitted, setInterpretationSubmitted] = useState(false)
+  const comparisonCorrect = comparisonAnswers.every((answer, index) => answer === comparisonTargets[index])
+  const ready = zones.length === 3 && comparisonSubmitted && comparisonCorrect && interpretationSubmitted && interpretation === 'different'
 
   useEffect(() => {
-    if (!props.isComplete && zones.length === 3) props.onComplete()
-  }, [props, zones.length])
+    if (!props.isComplete && ready) props.onComplete()
+  }, [props, ready])
 
   const observe = (value: number) => {
     setZ(value)
@@ -664,6 +701,10 @@ export function Lesson03Step5(props: CommonStepProps) {
         <div className="mt-4"><ZoneProgress zones={zones} /></div>
       </section>
 
+      <section className="mt-8" aria-labelledby="activation-table-title"><h3 id="activation-table-title" className="text-xl font-black">함수 비교표</h3><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[42rem] border-collapse text-left text-sm"><thead><tr className="bg-slate-100"><th className="p-3">함수</th><th className="p-3">출력 범위</th><th className="p-3">음수 입력</th><th className="p-3">z=0</th><th className="p-3">변화</th><th className="p-3">주요 쓰임</th></tr></thead><tbody>{[['계단 함수','0 또는 1','0','1','경계에서 불연속','즉시 0/1 판단'],['ReLU','0 이상','0','0','연속','은닉층 특징'],['Sigmoid','0~1','0과 0.5 사이','0.5','연속','이진 분류 확률']].map((row) => <tr key={row[0]} className="border-t border-slate-200">{row.map((cell) => <td key={cell} className="p-3 font-semibold">{cell}</td>)}</tr>)}</tbody></table></div><div className="mt-5 grid gap-4 md:grid-cols-2">{['출력이 0 또는 1뿐인 함수','음수는 0, 양수는 그대로인 함수','z=0에서 0.5인 함수','이진 분류 확률에 알맞은 함수','은닉층 특징 표현에 알맞은 함수'].map((label,index) => <label key={label} className="rounded-xl border border-slate-200 p-4"><span className="block font-bold leading-6">{label}</span><select value={comparisonAnswers[index]} onChange={(event) => { setComparisonAnswers((items) => items.map((answer,item) => item===index ? event.target.value : answer)); setComparisonSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">함수 선택</option><option>계단 함수</option><option>ReLU</option><option>Sigmoid</option></select></label>)}</div><Button className="mt-5" disabled={comparisonAnswers.some((answer) => !answer)} onClick={() => setComparisonSubmitted(true)}>비교표 연결 제출</Button>{comparisonSubmitted && <AnswerFeedback correct={comparisonCorrect} explanation={comparisonCorrect ? '출력 범위, 경계값, 연속성, 사용 위치를 모두 구분했습니다.' : '틀린 연결이 있습니다. 표에서 출력 범위와 주요 쓰임 열을 다시 비교하세요.'} />}</section>
+
+      <fieldset className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">같은 z라도 함수에 따라 출력이 달라지는 까닭은?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={interpretation === 'different' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'different'} onClick={() => { setInterpretation('different'); setInterpretationSubmitted(false) }}>각 함수의 변환 규칙과 출력 범위가 다르다</Button><Button variant={interpretation === 'same' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'same'} onClick={() => { setInterpretation('same'); setInterpretationSubmitted(false) }}>함수 이름만 다르고 규칙은 같다</Button></div><Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>차이 해석 제출</Button>{interpretationSubmitted && <AnswerFeedback correct={interpretation === 'different'} explanation={interpretation === 'different' ? '계단 함수는 판단, ReLU는 특징 전달, Sigmoid는 0~1 정도 표현에 맞는 서로 다른 규칙을 가집니다.' : '같은 z=0에서도 출력이 1, 0, 0.5로 다른 점을 다시 확인하세요.'} />}</fieldset>
+
       {z === 0 && (
         <div className="mt-5 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status">
           <Eye className="mt-0.5 shrink-0" size={22} aria-hidden="true" />
@@ -672,7 +713,7 @@ export function Lesson03Step5(props: CommonStepProps) {
       )}
 
       {props.isComplete && (
-        <StepCompletionMessage>같은 가중합의 음수, 0, 양수 영역을 비교했습니다. 같은 z라도 활성화 함수에 따라 출력값이 달라집니다.</StepCompletionMessage>
+        <StepCompletionMessage>세 영역을 관찰하고 비교표와 해석 문제로 함수의 출력 범위와 사용 위치를 구분했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
@@ -687,18 +728,23 @@ const softmaxClasses = [
 export function Lesson03Step6(props: CommonStepProps) {
   const [scores, setScores] = useState([1, 2, 4])
   const [observations, setObservations] = useState<string[]>([])
+  const [phenomena, setPhenomena] = useState<string[]>([])
+  const [reason, setReason] = useState<'relative' | 'independent' | null>(null)
+  const [reasonSubmitted, setReasonSubmitted] = useState(false)
   const [notice, setNotice] = useState('세 점수는 한 묶음으로 Softmax에 들어갑니다.')
   const probabilities = useMemo(() => softmax(scores), [scores])
+  const displayPercentages = useMemo(() => percentagesThatSumTo100(probabilities), [probabilities])
   const probabilitySum = probabilities.reduce((total, value) => total + value, 0)
   const maxScore = Math.max(...scores)
   const predicted = softmaxClasses
     .filter((_, index) => scores[index] === maxScore)
     .map((item) => item.label)
   const configurationKey = scores.join('|')
+  const ready = phenomena.length === 5 && reasonSubmitted && reason === 'relative'
 
   useEffect(() => {
-    if (!props.isComplete && observations.length >= 2) props.onComplete()
-  }, [observations.length, props])
+    if (!props.isComplete && ready) props.onComplete()
+  }, [props, ready])
 
   const changeScore = (index: number, value: number) => {
     setScores((current) => current.map((score, itemIndex) => (itemIndex === index ? value : score)))
@@ -717,7 +763,16 @@ export function Lesson03Step6(props: CommonStepProps) {
   const reset = () => {
     setScores([1, 2, 4])
     setObservations([])
+    setPhenomena([])
+    setReason(null)
+    setReasonSubmitted(false)
     setNotice('관찰 기록을 초기화했습니다. 기본 점수부터 다시 확인하세요.')
+  }
+
+  const observePhenomenon = (id: string, nextScores: number[], message: string) => {
+    setScores(nextScores)
+    setPhenomena((current) => current.includes(id) ? current : [...current, id])
+    setNotice(message)
   }
 
   return (
@@ -742,7 +797,7 @@ export function Lesson03Step6(props: CommonStepProps) {
                 value={scores[index]}
                 min={0}
                 max={5}
-                step={1}
+                step={0.5}
                 onChange={(value) => changeScore(index, value)}
               />
             ))}
@@ -765,7 +820,7 @@ export function Lesson03Step6(props: CommonStepProps) {
               <div key={item.id}>
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-bold text-slate-800">{item.label}</span>
-                  <span className="font-black tabular-nums text-indigo-800">{(probabilities[index] * 100).toFixed(1)}%</span>
+                  <span className="font-black tabular-nums text-indigo-800">{displayPercentages[index].toFixed(1)}%</span>
                 </div>
                 <div className="mt-2 h-5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
                   <div
@@ -807,6 +862,16 @@ export function Lesson03Step6(props: CommonStepProps) {
         <p className="mt-4 font-black tabular-nums text-indigo-900">서로 다른 설정 {observations.length} / 2</p>
       </section>
 
+      <section className="mt-7" aria-labelledby="softmax-challenges"><h3 id="softmax-challenges" className="text-xl font-black">다섯 비교 실험</h3><p className="mt-2 leading-7 text-slate-600">버튼을 눌러 점수 묶음을 바꾼 뒤 막대 전체가 어떻게 달라지는지 비교하세요.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[
+        { id: 'wide', label: '점수 차이가 큰 경우', scores: [0,0,5], message: '가장 큰 점수의 확률이 뚜렷하게 높아졌습니다.' },
+        { id: 'close', label: '점수 차이가 작은 경우', scores: [2,2.5,3], message: '점수가 비슷하면 확률도 비교적 고르게 나뉩니다.' },
+        { id: 'tie', label: '두 최고 점수가 같은 경우', scores: [3,3,1], message: '같은 최고 점수 두 클래스의 확률도 같습니다.' },
+        { id: 'shift', label: '모든 점수에 +1', scores: [2,3,5], message: '[1,2,4]와 [2,3,5]는 차이가 같아 확률 분포도 같습니다.' },
+        { id: 'one', label: '한 클래스만 높이기', scores: [1,2,5], message: '한 점수만 높여도 전체 합이 1이어야 하므로 다른 클래스 확률도 함께 변합니다.' },
+      ].map((item) => <Button key={item.id} variant={phenomena.includes(item.id) ? 'primary' : 'secondary'} onClick={() => observePhenomenon(item.id, item.scores, item.message)}>{phenomena.includes(item.id) ? <Check size={18} aria-hidden="true" /> : null}{item.label}</Button>)}</div><p className="mt-4 rounded-xl bg-slate-100 p-4 font-bold">비교 완료 {phenomena.length} / 5</p></section>
+
+      <fieldset className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">한 클래스 점수만 바꿔도 다른 확률이 함께 변하는 이유는?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={reason === 'relative' ? 'primary' : 'secondary'} aria-pressed={reason === 'relative'} onClick={() => { setReason('relative'); setReasonSubmitted(false) }}>여러 점수를 한 묶음으로 비교하고 합을 1로 만들기 때문</Button><Button variant={reason === 'independent' ? 'primary' : 'secondary'} aria-pressed={reason === 'independent'} onClick={() => { setReason('independent'); setReasonSubmitted(false) }}>각 점수를 서로 무관하게 따로 계산하기 때문</Button></div><Button className="mt-4" disabled={!reason} onClick={() => setReasonSubmitted(true)}>이유 제출</Button>{reasonSubmitted && <AnswerFeedback correct={reason === 'relative'} explanation={reason === 'relative' ? 'Softmax는 전체 점수의 상대적 크기를 한 번에 비교합니다.' : '세 확률의 합이 늘 1인 점과, 한 막대가 커질 때 다른 막대가 작아지는 점을 다시 보세요.'} />}</fieldset>
+
       <ul className="mt-7 grid gap-3 md:grid-cols-2">
         {[
           '점수가 커지면 해당 클래스의 확률이 높아지는 경향이 있습니다.',
@@ -827,7 +892,7 @@ export function Lesson03Step6(props: CommonStepProps) {
       </div>
 
       {props.isComplete && (
-        <StepCompletionMessage>서로 다른 Softmax 점수 설정을 두 번 이상 실험했습니다.</StepCompletionMessage>
+        <StepCompletionMessage>점수 차이, 동점, 공통 이동, 한 점수 변화와 확률 합을 실제 Softmax로 비교했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
@@ -838,6 +903,13 @@ interface Step7Props extends CommonStepProps {
   onCompletionReadyChange: (ready: boolean) => void
 }
 
+const applicationCases = [
+  { id: 'step', name: '계단 함수', location: '교육용 퍼셉트론 판단', output: '0 또는 1', reason: '기준을 넘었는지 즉시 구분' },
+  { id: 'relu', name: 'ReLU', location: '은닉층', output: '0 이상의 특징값', reason: '양수 특징을 그대로 전달' },
+  { id: 'sigmoid', name: 'Sigmoid', location: '이진 분류 출력층', output: '0~1 사이 한 확률', reason: '두 상태 중 한쪽의 정도 표현' },
+  { id: 'softmax', name: 'Softmax', location: '다중 분류 출력층', output: '합이 1인 클래스별 확률', reason: '여러 클래스를 한 묶음으로 비교' },
+] as const
+
 export function Lesson03Step7({
   priorStepsComplete,
   onCompletionReadyChange,
@@ -845,13 +917,21 @@ export function Lesson03Step7({
 }: Step7Props) {
   const [mappings, setMappings] = useState<Record<string, UsageTarget | undefined>>({})
   const [mappingSubmitted, setMappingSubmitted] = useState(false)
+  const [locations, setLocations] = useState<Record<string, string>>({})
+  const [outputs, setOutputs] = useState<Record<string, string>>({})
+  const [reasons, setReasons] = useState<Record<string, string>>({})
+  const [applicationSubmitted, setApplicationSubmitted] = useState(false)
   const [quizAnswers, setQuizAnswers] = useState<Array<string | null>>([null, null, null, null])
   const [quizSubmitted, setQuizSubmitted] = useState([false, false, false, false])
 
   const allMapped = usageFunctions.every((item) => mappings[item.id])
   const mappingCorrect = usageFunctions.every((item) => mappings[item.id] === item.target)
   const allQuizSubmitted = quizSubmitted.every(Boolean)
+  const allQuizCorrect = lesson03Quiz.every((quiz, index) => quizAnswers[index] === quiz.answer)
+  const allApplicationsAnswered = applicationCases.every((item) => locations[item.id] && outputs[item.id] && reasons[item.id])
+  const applicationsCorrect = applicationCases.every((item) => locations[item.id] === item.location && outputs[item.id] === item.output && reasons[item.id] === item.reason)
   const completionReady = mappingSubmitted && mappingCorrect && allQuizSubmitted
+    && allQuizCorrect && applicationSubmitted && applicationsCorrect
 
   useEffect(() => {
     onCompletionReadyChange(completionReady)
@@ -932,6 +1012,12 @@ export function Lesson03Step7({
         </div>
       </section>
 
+      <section className="mt-10" aria-labelledby="application-design-title"><h3 id="application-design-title" className="text-xl font-black">출력 형태와 선택 이유까지 설계</h3><p className="mt-2 leading-7 text-slate-600">함수 이름만 연결하지 말고 새 상황의 사용 위치, 출력 형태, 선택 이유를 모두 고르세요.</p><div className="mt-5 grid gap-5 xl:grid-cols-2">{applicationCases.map((item) => <article key={item.id} className="rounded-2xl border border-slate-200 p-5"><h4 className="text-lg font-black text-indigo-800">{item.name}</h4>{[
+        { label: '사용 위치', value: locations[item.id] ?? '', set: setLocations, options: applicationCases.map((candidate) => candidate.location) },
+        { label: '출력 형태', value: outputs[item.id] ?? '', set: setOutputs, options: applicationCases.map((candidate) => candidate.output) },
+        { label: '선택 이유', value: reasons[item.id] ?? '', set: setReasons, options: applicationCases.map((candidate) => candidate.reason) },
+      ].map((field) => <label key={field.label} className="mt-4 block"><span className="text-sm font-bold text-slate-700">{field.label}</span><select value={field.value} onChange={(event) => { field.set((current) => ({ ...current, [item.id]: event.target.value })); setApplicationSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{[...new Set(field.options)].map((option) => <option key={option} value={option}>{option}</option>)}</select></label>)}</article>)}</div><Button className="mt-5" disabled={!allApplicationsAnswered} onClick={() => setApplicationSubmitted(true)}>네 함수 설계 제출</Button>{applicationSubmitted && <AnswerFeedback correct={applicationsCorrect} explanation={applicationsCorrect ? '네 함수의 출력 형태와 선택 이유를 새로운 상황에 맞게 연결했습니다.' : '틀린 항목이 있습니다. 계단=즉시 0/1, ReLU=은닉 특징, Sigmoid=이진 확률, Softmax=클래스별 확률의 차이를 다시 보세요.'} />}</section>
+
       <section className="mt-10" aria-labelledby="lesson03-quiz-title">
         <h3 id="lesson03-quiz-title" className="text-xl font-black text-slate-950">확인 문제 4개</h3>
         <p className="mt-2 leading-7 text-slate-600">오답이어도 이유를 확인한 뒤 답을 바꾸어 다시 제출할 수 있습니다.</p>
@@ -962,7 +1048,7 @@ export function Lesson03Step7({
               {quizSubmitted[index] && (
                 <AnswerFeedback
                   correct={quizAnswers[index] === quiz.answer}
-                  explanation={quiz.explanation}
+                  explanation={quizAnswers[index] === quiz.answer ? quiz.explanation : '선택한 함수의 출력 범위와 사용 위치를 표에서 다시 확인하세요.'}
                 />
               )}
             </fieldset>
