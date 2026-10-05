@@ -4,7 +4,6 @@ import {
   ArrowUp,
   CheckCircle2,
   Circle,
-  Eye,
   Info,
   Move,
   RotateCcw,
@@ -14,17 +13,20 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
-import CnnFlowDiagram from './CnnFlowDiagram'
+import CnnFlowDiagram, { CnnOverview } from './CnnFlowDiagram'
 import { convolve2D, convolveAt, maxPool2D, type Matrix } from './cnnMath'
 import KernelVisualizer from './KernelVisualizer'
 import {
   CNN_FLOW,
   CNN_FLOW_ROLES,
+  cnnFlowLabel,
+  TEXTBOOK_INPUT,
+  TEXTBOOK_KERNEL,
+  TEXTBOOK_COMPARISON_KERNEL,
   CONVOLUTION_INPUT,
   CONVOLUTION_KERNEL,
   NETWORK_STATEMENTS,
   POOLING_INPUT,
-  SECOND_CONVOLUTION_KERNEL,
   VISION_SCENARIOS,
   VISION_TASKS,
   lesson09StepTitles,
@@ -119,7 +121,7 @@ export function Lesson09Step1(props: CommonStepProps) {
     <StepFrame {...props} step={1} intro="컴퓨터가 직접 받는 픽셀값, 픽셀 관계에서 찾는 패턴, 사람이 준 정답과 모델의 예측을 구분합니다.">
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5"><h3 className="font-black text-cyan-950">사람의 관점</h3><ul className="mt-3 grid gap-2 text-sm leading-6 text-cyan-900"><li>• 선의 모양과 곡선</li><li>• 선의 방향</li><li>• 숫자 전체 형태</li><li>• 다른 숫자와의 차이</li></ul></div>
-        <div className="rounded-2xl border border-violet-200 bg-violet-50 p-5"><h3 className="font-black text-violet-950">컴퓨터의 초기 입력</h3><ul className="mt-3 grid gap-2 text-sm leading-6 text-violet-900"><li>• 각 픽셀의 밝기값</li><li>• 픽셀의 위치</li><li>• 주변 픽셀과의 관계</li><li>• 반복되는 선과 모양</li></ul></div>
+        <div className="rounded-2xl border border-violet-200 bg-violet-50 p-5"><h3 className="font-black text-violet-950">컴퓨터의 입력과 이후 처리</h3><ul className="mt-3 grid gap-2 text-sm leading-6 text-violet-900"><li>• 각 픽셀의 밝기값</li><li>• 픽셀의 위치</li><li>• 입력 뒤 찾을 정보: 주변 픽셀의 관계</li><li>• 입력 뒤 찾을 정보: 반복되는 선과 모양</li></ul></div>
       </div>
       <Notice><p><strong>컴퓨터 비전</strong>은 컴퓨터가 이미지나 영상에서 의미 있는 정보를 찾도록 하는 인공지능 분야입니다. <strong>CNN</strong>은 이미지의 공간적 특징을 찾는 데 많이 사용하는 신경망 모델이며, 두 말은 같은 뜻이 아닙니다.</p><p className="mt-1">Lesson 07의 MNIST도 컴퓨터가 처음 받는 값은 28×28 픽셀의 밝기 숫자였습니다.</p></Notice>
 
@@ -142,14 +144,14 @@ export function Lesson09Step2(props: CommonStepProps) {
   const [submitted, setSubmitted] = useState(false)
   const allAssigned = VISION_SCENARIOS.every((item) => activity.visionAssignments[item.id])
   const allCorrect = VISION_SCENARIOS.every((item) => activity.visionAssignments[item.id] === item.answer)
-  const allViewed = visionTaskKeys.every((task) => activity.visionViewed.includes(task))
 
   const finish = () => {
-    if (submitted && allCorrect && allViewed) props.onComplete()
+    if (submitted && allCorrect) props.onComplete()
   }
 
   return (
     <StepFrame {...props} step={2} intro="이미지 전체, 한 객체의 위치, 여러 객체의 위치와 픽셀 영역은 서로 다른 결과입니다.">
+      <Notice><strong>안내 예</strong>: 도로 사진의 사람과 자동차를 각각 상자로 찾는 일은 객체 탐지입니다. 질문은 ‘어떤 객체가 각각 어디에 있는가?’, 출력은 여러 종류와 위치입니다. 아래에서는 얼굴·문서 등 다른 활용 상황에도 적용해 보세요.</Notice>
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
           <h3 className="font-black">① 상황 카드 선택</h3>
@@ -171,7 +173,7 @@ export function Lesson09Step2(props: CommonStepProps) {
       <Notice>객체 위치 식별은 주된 객체 하나를 가정해 하나의 상자를 찾습니다. 객체 탐지는 여러 객체와 각각의 상자를 찾고, 이미지 분할은 각 픽셀이 속한 영역을 표시합니다.</Notice>
       <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={!allAssigned}>여섯 상황 분류 확인</Button>
       {submitted ? allCorrect ? <Feedback correct>여섯 상황을 올바르게 연결했습니다. 네 작업은 질문뿐 아니라 출력 형태도 다릅니다.</Feedback> : <Feedback correct={false}><strong>다시 연결해 보세요.</strong><ul className="mt-1">{VISION_SCENARIOS.filter((item) => activity.visionAssignments[item.id] !== item.answer).map((item) => <li key={item.id}>• “{item.text}”는 {VISION_TASKS[item.answer].name} 결과가 필요합니다.</li>)}</ul></Feedback> : null}
-      <Button className="mt-5" onClick={finish} disabled={!submitted || !allCorrect || !allViewed}>STEP 2 활동 완료</Button>
+      <Button className="mt-5" onClick={finish} disabled={!submitted || !allCorrect}>STEP 2 활동 완료</Button>
       {props.isComplete ? <Completion>여섯 상황을 이미지 분류·객체 위치 식별·객체 탐지·이미지 분할로 구분하고 결과 형태를 확인했습니다.</Completion> : null}
     </StepFrame>
   )
@@ -185,7 +187,7 @@ const exampleImage = [
 ] as const
 
 const networkModeLabels: Record<NetworkMode, string> = {
-  'fully-connected': '완전연결 신경망 방식',
+  'fully-connected': '완전 연결 신경망 방식',
   cnn: 'CNN 방식',
   both: '둘 다 가능',
 }
@@ -200,8 +202,9 @@ export function Lesson09Step3(props: CommonStepProps) {
 
   return (
     <StepFrame {...props} step={3} intro="같은 이미지를 한 줄로 펼치는 방식과 가로·세로 구조를 유지하는 방식을 비교합니다.">
+      <CnnOverview />
       <div className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-2xl border border-violet-200 bg-violet-50 p-5"><h3 className="font-black text-violet-950">기존 완전연결 신경망 입력</h3><div className="mt-4 grid gap-4 sm:grid-cols-[10rem_1fr]"><PixelGrid values={exampleImage} label="4×4 예시 이미지" compact /><div><p className="text-sm font-bold">행 우선으로 펼치기 → 16개 입력값</p><div className="mt-3 flex flex-wrap gap-1" aria-label={`펼친 배열 ${exampleImage.flat().join(', ')}`}>{exampleImage.flat().map((value, index) => <span key={index} className="flex size-8 items-center justify-center rounded bg-white font-mono text-xs font-black">{value}</span>)}</div></div></div><p className="mt-4 text-sm leading-6">28×28 MNIST에서는 같은 방법으로 784개 입력값을 만들었습니다.</p></div>
+        <div className="rounded-2xl border border-violet-200 bg-violet-50 p-5"><h3 className="font-black text-violet-950">기존 완전 연결 신경망 입력</h3><div className="mt-4 grid gap-4 sm:grid-cols-[10rem_1fr]"><PixelGrid values={exampleImage} label="4×4 예시 이미지" compact /><div><p className="text-sm font-bold">행 우선으로 펼치기 → 16개 입력값</p><div className="mt-3 flex flex-wrap gap-1" aria-label={`펼친 배열 ${exampleImage.flat().join(', ')}`}>{exampleImage.flat().map((value, index) => <span key={index} className="flex size-8 items-center justify-center rounded bg-white font-mono text-xs font-black">{value}</span>)}</div></div></div><p className="mt-4 text-sm leading-6">28×28 MNIST에서는 같은 방법으로 784개 입력값을 만들었습니다.</p></div>
         <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5"><h3 className="font-black text-cyan-950">CNN 입력 표현</h3><div className="mt-4"><PixelGrid values={exampleImage} label="4×4 구조 유지 · 2×2 영역 선택" region={{ startRow: 1, startColumn: 1, height: 2, width: 2 }} compact /></div><p className="mt-4 text-sm leading-6">가로·세로 배치를 유지하고 가까운 픽셀의 작은 영역에서 특징을 찾습니다.</p></div>
       </div>
 
@@ -211,10 +214,10 @@ export function Lesson09Step3(props: CommonStepProps) {
       </div>
       <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={!allAssigned}>다섯 문장 분류 확인</Button>
       {submitted ? allCorrect ? <Feedback correct>올바르게 분류했습니다. 두 방식 모두 이미지를 분류하고 학습으로 예측할 수 있지만, 입력 구조와 특징을 살피는 방식이 다릅니다.</Feedback> : <Feedback correct={false}><strong>분류를 다시 확인하세요.</strong><ul>{NETWORK_STATEMENTS.filter((item) => activity.networkAssignments[item.id] !== item.answer).map((item) => <li key={item.id}>• “{item.text}” → {networkModeLabels[item.answer]}</li>)}</ul></Feedback> : null}
-      {submitted && allCorrect ? <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.fullyConnectedConfirmed} onChange={(event) => update((current) => ({ ...current, fullyConnectedConfirmed: event.target.checked }))} /><span>완전연결 신경망도 펼친 이미지를 입력받아 분류할 수 있습니다.</span></label><label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.cnnConfirmed} onChange={(event) => update((current) => ({ ...current, cnnConfirmed: event.target.checked }))} /><span>CNN은 가로·세로 공간 구조를 유지하며 가까운 영역의 특징을 찾는 데 적합합니다.</span></label></div> : null}
+      {submitted && allCorrect ? <div className="mt-4 grid gap-3 sm:grid-cols-2"><label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.fullyConnectedConfirmed} onChange={(event) => update((current) => ({ ...current, fullyConnectedConfirmed: event.target.checked }))} /><span>완전 연결 신경망도 펼친 이미지를 입력받아 분류할 수 있습니다.</span></label><label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.cnnConfirmed} onChange={(event) => update((current) => ({ ...current, cnnConfirmed: event.target.checked }))} /><span>CNN은 가로·세로 공간 구조를 유지하며 가까운 영역의 특징을 찾는 데 적합합니다.</span></label></div> : null}
       <Notice>어느 모델이 더 좋은지는 데이터, 구조와 학습 조건에 따라 달라집니다. 이미지는 반드시 CNN으로만 처리해야 하는 것이 아닙니다.</Notice>
       <Button className="mt-5" disabled={!complete} onClick={props.onComplete}>STEP 3 활동 완료</Button>
-      {props.isComplete ? <Completion>완전연결 신경망과 CNN의 이미지 입력 방식 및 공통점을 구분했습니다.</Completion> : null}
+      {props.isComplete ? <Completion>완전 연결 신경망과 CNN의 이미지 입력 방식 및 공통점을 구분했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -241,14 +244,14 @@ export function Lesson09Step4(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={4} intro="첫 칸은 안내를 따라 계산하고, 두 번째 칸은 같은 위치끼리 곱해 직접 완성합니다.">
+    <StepFrame {...props} step={4} intro="교과서 원리를 연습하는 축소 예제(3×3 입력·2×2 필터)입니다. 첫 칸은 안내를 보고, 두 번째 칸은 직접 완성합니다.">
       <Notice><strong>필터(커널)</strong>: 이미지의 작은 영역을 살펴보며 특정한 모양이나 밝기 변화를 찾는 작은 숫자 격자</Notice>
       <div className="mt-6"><KernelVisualizer input={input} kernel={kernel} startRow={0} startColumn={0} /></div>
-      <Feedback correct>안내형 첫 위치: {guidedTerms.join(' + ')} = <strong>{guidedSum}</strong>. 따라서 특성 맵 1행 1열은 6입니다.</Feedback>
+      <Feedback correct>안내형 첫 위치: {guidedTerms.join(' + ')} = <strong>{guidedSum}</strong>. 따라서 특징 맵 1행 1열은 {guidedSum}입니다.</Feedback>
       <div className="mt-7 rounded-2xl border border-orange-200 bg-orange-50 p-5">
         <h3 className="font-black text-orange-950">직접 계산하기</h3>
-        <p className="mt-2 text-sm leading-6">이번에는 필터를 오른쪽으로 한 칸 옮겼습니다. 대응하는 네 곱셈 결과와 합을 입력해 특성 맵 1행 2열을 만드세요.</p>
-        <div className="mt-4"><KernelVisualizer input={input} kernel={kernel} startRow={0} startColumn={1} outputRow={0} outputColumn={1} /></div>
+        <p className="mt-2 text-sm leading-6">이번에는 필터를 오른쪽으로 한 칸 옮겼습니다. 대응하는 네 곱셈 결과와 합을 입력해 특징 맵 1행 2열을 만드세요.</p>
+        <div className="mt-4"><KernelVisualizer input={input} kernel={kernel} startRow={0} startColumn={1} outputRow={0} outputColumn={1} showCalculation={false} /></div>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {kernel.flatMap((row, rowIndex) => row.map((kernelValue, columnIndex) => {
             const inputValue = input[rowIndex][columnIndex + 1]
@@ -259,69 +262,48 @@ export function Lesson09Step4(props: CommonStepProps) {
         <label className="mt-4 block max-w-sm font-bold">네 결과의 합<input type="number" inputMode="numeric" value={sumAnswer} onChange={(event) => { setSumAnswer(event.target.value); setSubmitted(false) }} className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-mono" /></label>
         <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={answers.some((item) => item === '') || sumAnswer === ''}>계산 제출</Button>
       </div>
-      {submitted ? correct ? <Feedback correct>계산 결과는 {terms.join(' + ')} = <strong>{expectedSum}</strong>입니다. 특성 맵 1행 2열에 들어갑니다.</Feedback> : <Feedback correct={false}><strong>다시 계산하세요.</strong> 같은 위치끼리 곱한 네 결과를 먼저 확인한 뒤 그 값을 모두 더합니다.{answers.map(Number).map((value, index) => answers[index] && value !== terms[index] ? <span key={index} className="block">• {Math.floor(index / 2) + 1}행 {index % 2 + 1}열 곱셈을 다시 확인하세요.</span> : null)}{!correctSum ? <span className="block">• 네 곱셈 결과의 최종 합을 다시 확인하세요.</span> : null}</Feedback> : null}
-      {submitted && correct ? <label className="mt-4 flex items-start gap-3 rounded-xl bg-emerald-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={mapConfirmed} onChange={(event) => setMapConfirmed(event.target.checked)} /><span>두 번째 위치의 결과 {expectedSum}은 특성 맵 1행 2열이 된다는 설명을 확인했습니다.</span></label> : null}
+      {submitted ? correct ? <Feedback correct>계산 결과는 {terms.join(' + ')} = <strong>{expectedSum}</strong>입니다. 특징 맵 1행 2열에 들어갑니다.</Feedback> : <Feedback correct={false}><strong>다시 계산하세요.</strong> 같은 위치끼리 곱한 네 결과를 먼저 확인한 뒤 그 값을 모두 더합니다.{answers.map(Number).map((value, index) => answers[index] && value !== terms[index] ? <span key={index} className="block">• {Math.floor(index / 2) + 1}행 {index % 2 + 1}열 곱셈을 다시 확인하세요.</span> : null)}{!correctSum ? <span className="block">• 네 곱셈 결과의 최종 합을 다시 확인하세요.</span> : null}</Feedback> : null}
+      {submitted && correct ? <label className="mt-4 flex items-start gap-3 rounded-xl bg-emerald-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={mapConfirmed} onChange={(event) => setMapConfirmed(event.target.checked)} /><span>두 번째 위치의 결과 {expectedSum}은 특징 맵 1행 2열이 된다는 설명을 확인했습니다.</span></label> : null}
       <Button className="mt-5" disabled={!submitted || !correct || !mapConfirmed} onClick={() => { update((current) => ({ ...current, selectedFilterPosition: 0 })); props.onComplete() }}>STEP 4 활동 완료</Button>
-      {props.isComplete ? <Completion>네 곱셈과 합을 실제 격자·필터로 계산해 특성 맵 첫 칸을 만들었습니다.</Completion> : null}
+      {props.isComplete ? <Completion>네 곱셈과 합을 실제 격자·필터로 계산해 특징 맵 두 번째 칸을 만들었습니다.</Completion> : null}
     </StepFrame>
   )
 }
 
 export function Lesson09Step5(props: CommonStepProps) {
   const { activity, update } = useLesson09()
-  const input = CONVOLUTION_INPUT as Matrix
-  const kernel = CONVOLUTION_KERNEL as Matrix
+  const input = TEXTBOOK_INPUT as Matrix
+  const kernel = TEXTBOOK_KERNEL as Matrix
   const featureMap = convolve2D(input, kernel)
-  const secondMap = convolve2D(input, SECOND_CONVOLUTION_KERNEL as Matrix)
-  const positions = featureMap.flatMap((row, rowIndex) => row.map((value, columnIndex) => ({
-    index: rowIndex * row.length + columnIndex,
-    row: rowIndex,
-    column: columnIndex,
-    value,
-  })))
-  const selectedIndex = positions.some((item) => item.index === activity.selectedFilterPosition) ? activity.selectedFilterPosition : 0
-  const selected = positions[selectedIndex]
-  const allChecked = positions.every((item) => activity.checkedFilterPositions.includes(item.index))
-  const visibleMap = featureMap.map((row, rowIndex) => row.map((value, columnIndex) =>
-    activity.checkedFilterPositions.includes(rowIndex * row.length + columnIndex) ? value : '·',
-  ))
+  const secondMap = convolve2D(input, TEXTBOOK_COMPARISON_KERNEL as Matrix)
+  const [answers, setAnswers] = useState(['', ''])
+  const [submitted, setSubmitted] = useState(false)
   const [largest, setLargest] = useState<number | null>(null)
-  const [sizeAnswer, setSizeAnswer] = useState<string | null>(null)
-  const [filterAnswer, setFilterAnswer] = useState<string | null>(null)
-  const interpretationComplete = largest === Math.max(...featureMap.flat()) && sizeAnswer === '2' && filterAnswer === 'different'
-
-  const confirmCurrent = () => {
-    update((current) => ({ ...current, checkedFilterPositions: [...new Set([...current.checkedFilterPositions, selected.index])] }))
-  }
-
+  const [sizeAnswer, setSizeAnswer] = useState('')
+  const [filterAnswer, setFilterAnswer] = useState('')
+  const positions = featureMap.flatMap((row, r) => row.map((value, c) => ({ index: r * row.length + c, row: r, column: c, value })))
+  const selected = positions[activity.selectedFilterPosition] ?? positions[0]
+  const correct = answers.every((answer, index) => answer.trim() !== '' && Number(answer) === featureMap[1][index])
+  const ready = submitted && correct && largest === Math.max(...featureMap.flat()) && sizeAnswer === String(featureMap.length) && filterAnswer === 'different'
   return (
-    <StepFrame {...props} step={5} intro="같은 필터를 네 위치로 옮겨 특성 맵을 만들고, 필터가 달라질 때 결과가 어떻게 달라지는지 해석합니다.">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="필터 위치 선택">
-        {positions.map((position) => {
-          const checked = activity.checkedFilterPositions.includes(position.index)
-          return <button key={position.index} type="button" aria-pressed={selected.index === position.index} onClick={() => update((current) => ({ ...current, selectedFilterPosition: position.index }))} className={`min-h-12 rounded-xl border px-4 font-bold ${selected.index === position.index ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white text-slate-700'}`}>위치 {position.index + 1} · {position.row + 1}행 {position.column + 1}열 {checked ? '✓ 확인함' : ''}</button>
-        })}
-      </div>
-      <div className="mt-6"><KernelVisualizer input={input} kernel={kernel} startRow={selected.row} startColumn={selected.column} outputRow={selected.row} outputColumn={selected.column} /></div>
-      <Button className="mt-5" onClick={confirmCurrent}><Eye size={18} aria-hidden="true" /> 위치 {selected.index + 1} 계산 확인</Button>
-
-      <div className="mt-7 grid gap-5 md:grid-cols-2 md:items-center">
-        <PixelGrid values={visibleMap} label="확인하면서 채워지는 특성 맵" tone="feature" />
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <h3 className="font-black text-emerald-950">특성 맵은 어떻게 만들어질까?</h3>
-          <ul className="mt-3 grid gap-2 text-sm leading-6 text-emerald-900"><li>• 필터는 이미지 전체가 아닌 작은 영역을 반복해서 살펴봅니다.</li><li>• 같은 필터를 여러 위치에 적용해 비슷한 특징이 나타난 위치를 찾습니다.</li><li>• 이 결과 격자를 <strong>특성 맵</strong>이라고 합니다.</li><li>• 실제 CNN에서는 필터의 숫자도 학습 과정에서 조정될 수 있습니다.</li></ul>
-        </div>
-      </div>
-      {allChecked ? <div className="mt-5 grid gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-        <p className="font-black">특성 맵 해석하기</p>
-        <div><p className="text-sm font-bold">① 가장 큰 반응값은 무엇인가요? 큰 값은 필터가 찾는 패턴과 더 강하게 맞았다는 뜻입니다.</p><div className="mt-2 flex flex-wrap gap-2">{featureMap.flat().map((value, index) => <button key={`${value}-${index}`} type="button" aria-pressed={largest === value} onClick={() => setLargest(value)} className={`min-h-11 rounded-lg border px-4 font-mono font-black ${largest === value ? 'border-emerald-700 bg-white' : 'border-emerald-300 bg-emerald-100'}`}>{value}</button>)}</div></div>
-        <div><p className="text-sm font-bold">② 입력 3×3, 필터 2×2, stride 1·padding 없음일 때 출력 한 변은?</p><div className="mt-2 flex gap-2">{['1', '2', '3'].map((value) => <button key={value} type="button" aria-pressed={sizeAnswer === value} onClick={() => setSizeAnswer(value)} className={`min-h-11 rounded-lg border px-4 font-bold ${sizeAnswer === value ? 'border-emerald-700 bg-white' : 'border-emerald-300 bg-emerald-100'}`}>{value}</button>)}</div><p className="mt-2 text-xs">출력 한 변 = 입력 한 변 − 필터 한 변 + 1 = 3 − 2 + 1</p></div>
-        <div><p className="text-sm font-bold">③ 두 번째 필터의 특성 맵은 실제 계산으로 [[{secondMap[0].join(', ')}], [{secondMap[1].join(', ')}]]입니다. 필터가 달라지면?</p><div className="mt-2 flex flex-wrap gap-2"><button type="button" aria-pressed={filterAnswer === 'different'} onClick={() => setFilterAnswer('different')} className={`min-h-11 rounded-lg border px-4 text-left font-bold ${filterAnswer === 'different' ? 'border-emerald-700 bg-white' : 'border-emerald-300 bg-emerald-100'}`}>같은 이미지라도 특성 맵이 달라질 수 있다</button><button type="button" aria-pressed={filterAnswer === 'same'} onClick={() => setFilterAnswer('same')} className={`min-h-11 rounded-lg border px-4 text-left font-bold ${filterAnswer === 'same' ? 'border-emerald-700 bg-white' : 'border-emerald-300 bg-emerald-100'}`}>항상 같은 특성 맵이 나온다</button></div></div>
-        {largest !== null || sizeAnswer || filterAnswer ? <Feedback correct={interpretationComplete}>{interpretationComplete ? '최댓값, 출력 크기, 필터 비교를 모두 해석했습니다.' : '세 판단을 다시 확인하세요. 가장 큰 값은 10이고 출력 한 변은 2입니다.'}</Feedback> : null}
-        {interpretationComplete ? <label className="flex items-start gap-3 rounded-xl bg-white p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.featureMapConfirmed} onChange={(event) => update((current) => ({ ...current, featureMapConfirmed: event.target.checked }))} /><span>네 위치와 두 필터의 결과를 바탕으로 특성 맵을 해석했습니다.</span></label> : null}
-      </div> : <Notice>네 위치를 차례로 선택하고 각 위치의 계산을 확인하면 특성 맵 칸이 채워집니다.</Notice>}
-      <Button className="mt-5" disabled={!allChecked || !interpretationComplete || !activity.featureMapConfirmed} onClick={props.onComplete}>STEP 5 활동 완료</Button>
-      {props.isComplete ? <Completion>네 위치를 실제 계산하여 특성 맵 [[{featureMap[0].join(', ')}], [{featureMap[1].join(', ')}]]를 완성했습니다.</Completion> : null}
+    <StepFrame {...props} step={5} intro="교과서 105쪽의 4×4 입력·3×3 필터로 확장합니다. 앞 두 위치의 풀이를 살펴본 뒤 나머지 두 칸을 직접 계산하세요.">
+      <Notice>안내 풀이: {positions.slice(0, 2).map((position) => <p key={position.index}>위치 {position.index + 1}: {kernel.flatMap((row, r) => row.map((v, c) => input[position.row + r][position.column + c] * v)).join(' + ')} = <strong>{position.value}</strong> → 특징 맵 {position.row + 1}행 {position.column + 1}열</p>)}</Notice>
+      <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="필터 위치 선택">{positions.map((position) => <button key={position.index} type="button" aria-pressed={selected.index === position.index} onClick={() => update((current) => ({ ...current, selectedFilterPosition: position.index }))} className={`min-h-12 rounded-xl border px-4 font-bold ${selected.index === position.index ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>위치 {position.index + 1} · {position.row + 1}행 {position.column + 1}열</button>)}</div>
+      <div className="mt-5"><KernelVisualizer input={input} kernel={kernel} startRow={selected.row} startColumn={selected.column} showCalculation={selected.index < 2 || (submitted && correct)} /></div>
+      <fieldset className="mt-5 rounded-2xl border border-slate-200 p-5"><legend className="px-2 font-black">독립 적용: 아래 두 칸의 합성곱</legend><div className="grid gap-3 sm:grid-cols-2">{answers.map((answer, index) => <label key={index} className="font-bold">특징 맵 2행 {index + 1}열<input type="number" inputMode="numeric" value={answer} onChange={(event) => { setAnswers((current) => current.map((v, i) => i === index ? event.target.value : v)); setSubmitted(false) }} className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 px-3" /></label>)}</div><Button className="mt-4" disabled={answers.some((v) => !v.trim())} onClick={() => setSubmitted(true)}>나머지 두 위치 제출</Button></fieldset>
+      {submitted ? <Feedback correct={correct}>{correct ? '두 칸을 올바르게 계산했습니다. 이제 결과의 크기와 반응을 해석하세요.' : '각 위치의 3×3 영역과 필터에서 같은 자리끼리 곱해 모두 더하세요. 필터가 0인 자리는 합에 영향을 주지 않습니다.'}{answers.map((v, i) => Number(v) !== featureMap[1][i] ? <p key={i}>2행 {i + 1}열 계산을 다시 확인하세요.</p> : null)}</Feedback> : null}
+      {submitted && correct ? <div className="mt-5 grid gap-4"><PixelGrid values={featureMap} label="계산한 특징 맵" tone="feature" />
+        <ChoiceRow label="가장 큰 반응값은?" value={largest === null ? '' : String(largest)} onChange={(v) => setLargest(Number(v))} options={featureMap.flat().map((v) => [String(v), String(v)])} />
+        <ChoiceRow label="4×4 입력에 3×3 필터를 한 칸씩, 테두리 추가 없이 옮기면 출력 한 변은?" value={sizeAnswer} onChange={setSizeAnswer} options={['1', '2', '3'].map((v) => [v, v])} />
+        <p className="text-sm">이 조건에서 출력 한 변 = 입력 한 변 − 필터 한 변 + 1 = {input.length} − {kernel.length} + 1. 큰 반응은 이 필터의 패턴에 강하게 반응한 위치이지 최종 분류 결과가 아닙니다.</p>
+        <PixelGrid values={TEXTBOOK_COMPARISON_KERNEL} label="비교할 다른 필터" tone="kernel" compact />
+        <p className="text-sm">같은 입력에 이 필터를 적용한 결과: {JSON.stringify(secondMap)}</p>
+        <ChoiceRow label="두 특징 맵을 비교하면?" value={filterAnswer} onChange={setFilterAnswer} options={[['different', '필터에 따라 찾는 특징과 결과가 달라질 수 있다'], ['same', '입력이 같으면 어떤 필터든 결과가 같다']]} />
+        {largest !== null && sizeAnswer && filterAnswer ? <Feedback correct={ready}>{ready ? '계산과 해석을 연결했습니다. 특징 맵은 뒤의 풀링과 완전 연결층으로 전달됩니다.' : '최댓값, 가능한 이동 위치 수, 두 특징 맵의 차이를 다시 살펴보세요.'}</Feedback> : null}
+      </div> : null}
+      <Notice>이 고정 필터는 원리 설명용입니다. 실제 합성곱 신경망에서는 분류에 도움이 되는 특징을 찾도록 필터의 가중치를 학습으로 조정합니다.</Notice>
+      <Button className="mt-5" disabled={!ready} onClick={props.onComplete}>STEP 5 활동 완료</Button>
+      {props.isComplete ? <Completion>교과서 예제의 네 위치를 연결하고 계산 결과가 분류 과정에서 맡는 역할을 해석했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -358,6 +340,7 @@ export function Lesson09Step6(props: CommonStepProps) {
 
   return (
     <StepFrame {...props} step={6} intro="최대 풀링은 작은 영역의 가장 큰 값을 대표값으로 선택해 격자의 크기를 줄입니다.">
+      <p className="mb-4 text-sm leading-6 text-slate-600">아래 숫자는 교과서의 풀링 그림과 같은 원리를 적용한 앱 예제입니다. 교과서 그림의 수치를 그대로 옮긴 것은 아닙니다.</p>
       <PoolingVisualizer input={input} poolSize={2} selectedRegion={selected.index} checkedRegions={activity.checkedPoolRegions} />
       <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="2×2 풀링 영역 선택">
         {regions.map((region) => <button key={region.index} type="button" aria-pressed={selected.index === region.index} onClick={() => update((current) => ({ ...current, selectedPoolRegion: region.index }))} className={`min-h-12 rounded-xl border px-4 font-bold ${selected.index === region.index ? 'border-amber-600 bg-amber-500 text-slate-950' : 'border-slate-300 bg-white'}`}>영역 {region.index + 1} · {region.row + 1}행 {region.column + 1}열 {activity.checkedPoolRegions.includes(region.index) ? '✓ 완료' : ''}</button>)}
@@ -374,10 +357,10 @@ export function Lesson09Step6(props: CommonStepProps) {
         <ChoiceRow label="② 최대 풀링 뒤 위치 정보는?" value={meaning.location} onChange={(value) => setMeaning((current) => ({ ...current, location: value }))} options={[['not-all', '강한 반응은 남지만 모든 세부 위치가 그대로 보존되지는 않는다'], ['all', '모든 위치 정보가 완전히 그대로 남는다']]} />
         <ChoiceRow label="③ 최대 풀링이 분류 결과 자체를 바로 만드는가?" value={meaning.classification} onChange={(value) => setMeaning((current) => ({ ...current, classification: value }))} options={[['no', '아니다. 중요한 반응을 줄여 다음 층에 전달하는 중간 단계이다'], ['yes', '그렇다. 풀링값만으로 곧바로 클래스를 결정한다']]} />
         {(meaning.size || meaning.location || meaning.classification) ? <Feedback correct={meaningComplete}>{meaningComplete ? '풀링은 강한 반응을 남기며 크기와 이후 계산량을 줄일 수 있지만, 분류 결과 자체를 만드는 단계는 아닙니다.' : '각 문장의 의미를 다시 비교해 보세요.'}</Feedback> : null}
-        {meaningComplete ? <label className="flex items-start gap-3 rounded-xl bg-white p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.poolingConfirmed} onChange={(event) => update((current) => ({ ...current, poolingConfirmed: event.target.checked }))} /><span>4×4 특성 맵이 대표값 [{pooled[0].join(', ')}] / [{pooled[1].join(', ')}]의 2×2 결과로 줄어드는 것을 확인했습니다.</span></label> : null}
+        {meaningComplete ? <label className="flex items-start gap-3 rounded-xl bg-white p-4"><input type="checkbox" className="mt-1 size-5" checked={activity.poolingConfirmed} onChange={(event) => update((current) => ({ ...current, poolingConfirmed: event.target.checked }))} /><span>4×4 특징 맵이 대표값 [{pooled[0].join(', ')}] / [{pooled[1].join(', ')}]의 2×2 결과로 줄어드는 것을 확인했습니다.</span></label> : null}
       </div> : <Notice>네 영역에서 실제 최댓값을 모두 선택하면 2×2 결과가 완성됩니다.</Notice>}
       <Button className="mt-5" disabled={!allChecked || !meaningComplete || !activity.poolingConfirmed} onClick={props.onComplete}>STEP 6 활동 완료</Button>
-      {props.isComplete ? <Completion>네 영역의 대표값을 계산해 4×4 특성 맵을 2×2 [[{pooled[0].join(', ')}], [{pooled[1].join(', ')}]]로 줄였습니다.</Completion> : null}
+      {props.isComplete ? <Completion>네 영역의 대표값을 계산해 4×4 특징 맵을 2×2 [[{pooled[0].join(', ')}], [{pooled[1].join(', ')}]]로 줄였습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -390,6 +373,9 @@ interface QuizDefinition {
   multiple?: boolean
   explanation: string
 }
+
+const practiceMap = convolve2D(CONVOLUTION_INPUT, CONVOLUTION_KERNEL)
+const practiceTerms = CONVOLUTION_KERNEL.flatMap((row, r) => row.map((value, c) => CONVOLUTION_INPUT[r][c + 1] * value))
 
 const quiz: QuizDefinition[] = [
   {
@@ -412,23 +398,23 @@ const quiz: QuizDefinition[] = [
   {
     id: 3,
     question: '오른쪽 위 위치의 합성곱 값은 무엇인가? (3×1 + 1×0 + 4×0 + 6×1)',
-    options: [{ id: '9', text: '9' }, { id: '6', text: '6' }, { id: '14', text: '14' }],
-    answers: ['9'], explanation: '같은 위치끼리 곱한 3, 0, 0, 6을 더하면 9입니다.',
+    options: [{ id: String(practiceMap[0][1]), text: String(practiceMap[0][1]) }, { id: '6', text: '6' }, { id: '14', text: '14' }],
+    answers: [String(practiceMap[0][1])], explanation: `같은 위치끼리 곱한 ${practiceTerms.join(', ')}을 더하면 ${practiceMap[0][1]}입니다.`,
   },
   {
     id: 4,
-    question: '입력 3×3과 필터 2×2를 stride 1, padding 없음으로 계산하면 특성 맵 크기는?',
+    question: '입력 3×3과 필터 2×2를 stride 1, padding 없음으로 계산하면 특징 맵 크기는?',
     options: [{ id: '2', text: '2×2' }, { id: '3', text: '3×3' }, { id: '1', text: '1×1' }],
-    answers: ['2'], explanation: '한 변은 3 − 2 + 1 = 2이므로 2×2 특성 맵입니다.',
+    answers: [String(practiceMap.length)], explanation: `한 변은 ${CONVOLUTION_INPUT.length} − ${CONVOLUTION_KERNEL.length} + 1 = ${practiceMap.length}이므로 ${practiceMap.length}×${practiceMap[0].length} 특징 맵입니다.`,
   },
   {
     id: 5,
     question: '같은 이미지에 다른 필터를 적용하면?',
     options: [
-      { id: 'different', text: '찾는 패턴이 달라져 특성 맵도 달라질 수 있다.' },
-      { id: 'same', text: '언제나 같은 특성 맵이 나온다.' }, { id: 'label', text: 'label이 자동으로 바뀐다.' },
+      { id: 'different', text: '찾는 패턴이 달라져 특징 맵도 달라질 수 있다.' },
+      { id: 'same', text: '언제나 같은 특징 맵이 나온다.' }, { id: 'label', text: 'label이 자동으로 바뀐다.' },
     ],
-    answers: ['different'], explanation: '필터마다 강조하는 지역 패턴이 다르므로 같은 이미지에서도 계산된 특성 맵은 달라질 수 있습니다.',
+    answers: ['different'], explanation: '필터마다 강조하는 지역 패턴이 다르므로 같은 이미지에서도 계산된 특징 맵은 달라질 수 있습니다.',
   },
   {
     id: 6,
@@ -439,7 +425,7 @@ const quiz: QuizDefinition[] = [
     ],
     answers: ['maximum'], explanation: '최대 풀링은 강한 반응을 대표값으로 남기는 중간 단계입니다. 일부 위치 정보는 줄고, 뒤의 층이 분류를 이어갑니다.',
   },
-  { id: 7, question: 'CNN의 올바른 전체 흐름은?', options: [{ id: 'correct', text: '이미지 입력 → 합성곱 → ReLU → 풀링 → flatten → 완전연결층 → Softmax → 클래스 예측' }, { id: 'missing', text: '이미지 입력 → Softmax → 합성곱 → 클래스 예측' }, { id: 'reverse', text: '클래스 예측 → flatten → 이미지 입력' }], answers: ['correct'], explanation: '합성곱과 ReLU, 풀링으로 특징을 다룬 뒤 flatten과 완전연결층이 특징을 종합하고 Softmax가 클래스별 확률을 만듭니다.' },
+  { id: 7, question: 'CNN의 올바른 전체 흐름은?', options: [{ id: 'correct', text: '이미지 입력 → 합성곱 → ReLU → 풀링 → flatten → 완전 연결층 → Softmax → 클래스 예측' }, { id: 'missing', text: '이미지 입력 → Softmax → 합성곱 → 클래스 예측' }, { id: 'reverse', text: '클래스 예측 → flatten → 이미지 입력' }], answers: ['correct'], explanation: '합성곱과 ReLU, 풀링으로 특징을 다룬 뒤 flatten과 완전 연결층이 특징을 종합하고 Softmax가 클래스별 확률을 만듭니다.' },
 ]
 
 function sameAnswers(selected: readonly string[], expected: readonly string[]) {
@@ -503,13 +489,21 @@ export function Lesson09Step7({ priorStepsComplete, onCompletionReadyChange, ...
 
   return (
     <StepFrame {...props} step={7} intro="지역 패턴 탐색부터 클래스별 확률과 최종 예측까지 CNN의 전체 구조를 완성합니다.">
+      <section className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
+        <h3 className="font-black text-cyan-950">① 교과서 기본 구조</h3>
+        <div className="mt-4 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">{['합성곱층', '풀링층', '완전 연결층'].map((item, index, items) => <div key={item} className="contents"><span className="flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 text-center text-sm font-black">{item}</span>{index < items.length - 1 ? <><ArrowDown className="mx-auto text-cyan-700 lg:hidden" size={18} aria-hidden="true" /><ArrowRight className="hidden shrink-0 text-cyan-700 lg:block" size={18} aria-hidden="true" /></> : null}</div>)}</div>
+        <h3 className="mt-7 font-black text-cyan-950">② 과정 자세히 보기</h3>
+        <p className="mt-2 text-sm leading-6 text-cyan-950">합성곱층에서는 필터 계산과 렐루 함수로 특징을 찾고, 풀링층에서는 크기를 줄입니다. 차원 변환 뒤 완전 연결층에서 특징을 종합하며 소프트맥스로 클래스별 확률을 얻습니다.</p>
+        <div className="mt-4 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">{['이미지 입력', '합성곱', '렐루(ReLU)', '풀링', '평탄화(flatten)', '완전 연결층', '소프트맥스(softmax)', '클래스 예측'].map((item, index, items) => <div key={item} className="contents"><span className="flex min-h-11 items-center justify-center rounded-xl border border-cyan-200 bg-white px-3 text-center text-sm font-black">{item}</span>{index < items.length - 1 ? <><ArrowDown className="mx-auto text-cyan-700 lg:hidden" size={18} aria-hidden="true" /><ArrowRight className="hidden shrink-0 text-cyan-700 lg:block" size={18} aria-hidden="true" /></> : null}</div>)}</div>
+        <p className="mt-4 text-sm leading-6 text-cyan-950">위 과정은 이미지 분류 CNN의 대표적인 구성 예시입니다. 실제 CNN에서는 합성곱층과 풀링층이 여러 번 반복되거나 구조가 달라질 수 있습니다.</p>
+      </section>
       <CnnFlowDiagram flow={activity.cnnFlow} />
       <div className="mt-6 grid gap-2">
-        {activity.cnnFlow.map((item, index) => <div key={item} className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"><span className="flex size-8 items-center justify-center rounded-full bg-slate-100 font-black">{index + 1}</span><div><strong>{item}</strong><span className="mt-1 block text-xs leading-5 text-slate-600">{CNN_FLOW_ROLES[item]}</span></div><div className="flex gap-1"><button type="button" aria-label={`${item} 위로 이동`} disabled={index === 0 || activity.flowCorrect} onClick={() => move(index, -1)} className="flex size-11 items-center justify-center rounded-lg border border-slate-300 disabled:opacity-30"><ArrowUp size={18} /></button><button type="button" aria-label={`${item} 아래로 이동`} disabled={index === activity.cnnFlow.length - 1 || activity.flowCorrect} onClick={() => move(index, 1)} className="flex size-11 items-center justify-center rounded-lg border border-slate-300 disabled:opacity-30"><ArrowDown size={18} /></button></div></div>)}
+        {activity.cnnFlow.map((item, index) => <div key={item} className="grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"><span className="flex size-8 items-center justify-center rounded-full bg-slate-100 font-black">{index + 1}</span><div><strong>{cnnFlowLabel(item)}</strong><span className="mt-1 block text-xs leading-5 text-slate-600">{CNN_FLOW_ROLES[item]}</span></div><div className="flex gap-1"><button type="button" aria-label={`${cnnFlowLabel(item)} 위로 이동`} disabled={index === 0 || activity.flowCorrect} onClick={() => move(index, -1)} className="flex size-11 items-center justify-center rounded-lg border border-slate-300 disabled:opacity-30"><ArrowUp size={18} /></button><button type="button" aria-label={`${cnnFlowLabel(item)} 아래로 이동`} disabled={index === activity.cnnFlow.length - 1 || activity.flowCorrect} onClick={() => move(index, 1)} className="flex size-11 items-center justify-center rounded-lg border border-slate-300 disabled:opacity-30"><ArrowDown size={18} /></button></div></div>)}
       </div>
       <Button className="mt-5" onClick={submitFlow} disabled={activity.flowCorrect}>{activity.flowCorrect ? <><CheckCircle2 size={18} /> CNN 흐름 완성</> : <><Move size={18} /> 순서 확인</>}</Button>
-      {activity.flowCorrect ? <Feedback correct>{CNN_FLOW.join(' → ')} 순서가 맞습니다.</Feedback> : null}
-      {flowSubmitted && !activity.flowCorrect ? <Feedback correct={false}>아직 순서가 맞지 않습니다. 합성곱으로 지역 패턴을 찾고 ReLU·풀링으로 반응을 다룬 뒤 flatten과 완전연결층, Softmax로 이어집니다.</Feedback> : null}
+      {activity.flowCorrect ? <Feedback correct>{CNN_FLOW.map(cnnFlowLabel).join(' → ')} 순서가 맞습니다.</Feedback> : null}
+      {flowSubmitted && !activity.flowCorrect ? <Feedback correct={false}>아직 순서가 맞지 않습니다. 합성곱으로 지역 패턴을 찾고 ReLU·풀링으로 반응을 다룬 뒤 flatten과 완전 연결층, Softmax로 이어집니다.</Feedback> : null}
 
       <div className="mt-9 border-t border-slate-200 pt-7">
         <h3 className="text-xl font-black">확인 문제 7개</h3>
@@ -538,7 +532,7 @@ export function Lesson09Step7({ priorStepsComplete, onCompletionReadyChange, ...
         <div className="mt-8 rounded-3xl bg-slate-950 p-6 text-white sm:p-8">
           <p className="text-sm font-black tracking-[0.16em] text-emerald-300">CNN SIGNAL FLOW COMPLETE</p>
           <h3 className="mt-2 text-2xl font-black">이미지의 공간 구조에서 분류 결과까지 연결했습니다.</h3>
-          <div className="mt-6 border-t border-slate-700 pt-6"><p className="text-sm font-bold text-cyan-300">Lesson 10 연결 질문</p><p className="mt-2 text-lg font-black">이미지 특징을 찾는 CNN은 숫자만 다루는 신경망과 구조가 어떻게 다를까요? 실제 CNN 모델은 어떤 층으로 구성할 수 있을까요?</p><Link to="/lesson/10" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 font-bold text-slate-950">Lesson 10 미리 보기 <ArrowRight size={18} /></Link></div>
+          <div className="mt-6 border-t border-slate-700 pt-6"><p className="text-sm font-bold text-cyan-300">Lesson 10 연결 질문</p><p className="mt-2 text-lg font-black">이미지를 분류하는 인공지능과 달리, 새로운 이미지를 만드는 생성형 인공지능은 어떤 원리를 사용할까요?</p><Link to="/lesson/10" className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 font-bold text-slate-950">Lesson 10 미리 보기 <ArrowRight size={18} /></Link></div>
         </div>
       ) : null}
     </StepFrame>

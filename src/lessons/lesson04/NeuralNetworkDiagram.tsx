@@ -128,18 +128,18 @@ export function SimpleFlow({
   label: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+    <div className="@container/simple-flow min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
       <p className="font-black text-slate-950">{label}</p>
-      <div className="mt-4 grid items-center gap-2 md:grid-flow-col md:auto-cols-fr">
+      <div className="mt-4 flex flex-col items-center gap-2 @min-[48rem]/simple-flow:flex-row">
         {items.map((item, index) => (
           <div key={`${item}-${index}`} className="contents">
-            <div className="flex min-h-16 min-w-0 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 py-3 text-center font-bold leading-6 text-slate-900">
+            <div className="flex min-h-16 w-full min-w-0 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 py-3 text-center font-bold leading-6 break-keep text-slate-900 @min-[48rem]/simple-flow:flex-1">
               {item}
             </div>
             {index < items.length - 1 && (
               <>
-                <ArrowDown className="mx-auto text-cyan-700 md:hidden" size={21} aria-hidden="true" />
-                <ArrowRight className="mx-auto hidden text-cyan-700 md:block" size={21} aria-hidden="true" />
+                <ArrowDown className="mx-auto shrink-0 text-cyan-700 @min-[48rem]/simple-flow:hidden" size={21} aria-hidden="true" />
+                <ArrowRight className="mx-auto hidden shrink-0 text-cyan-700 @min-[48rem]/simple-flow:block" size={21} aria-hidden="true" />
               </>
             )}
           </div>

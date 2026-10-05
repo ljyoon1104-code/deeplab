@@ -9,7 +9,7 @@ export const lesson01StepTitles = [
 ]
 
 export const lesson01Objectives = [
-  '데이터, 관찰 가능한 특징, 정답 라벨의 역할을 구분할 수 있다.',
+  '데이터, 관찰 가능한 특징, 정답 레이블의 역할을 구분할 수 있다.',
   '기계학습과 딥러닝이 이미지를 학습하는 흐름을 비교할 수 있다.',
   '문제의 조건을 근거로 규칙 기반 방법, 기계학습, 딥러닝을 판단할 수 있다.',
   '새로운 데이터로 평가하는 간단한 AI 프로젝트를 설계할 수 있다.',
@@ -20,7 +20,7 @@ export type ObservationRole = 'feature' | 'unstable' | 'label'
 export const observationRoles: { id: ObservationRole; label: string; description: string }[] = [
   { id: 'feature', label: '이미지에서 관찰 가능한 특징', description: '사진 속 모양·색·무늬처럼 입력 이미지에서 읽을 수 있는 정보' },
   { id: 'unstable', label: '불안정하거나 사용하면 안 되는 정보', description: '촬영 조건에 따라 바뀌거나 정답을 미리 알려 주는 정보' },
-  { id: 'label', label: '학습 목표인 정답 라벨', description: '학습할 때만 알려 주는 정답 이름' },
+  { id: 'label', label: '학습 목표인 정답 레이블', description: '학습·평가에서 예측과 비교하는 정답 정보' },
 ]
 
 export const observationCards: { id: string; label: string; answer: ObservationRole; explanation: string }[] = [
@@ -30,7 +30,7 @@ export const observationCards: { id: string; label: string; answer: ObservationR
   { id: 'fur', label: '털의 무늬', answer: 'feature', explanation: '사진에 보이는 정보이지만, 하나만으로 정답을 정할 수는 없습니다.' },
   { id: 'background', label: '촬영 배경', answer: 'unstable', explanation: '장소가 바뀌면 쉽게 달라져서 동물 자체의 특징이 아닙니다.' },
   { id: 'filename', label: '파일 이름에 포함된 cat', answer: 'unstable', explanation: '정답을 몰래 알려 주는 정보입니다. 새 사진에서는 없거나 틀릴 수 있습니다.' },
-  { id: 'answer', label: '실제 정답 라벨', answer: 'label', explanation: '학습할 때 모델의 예측과 비교하는 정답입니다.' },
+  { id: 'answer', label: '실제 정답 레이블', answer: 'label', explanation: '학습할 때와 새로운 데이터로 평가할 때 모델의 예측과 비교하는 정답입니다.' },
 ]
 
 export type FlowStageId = 'data' | 'feature' | 'model' | 'result'
@@ -152,7 +152,7 @@ export const projectOptions = {
   method: [
     { id: 'project-dl', label: '딥러닝: 이미지의 다양한 시각 특징을 여러 층에서 학습', correct: true },
     { id: 'project-rule', label: '규칙 기반: 모든 물체는 정해진 모양 하나만 가진다고 가정', correct: false },
-    { id: 'project-ml', label: '일반 기계학습: 사람이 정한 한 가지 특징만 사용', correct: false },
+    { id: 'project-ml', label: '일반적인 기계학습: 사람이 여러 특징을 설계해 모델에 제공', correct: false },
   ],
   evaluation: [
     { id: 'new-images', label: '학습에 사용하지 않은 새로운 이미지로 정확도를 확인한다.', correct: true },
@@ -174,10 +174,10 @@ export const lesson01Quiz = [
     question: '분리수거 이미지 분류에서 “종이·플라스틱·캔”은 무엇인가요?',
     options: [
       { id: 'input', label: '입력 데이터', correct: false },
-      { id: 'label', label: '정답 라벨', correct: true },
+      { id: 'label', label: '정답 레이블', correct: true },
       { id: 'feature', label: '촬영 배경 특징', correct: false },
     ],
-    explanation: '이미지의 종류를 나타내는 정답 이름은 라벨입니다.',
+    explanation: '이미지의 종류를 나타내는 정답 이름은 레이블입니다.',
   },
   {
     id: 'feature-role',
@@ -225,7 +225,7 @@ export const lesson01Quiz = [
     options: [
       { id: 'generalize', label: '처음 보는 상황에서도 잘 작동할 가능성을 확인하기 위해서', correct: true },
       { id: 'hide', label: '학습 결과를 숨기기 위해서', correct: false },
-      { id: 'label-change', label: '정답 라벨을 바꾸기 위해서', correct: false },
+      { id: 'label-change', label: '정답 레이블을 바꾸기 위해서', correct: false },
     ],
     explanation: '새 데이터 평가는 모델이 학습한 사진만 외운 것은 아닌지 확인하게 해 줍니다.',
   },

@@ -291,6 +291,27 @@ function PresetButtons({
   )
 }
 
+function LayerLocation({ focus }: { focus: 'hidden' | 'output' }) {
+  return <figure className="mb-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+    <figcaption className="font-black">함수는 신경망의 어디에서 쓰일까요?</figcaption>
+    <svg viewBox="0 0 300 190" className="mx-auto mt-3 w-full max-w-sm" role="img" aria-label="입력층, 은닉층, 출력층의 위치. 입력층은 데이터를 전달하고 은닉층과 출력층은 처리합니다.">
+      {[15,115,215].map((x, i) => <rect key={x} x={x} y="5" width="70" height="180" rx="12" fill={(focus === 'hidden' && i === 1) || (focus === 'output' && i === 2) ? '#c7d2fe' : 'white'} stroke="#4338ca" strokeWidth={(focus === 'hidden' && i === 1) || (focus === 'output' && i === 2) ? 3 : 1} />)}
+      {[65,130].flatMap((from) => [65,130].map((to) => <line key={from + '-' + to} x1="50" y1={from} x2="150" y2={to} stroke="#94a3b8" strokeWidth="2" />))}
+      {[65,130].map((from) => <line key={from} x1="150" y1={from} x2="250" y2="98" stroke="#94a3b8" strokeWidth="2" />)}
+      {[50,150].flatMap((x) => [65,130].map((y) => <circle key={x + '-' + y} cx={x} cy={y} r="14" fill={x === 50 ? '#cffafe' : '#e0e7ff'} stroke="#4338ca" strokeWidth="2" />))}
+      <circle cx="250" cy="98" r="17" fill="#d1fae5" stroke="#047857" strokeWidth="2" />
+      {['입력층','은닉층','출력층'].map((name,i) => <text key={name} x={50 + i * 100} y="29" textAnchor="middle" fontSize="14" fontWeight="bold">{name}</text>)}
+      <text x={focus === 'hidden' ? 150 : 250} y="170" textAnchor="middle" fontSize="13" fontWeight="bold">{focus === 'hidden' ? '렐루' : '시그모이드'}</text>
+    </svg>
+    <dl className="mt-3 grid gap-2 text-sm leading-6 sm:grid-cols-3">
+      <div><dt className="font-black">입력층</dt><dd>외부 데이터를 받아 전달합니다.</dd></div>
+      <div><dt className="font-black">은닉층</dt><dd>입력층과 출력층 사이에서 정보를 처리합니다.</dd></div>
+      <div><dt className="font-black">출력층</dt><dd>최종 결과를 내보냅니다.</dd></div>
+    </dl>
+    <p className="mt-3 leading-7">{focus === 'hidden' ? '렐루는 은닉층에서 자주 사용됩니다.' : '이진 분류에서는 출력층 뉴런 하나에 시그모이드를 사용해 1로 표시한 클래스의 예측 확률을 나타낼 수 있습니다.'} 자세한 층 구조는 Lesson 04에서 배웁니다.</p>
+  </figure>
+}
+
 export function Lesson03Step1(props: CommonStepProps) {
   const [choice, setChoice] = useState<'A' | 'B' | 'C' | null>(null)
   const [submitted, setSubmitted] = useState(false)
@@ -324,6 +345,7 @@ export function Lesson03Step1(props: CommonStepProps) {
 
       <section className="mt-9" aria-labelledby="activation-flow-title">
         <h3 id="activation-flow-title" className="text-xl font-black text-slate-950">가중합 이후의 Signal Flow</h3>
+        <p className="mt-3 rounded-xl bg-indigo-50 p-4 leading-7">가중합은 활성화 함수 적용 전의 계산값입니다. <strong>활성화 함수</strong>는 가중합을 다음 뉴런에 전달하거나 최종 결과로 사용할 출력으로 바꿉니다. 함수에 따라 출력의 범위와 형태가 달라지므로, 모든 함수가 0과 1만 출력하는 것은 아닙니다.</p>
         <div className="mt-5 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
           <FlowNode eyebrow="계산" title="입력값 × 가중치" detail="각 입력에 가중치를 곱합니다." />
           <FlowArrow />
@@ -491,12 +513,13 @@ export function Lesson03Step3(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={3}
-      intro="그래프를 보기 전에 음수, 0, 양수의 ReLU 출력을 먼저 예측하고 변화 방향을 설명합니다."
+      intro="렐루(ReLU) 함수는 음수를 0으로, 0 이상의 값은 그대로 출력합니다. 그래프의 꺾인 모양과 연결해 보고 세 입력에 적용해 보세요."
     >
+      <LayerLocation focus="hidden" />
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.75fr)_minmax(19rem,1.15fr)] lg:items-start">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="relu-control-title">
           <div className="flex items-center justify-between gap-3">
-            <h3 id="relu-control-title" className="text-xl font-black text-slate-950">ReLU 조작</h3>
+            <h3 id="relu-control-title" className="text-xl font-black text-slate-950">렐루(ReLU) 함수 조작</h3>
             <SlidersHorizontal className="text-cyan-700" size={24} aria-hidden="true" />
           </div>
           <div className="mt-5"><PresetButtons values={challenges} current={z} onSelect={(value) => chooseChallenge(challenges.indexOf(value as -3 | 0 | 2))} /></div>
@@ -526,7 +549,7 @@ export function Lesson03Step3(props: CommonStepProps) {
       </div>
 
       {props.isComplete && (
-        <StepCompletionMessage>음수, 0, 양수의 ReLU 출력을 모두 먼저 예측하고 그래프에서 확인했습니다.</StepCompletionMessage>
+        <StepCompletionMessage>음수, 0, 양수의 렐루 출력을 예측하고 그래프와 연결했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
@@ -568,11 +591,13 @@ export function Lesson03Step4(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={4}
-      intro="복잡한 지수 계산 대신 출력이 0.5보다 큰지 작은지 먼저 예측하고, 판단의 방향을 해석합니다."
+      intro="시그모이드(sigmoid) 함수는 가중합을 0과 1 사이로 바꿉니다. 그래프는 z=0에서 0.5를 지나며 오른쪽으로 갈수록 출력이 커집니다. 지수 계산 대신 출력의 의미를 판단하세요."
     >
+      <LayerLocation focus="output" />
+      <p className="mb-6 rounded-xl bg-cyan-50 p-4 leading-7">여기서 출력이 커진다는 것은 이진 분류에서 <strong>1로 표시한 클래스의 예측 확률이 커진다</strong>는 뜻입니다. 실제 정답인지 알려면 예측과 레이블을 비교해야 합니다.</p>
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.75fr)_minmax(19rem,1.15fr)] lg:items-start">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="sigmoid-control-title">
-          <h3 id="sigmoid-control-title" className="text-xl font-black text-slate-950">Sigmoid 조작</h3>
+          <h3 id="sigmoid-control-title" className="text-xl font-black text-slate-950">시그모이드(sigmoid) 함수 조작</h3>
           <div className="mt-5"><PresetButtons values={challenges} current={z} onSelect={chooseZ} /></div>
           <fieldset className="mt-6"><legend className="font-black">Sigmoid({z})는 0.5와 비교하면?</legend><div className="mt-3 grid gap-3 sm:grid-cols-3">{([{ value: 'below', label: '0.5보다 작다' }, { value: 'equal', label: '0.5이다' }, { value: 'above', label: '0.5보다 크다' }] as const).map((option) => <Button key={option.value} variant={prediction === option.value ? 'primary' : 'secondary'} aria-pressed={prediction === option.value} onClick={() => { setPrediction(option.value); setSubmitted(false) }}>{option.label}</Button>)}</div><Button className="mt-4 w-full" disabled={!prediction} onClick={submit}>예측 제출</Button></fieldset>
           {submitted && <AnswerFeedback correct={correct} explanation={correct ? `z=${z}일 때 내부 계산값은 ${output.toPrecision(8)}이고, 화면 표시값은 ${output.toFixed(2)}입니다.` : 'z가 음수이면 0.5보다 작고, 0이면 0.5, 양수이면 0.5보다 큽니다.'} />}
@@ -598,7 +623,7 @@ export function Lesson03Step4(props: CommonStepProps) {
         <div className="mt-4"><ZoneProgress zones={zones} /></div>
       </section>
 
-      <fieldset className="mt-7 rounded-2xl border border-slate-200 p-5"><legend className="font-black">z가 -2에서 2로 커지면 Sigmoid 출력은?</legend><div className="mt-4 grid grid-cols-2 gap-3"><Button variant={direction === 'increase' ? 'primary' : 'secondary'} aria-pressed={direction === 'increase'} onClick={() => { setDirection('increase'); setDirectionSubmitted(false) }}>커진다</Button><Button variant={direction === 'decrease' ? 'primary' : 'secondary'} aria-pressed={direction === 'decrease'} onClick={() => { setDirection('decrease'); setDirectionSubmitted(false) }}>작아진다</Button></div><Button className="mt-4" disabled={!direction} onClick={() => setDirectionSubmitted(true)}>변화 방향 제출</Button>{directionSubmitted && <AnswerFeedback correct={direction === 'increase'} explanation={direction === 'increase' ? 'z가 커질수록 출력은 1에 가까워져 정답 1 쪽 판단이 강해집니다.' : 'S자 그래프가 왼쪽에서 오른쪽으로 올라가는 방향인지 확인하세요.'} />}</fieldset>
+      <fieldset className="mt-7 rounded-2xl border border-slate-200 p-5"><legend className="font-black">z가 -2에서 2로 커지면 Sigmoid 출력은?</legend><div className="mt-4 grid grid-cols-2 gap-3"><Button variant={direction === 'increase' ? 'primary' : 'secondary'} aria-pressed={direction === 'increase'} onClick={() => { setDirection('increase'); setDirectionSubmitted(false) }}>커진다</Button><Button variant={direction === 'decrease' ? 'primary' : 'secondary'} aria-pressed={direction === 'decrease'} onClick={() => { setDirection('decrease'); setDirectionSubmitted(false) }}>작아진다</Button></div><Button className="mt-4" disabled={!direction} onClick={() => setDirectionSubmitted(true)}>변화 방향 제출</Button>{directionSubmitted && <AnswerFeedback correct={direction === 'increase'} explanation={direction === 'increase' ? 'z가 커질수록 이진 분류에서 1로 표시한 클래스의 예측 확률이 커집니다. 정답 여부는 실제 레이블과 비교해야 합니다.' : 'S자 그래프가 왼쪽에서 오른쪽으로 올라가는 방향인지 확인하세요.'} />}</fieldset>
 
       <div className="mt-7 grid gap-3 sm:grid-cols-5">
         {[-5, -2, 0, 2, 5].map((value) => (
@@ -740,7 +765,7 @@ export function Lesson03Step6(props: CommonStepProps) {
     .filter((_, index) => scores[index] === maxScore)
     .map((item) => item.label)
   const configurationKey = scores.join('|')
-  const ready = phenomena.length === 5 && reasonSubmitted && reason === 'relative'
+  const ready = observations.length >= 2 && reasonSubmitted && reason === 'relative'
 
   useEffect(() => {
     if (!props.isComplete && ready) props.onComplete()
@@ -779,7 +804,7 @@ export function Lesson03Step6(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={6}
-      intro="Softmax는 여러 클래스의 점수를 하나의 묶음으로 받아 서로 비교 가능한 확률로 바꿉니다."
+      intro="소프트맥스(softmax) 함수는 여러 클래스의 점수를 한 묶음으로 받아 클래스별 확률로 바꿉니다. 합은 1이며, 가장 높은 확률의 클래스를 예측으로 선택할 수 있습니다."
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.7fr)_minmax(0,1.3fr)]">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="softmax-score-title">
@@ -807,7 +832,7 @@ export function Lesson03Step6(props: CommonStepProps) {
         <section className="rounded-2xl bg-slate-50 p-5 sm:p-6" aria-labelledby="softmax-result-title">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h3 id="softmax-result-title" className="text-xl font-black text-slate-950">Softmax 확률</h3>
+              <h3 id="softmax-result-title" className="text-xl font-black text-slate-950">소프트맥스(softmax) 함수의 확률</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600">세 점수 전체를 함께 계산한 결과입니다.</p>
             </div>
             <span className="rounded-xl bg-emerald-100 px-3 py-2 text-sm font-black text-emerald-900">
@@ -848,7 +873,7 @@ export function Lesson03Step6(props: CommonStepProps) {
       <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="softmax-observation-title">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 id="softmax-observation-title" className="font-black text-indigo-950">Softmax 설정 관찰</h3>
+            <h3 id="softmax-observation-title" className="font-black text-indigo-950">소프트맥스(softmax) 설정 비교</h3>
             <p className="mt-1 text-sm leading-6 text-slate-700" aria-live="polite">{notice}</p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -862,13 +887,12 @@ export function Lesson03Step6(props: CommonStepProps) {
         <p className="mt-4 font-black tabular-nums text-indigo-900">서로 다른 설정 {observations.length} / 2</p>
       </section>
 
-      <section className="mt-7" aria-labelledby="softmax-challenges"><h3 id="softmax-challenges" className="text-xl font-black">다섯 비교 실험</h3><p className="mt-2 leading-7 text-slate-600">버튼을 눌러 점수 묶음을 바꾼 뒤 막대 전체가 어떻게 달라지는지 비교하세요.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[
+      <section className="mt-7" aria-labelledby="softmax-challenges"><h3 id="softmax-challenges" className="text-xl font-black">비교를 돕는 점수 예시</h3><p className="mt-2 leading-7 text-slate-600">예시나 슬라이더로 서로 다른 두 설정을 비교하고 기록하세요. 모든 예시 버튼을 누를 필요는 없습니다.</p><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[
         { id: 'wide', label: '점수 차이가 큰 경우', scores: [0,0,5], message: '가장 큰 점수의 확률이 뚜렷하게 높아졌습니다.' },
         { id: 'close', label: '점수 차이가 작은 경우', scores: [2,2.5,3], message: '점수가 비슷하면 확률도 비교적 고르게 나뉩니다.' },
         { id: 'tie', label: '두 최고 점수가 같은 경우', scores: [3,3,1], message: '같은 최고 점수 두 클래스의 확률도 같습니다.' },
-        { id: 'shift', label: '모든 점수에 +1', scores: [2,3,5], message: '[1,2,4]와 [2,3,5]는 차이가 같아 확률 분포도 같습니다.' },
         { id: 'one', label: '한 클래스만 높이기', scores: [1,2,5], message: '한 점수만 높여도 전체 합이 1이어야 하므로 다른 클래스 확률도 함께 변합니다.' },
-      ].map((item) => <Button key={item.id} variant={phenomena.includes(item.id) ? 'primary' : 'secondary'} onClick={() => observePhenomenon(item.id, item.scores, item.message)}>{phenomena.includes(item.id) ? <Check size={18} aria-hidden="true" /> : null}{item.label}</Button>)}</div><p className="mt-4 rounded-xl bg-slate-100 p-4 font-bold">비교 완료 {phenomena.length} / 5</p></section>
+      ].map((item) => <Button key={item.id} variant={phenomena.includes(item.id) ? 'primary' : 'secondary'} onClick={() => observePhenomenon(item.id, item.scores, item.message)}>{phenomena.includes(item.id) ? <Check size={18} aria-hidden="true" /> : null}{item.label}</Button>)}</div><p className="mt-4 rounded-xl bg-slate-100 p-4 font-bold">선택해 본 예시 {phenomena.length}개 · 완료 조건은 두 설정 비교와 이유 판단입니다.</p></section>
 
       <fieldset className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">한 클래스 점수만 바꿔도 다른 확률이 함께 변하는 이유는?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={reason === 'relative' ? 'primary' : 'secondary'} aria-pressed={reason === 'relative'} onClick={() => { setReason('relative'); setReasonSubmitted(false) }}>여러 점수를 한 묶음으로 비교하고 합을 1로 만들기 때문</Button><Button variant={reason === 'independent' ? 'primary' : 'secondary'} aria-pressed={reason === 'independent'} onClick={() => { setReason('independent'); setReasonSubmitted(false) }}>각 점수를 서로 무관하게 따로 계산하기 때문</Button></div><Button className="mt-4" disabled={!reason} onClick={() => setReasonSubmitted(true)}>이유 제출</Button>{reasonSubmitted && <AnswerFeedback correct={reason === 'relative'} explanation={reason === 'relative' ? 'Softmax는 전체 점수의 상대적 크기를 한 번에 비교합니다.' : '세 확률의 합이 늘 1인 점과, 한 막대가 커질 때 다른 막대가 작아지는 점을 다시 보세요.'} />}</fieldset>
 
@@ -892,7 +916,7 @@ export function Lesson03Step6(props: CommonStepProps) {
       </div>
 
       {props.isComplete && (
-        <StepCompletionMessage>점수 차이, 동점, 공통 이동, 한 점수 변화와 확률 합을 실제 Softmax로 비교했습니다.</StepCompletionMessage>
+        <StepCompletionMessage>두 점수 설정의 클래스별 확률과 합을 비교하고 여러 점수가 함께 계산되는 이유를 설명했습니다.</StepCompletionMessage>
       )}
     </StepFrame>
   )
@@ -905,9 +929,9 @@ interface Step7Props extends CommonStepProps {
 
 const applicationCases = [
   { id: 'step', name: '계단 함수', location: '교육용 퍼셉트론 판단', output: '0 또는 1', reason: '기준을 넘었는지 즉시 구분' },
-  { id: 'relu', name: 'ReLU', location: '은닉층', output: '0 이상의 특징값', reason: '양수 특징을 그대로 전달' },
-  { id: 'sigmoid', name: 'Sigmoid', location: '이진 분류 출력층', output: '0~1 사이 한 확률', reason: '두 상태 중 한쪽의 정도 표현' },
-  { id: 'softmax', name: 'Softmax', location: '다중 분류 출력층', output: '합이 1인 클래스별 확률', reason: '여러 클래스를 한 묶음으로 비교' },
+  { id: 'relu', name: '렐루(ReLU) 함수', location: '은닉층', output: '0 이상의 특징값', reason: '양수 특징을 그대로 전달' },
+  { id: 'sigmoid', name: '시그모이드(sigmoid) 함수', location: '이진 분류 출력층', output: '0~1 사이 한 확률', reason: '두 상태 중 한쪽의 정도 표현' },
+  { id: 'softmax', name: '소프트맥스(softmax) 함수', location: '다중 분류 출력층', output: '합이 1인 클래스별 확률', reason: '여러 클래스를 한 묶음으로 비교' },
 ] as const
 
 export function Lesson03Step7({
@@ -917,7 +941,6 @@ export function Lesson03Step7({
 }: Step7Props) {
   const [mappings, setMappings] = useState<Record<string, UsageTarget | undefined>>({})
   const [mappingSubmitted, setMappingSubmitted] = useState(false)
-  const [locations, setLocations] = useState<Record<string, string>>({})
   const [outputs, setOutputs] = useState<Record<string, string>>({})
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [applicationSubmitted, setApplicationSubmitted] = useState(false)
@@ -928,9 +951,9 @@ export function Lesson03Step7({
   const mappingCorrect = usageFunctions.every((item) => mappings[item.id] === item.target)
   const allQuizSubmitted = quizSubmitted.every(Boolean)
   const allQuizCorrect = lesson03Quiz.every((quiz, index) => quizAnswers[index] === quiz.answer)
-  const allApplicationsAnswered = applicationCases.every((item) => locations[item.id] && outputs[item.id] && reasons[item.id])
-  const applicationsCorrect = applicationCases.every((item) => locations[item.id] === item.location && outputs[item.id] === item.output && reasons[item.id] === item.reason)
-  const completionReady = mappingSubmitted && mappingCorrect && allQuizSubmitted
+  const allApplicationsAnswered = applicationCases.every((item) => outputs[item.id] && reasons[item.id])
+  const applicationsCorrect = applicationCases.every((item) => outputs[item.id] === item.output && reasons[item.id] === item.reason)
+  const completionReady = priorStepsComplete && mappingSubmitted && mappingCorrect && allQuizSubmitted
     && allQuizCorrect && applicationSubmitted && applicationsCorrect
 
   useEffect(() => {
@@ -1012,11 +1035,10 @@ export function Lesson03Step7({
         </div>
       </section>
 
-      <section className="mt-10" aria-labelledby="application-design-title"><h3 id="application-design-title" className="text-xl font-black">출력 형태와 선택 이유까지 설계</h3><p className="mt-2 leading-7 text-slate-600">함수 이름만 연결하지 말고 새 상황의 사용 위치, 출력 형태, 선택 이유를 모두 고르세요.</p><div className="mt-5 grid gap-5 xl:grid-cols-2">{applicationCases.map((item) => <article key={item.id} className="rounded-2xl border border-slate-200 p-5"><h4 className="text-lg font-black text-indigo-800">{item.name}</h4>{[
-        { label: '사용 위치', value: locations[item.id] ?? '', set: setLocations, options: applicationCases.map((candidate) => candidate.location) },
+      <section className="mt-10" aria-labelledby="application-design-title"><h3 id="application-design-title" className="text-xl font-black">출력 형태와 사용 이유 해석</h3><p className="mt-2 leading-7 text-slate-600">위에서 연결한 사용 위치를 참고하여, 각 함수가 만드는 출력과 그 이유를 해석하세요.</p><div className="mt-5 grid gap-5 xl:grid-cols-2">{applicationCases.map((item) => <article key={item.id} className="rounded-2xl border border-slate-200 p-5"><h4 className="text-lg font-black text-indigo-800">{item.name}</h4><p className="mt-2 text-sm text-slate-600">사용 위치: {item.location}</p>{[
         { label: '출력 형태', value: outputs[item.id] ?? '', set: setOutputs, options: applicationCases.map((candidate) => candidate.output) },
         { label: '선택 이유', value: reasons[item.id] ?? '', set: setReasons, options: applicationCases.map((candidate) => candidate.reason) },
-      ].map((field) => <label key={field.label} className="mt-4 block"><span className="text-sm font-bold text-slate-700">{field.label}</span><select value={field.value} onChange={(event) => { field.set((current) => ({ ...current, [item.id]: event.target.value })); setApplicationSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{[...new Set(field.options)].map((option) => <option key={option} value={option}>{option}</option>)}</select></label>)}</article>)}</div><Button className="mt-5" disabled={!allApplicationsAnswered} onClick={() => setApplicationSubmitted(true)}>네 함수 설계 제출</Button>{applicationSubmitted && <AnswerFeedback correct={applicationsCorrect} explanation={applicationsCorrect ? '네 함수의 출력 형태와 선택 이유를 새로운 상황에 맞게 연결했습니다.' : '틀린 항목이 있습니다. 계단=즉시 0/1, ReLU=은닉 특징, Sigmoid=이진 확률, Softmax=클래스별 확률의 차이를 다시 보세요.'} />}</section>
+      ].map((field) => <label key={field.label} className="mt-4 block"><span className="text-sm font-bold text-slate-700">{field.label}</span><select value={field.value} onChange={(event) => { field.set((current) => ({ ...current, [item.id]: event.target.value })); setApplicationSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{[...new Set(field.options)].map((option) => <option key={option} value={option}>{option}</option>)}</select></label>)}</article>)}</div><Button className="mt-5" disabled={!allApplicationsAnswered} onClick={() => setApplicationSubmitted(true)}>출력 해석 제출</Button>{applicationSubmitted && <AnswerFeedback correct={applicationsCorrect} explanation={applicationsCorrect ? '네 함수가 그 위치에서 사용되는 이유를 출력 특성과 연결했습니다.' : '틀린 항목이 있습니다. 계단=즉시 0/1, ReLU=은닉 특징, Sigmoid=이진 확률, Softmax=클래스별 확률의 차이를 다시 보세요.'} />}</section>
 
       <section className="mt-10" aria-labelledby="lesson03-quiz-title">
         <h3 id="lesson03-quiz-title" className="text-xl font-black text-slate-950">확인 문제 4개</h3>

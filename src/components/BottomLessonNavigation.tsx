@@ -25,12 +25,12 @@ export function BottomLessonNavigation({
   return (
     <div className="mt-10 border-t border-slate-200 bg-white py-3 shadow-[0_-12px_30px_-28px_rgba(30,41,59,0.7)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Button variant="secondary" onClick={onPrevious} disabled={isFirst}>
+        <Button className="shrink-0 whitespace-nowrap" variant="secondary" onClick={onPrevious} disabled={isFirst}>
           <ArrowLeft size={18} aria-hidden="true" />
           이전
         </Button>
         <span
-          className="text-center text-sm font-bold tabular-nums text-slate-700"
+          className="min-w-0 text-center text-sm font-bold tabular-nums text-slate-700"
           aria-live="polite"
         >
           <span className="block">{currentStep} / {STEP_COUNT}</span>
@@ -42,6 +42,7 @@ export function BottomLessonNavigation({
         </span>
         {isLast ? (
           <Button
+            className="shrink-0 whitespace-nowrap"
             onClick={onComplete}
             disabled={!canComplete || lessonCompleted}
             aria-label={
@@ -56,7 +57,7 @@ export function BottomLessonNavigation({
             {lessonCompleted ? '완료됨' : '완료'}
           </Button>
         ) : (
-          <Button onClick={onNext}>
+          <Button className="shrink-0 whitespace-nowrap" onClick={onNext}>
             다음
             <ArrowRight size={18} aria-hidden="true" />
           </Button>

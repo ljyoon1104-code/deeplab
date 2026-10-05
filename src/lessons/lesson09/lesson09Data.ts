@@ -19,6 +19,26 @@ export const CONVOLUTION_KERNEL = [
   [0, 1],
 ] as const
 
+// 교과서 인쇄 105쪽(그림 II-22)의 격자를 확인한 예제입니다.
+export const TEXTBOOK_INPUT = [
+  [1, 2, 3, 4],
+  [2, 1, 0, 1],
+  [3, 0, 1, 1],
+  [1, 4, 1, 1],
+] as const
+
+export const TEXTBOOK_KERNEL = [
+  [1, 0, 1],
+  [1, 0, 1],
+  [0, 1, 0],
+] as const
+
+export const TEXTBOOK_COMPARISON_KERNEL = [
+  [0, 1, 0],
+  [0, 1, 0],
+  [1, 0, 1],
+] as const
+
 export const POOLING_INPUT = [
   [1, 8, 2, 3],
   [4, 6, 9, 1],
@@ -39,12 +59,16 @@ export const CNN_FLOW = [
 
 export type CnnFlowItem = (typeof CNN_FLOW)[number]
 
+// 저장된 cnnFlow 문자열은 유지하고 표시만 교과서 용어로 바꿉니다.
+export const cnnFlowLabel = (item: CnnFlowItem) =>
+  item === '완전연결층' ? '완전 연결층' : item === 'flatten' ? '차원 변환(flatten)' : item
+
 export const CNN_FLOW_ROLES: Record<CnnFlowItem, string> = {
   '입력 이미지': '픽셀의 가로·세로 구조를 유지한 입력',
   '합성곱': '작은 필터로 지역 패턴을 탐색',
   ReLU: '음수 반응을 0으로 바꾸고 비선형성을 더함',
   '풀링': '공간 크기를 줄이며 강한 반응을 남김',
-  flatten: '2차원 특성 맵을 한 줄 배열로 변환',
+  flatten: '2차원 특징 맵을 한 줄 배열로 변환',
   '완전연결층': '추출된 특징을 종합',
   Softmax: '클래스별 확률을 생성',
   '클래스 예측': '가장 높은 확률을 바탕으로 예측 결과를 선택',
@@ -80,8 +104,8 @@ export const VISION_SCENARIOS = [
   { id: 'one-car', text: '사진 속 하나의 자동차 위치를 사각형으로 표시한다.', answer: 'localization' },
   { id: 'road-boxes', text: '도로 사진에서 자동차와 사람을 모두 찾아 각각 상자로 표시한다.', answer: 'detection' },
   { id: 'pixel-regions', text: '사진의 모든 픽셀을 사람·도로·하늘 영역으로 구분한다.', answer: 'segmentation' },
-  { id: 'one-bird', text: '사진 속 새 한 마리의 종류와 위치를 하나의 상자로 표시한다.', answer: 'localization' },
-  { id: 'many-birds', text: '사진 속 여러 새의 종류와 각각의 위치를 모두 상자로 표시한다.', answer: 'detection' },
+  { id: 'one-bird', text: '얼굴 인식에 앞서 사진 속 얼굴 하나의 위치를 사각형으로 표시한다.', answer: 'localization' },
+  { id: 'many-birds', text: '스마트폰으로 문서를 읽기 전에 글자 영역들을 각각 상자로 찾는다.', answer: 'detection' },
 ] as const
 
 export type NetworkMode = 'fully-connected' | 'cnn' | 'both'

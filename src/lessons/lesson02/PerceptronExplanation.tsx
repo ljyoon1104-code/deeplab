@@ -1,0 +1,122 @@
+import { useId, useState } from 'react'
+import { ArrowDown, ArrowRight, RotateCcw } from 'lucide-react'
+import { Button } from '../../components/ui/Button'
+import type { PerceptronCalculation } from './perceptronMath'
+
+export function NeuronIntroduction() {
+  return (
+    <section className="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 sm:p-5" aria-label="뉴런에서 인공신경망까지">
+      <h3 className="text-xl font-black">한 뉴런의 정보 처리를 계산으로 표현하면?</h3>
+      <p className="mt-3 leading-7">퍼셉트론은 뉴런의 정보 처리 방식을 단순화한 인공 뉴런입니다. 여러 인공 뉴런을 연결하면 인공신경망(ANN)이 됩니다. 교과서 91~92쪽 그림의 관계를 아래처럼 나타낼 수 있습니다.</p>
+      <div className="mt-4 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+        <figure className="min-w-0 rounded-xl border border-cyan-200 bg-white p-3">
+          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="여러 방향에서 정보를 받아 다음 뉴런으로 전달하는 뉴런의 단순한 모습">
+            <path d="M15 15 L50 32 L82 55 M15 55 L82 55 M20 95 L50 78 L82 55 M110 55 L180 55 L205 25 M180 55 L205 55 M180 55 L205 90" fill="none" stroke="#0e7490" strokeWidth="3" />
+            <circle cx="95" cy="55" r="18" fill="#cffafe" stroke="#0e7490" strokeWidth="3" />
+          </svg>
+          <figcaption className="font-black">① 뉴런</figcaption><p className="mt-1 text-sm leading-6">정보를 받아 처리하고 다음 뉴런으로 전달합니다.</p>
+        </figure>
+        <ArrowRight className="hidden text-cyan-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-cyan-700 md:hidden" aria-hidden="true" />
+        <figure className="min-w-0 rounded-xl border border-indigo-200 bg-white p-3">
+          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="두 입력을 받아 계산한 뒤 하나의 출력을 만드는 퍼셉트론">
+            <path d="M38 25 L98 55 M38 85 L98 55 M134 55 L193 55" fill="none" stroke="#6366f1" strokeWidth="3" />
+            <circle cx="28" cy="25" r="11" fill="#cffafe" stroke="#0e7490" /><circle cx="28" cy="85" r="11" fill="#cffafe" stroke="#0e7490" />
+            <circle cx="116" cy="55" r="25" fill="#e0e7ff" stroke="#4338ca" strokeWidth="2" /><text x="116" y="61" textAnchor="middle" fontSize="16">계산</text>
+            <circle cx="199" cy="55" r="11" fill="#d1fae5" stroke="#047857" />
+          </svg>
+          <figcaption className="font-black">② 퍼셉트론</figcaption><p className="mt-1 text-sm leading-6">입력·가중치·편향으로 가중합을 구한 뒤 활성화 함수로 출력을 만듭니다.</p>
+        </figure>
+        <ArrowRight className="hidden text-cyan-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-cyan-700 md:hidden" aria-hidden="true" />
+        <figure className="min-w-0 rounded-xl border border-indigo-200 bg-white p-3">
+          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="두 입력 노드와 중간 뉴런 두 개, 출력 뉴런 하나가 연결된 인공신경망">
+            {[25,85].flatMap((y) => [25,85].map((to) => <line key={y + '-' + to} x1="30" y1={y} x2="110" y2={to} stroke="#94a3b8" strokeWidth="2" />))}
+            {[25,85].map((y) => <line key={y} x1="110" y1={y} x2="190" y2="55" stroke="#94a3b8" strokeWidth="2" />)}
+            {[25,85].map((y) => <circle key={y} cx="30" cy={y} r="12" fill="#cffafe" stroke="#0e7490" />)}
+            {[25,85].map((y) => <circle key={y} cx="110" cy={y} r="15" fill="#e0e7ff" stroke="#4338ca" />)}
+            <circle cx="190" cy="55" r="15" fill="#d1fae5" stroke="#047857" />
+          </svg>
+          <figcaption className="font-black">③ 인공신경망</figcaption><p className="mt-1 text-sm leading-6">여러 뉴런을 연결해 앞 뉴런의 출력을 다음 뉴런의 입력으로 전달합니다.</p>
+        </figure>
+      </div>
+      <p className="mt-4 leading-7"><strong>가중치</strong>는 각 입력이 계산에 반영되는 방식을 조절하며 음수도 가능합니다. <strong>편향</strong>은 입력에 곱하지 않고, 곱한 값들의 합에 더합니다. 가중합과 활성화 함수 적용 후 출력은 구분합니다.</p>
+      <figure className="mt-4 rounded-xl border border-indigo-200 bg-white p-4">
+        <figcaption className="font-black">② 퍼셉트론 안을 확대하면</figcaption>
+        <svg viewBox="0 0 300 295" className="mx-auto mt-3 w-full max-w-sm" role="img" aria-label="입력 x1과 x2가 각 연결의 가중치 w1, w2와 곱해져 합산되고, 편향 b를 더한 가중합 z가 활성화 함수를 거쳐 출력이 됩니다.">
+          <path d="M65 49 L65 80 L150 124 M235 49 L235 80 L150 124 M150 166 V194 M150 237 V265" fill="none" stroke="#6366f1" strokeWidth="2" />
+          {[65,235].map((x,index) => <g key={x}><circle cx={x} cy="28" r="25" fill="#cffafe" stroke="#0e7490" strokeWidth="2" /><text x={x} y="33" textAnchor="middle" fontSize="15">입력 x{index + 1}</text><rect x={x - 54} y="67" width="108" height="28" rx="6" fill="#eef2ff" stroke="#4338ca" /><text x={x} y="86" textAnchor="middle" fontSize="14">× 가중치 w{index + 1}</text></g>)}
+          <rect x="68" y="117" width="164" height="53" rx="10" fill="#e0e7ff" stroke="#4338ca" strokeWidth="2" />
+          <text x="150" y="139" textAnchor="middle" fontSize="14">곱의 합 + 편향 b</text><text x="150" y="159" textAnchor="middle" fontSize="16" fontWeight="bold">가중합 z</text>
+          <rect x="68" y="195" width="164" height="42" rx="10" fill="#cffafe" stroke="#0e7490" /><text x="150" y="222" textAnchor="middle" fontSize="16">활성화 함수</text>
+          <rect x="90" y="264" width="120" height="28" rx="10" fill="#d1fae5" stroke="#047857" /><text x="150" y="284" textAnchor="middle" fontSize="16">출력</text>
+        </svg>
+        <p className="mt-3 text-sm leading-6">선 위에서는 입력에 가중치를 곱하고, 합산하는 곳에서 편향을 더합니다. 활성화 함수 앞은 가중합, 뒤는 출력입니다. 이 위치를 아래 순서·역할 활동과 연결하세요.</p>
+      </figure>
+    </section>
+  )
+}
+
+const stages = [
+  { title: '① 입력값', detail: '모델이 받은 두 입력을 확인합니다. 아직 가중치를 곱하지 않았습니다.' },
+  { title: '② 가중치와 곱셈', detail: '같은 번호의 입력과 가중치를 연결해 곱합니다. 가중치는 연결마다 붙어 있습니다.' },
+  { title: '③ 곱의 합', detail: '두 곱셈 결과를 모두 더합니다. 편향을 더하기 전의 값입니다.' },
+  { title: '④ 편향과 가중합', detail: '곱의 합에 편향을 더하면 가중합 z가 됩니다. 편향을 각 입력에 곱하지 않습니다.' },
+  { title: '⑤ 활성화 함수와 출력', detail: '계단 함수는 z가 음수이면 0, 0 이상이면 1을 출력합니다. 가중합과 최종 출력은 다른 값입니다.' },
+] as const
+
+export function PerceptronWalkthrough({ result }: { result: PerceptronCalculation }) {
+  const [scene, setScene] = useState(0)
+  const titleId = useId()
+  const paint = (step: number) => scene === step ? '#4338ca' : '#64748b'
+  const fill = (step: number) => scene === step ? '#e0e7ff' : '#ffffff'
+  const highlight = 'transition-colors duration-150 motion-reduce:transition-none'
+  return (
+    <section className="mt-5 rounded-2xl border border-indigo-200 bg-white p-4" aria-label="퍼셉트론 완성 풀이 그림">
+      <h4 className="font-black">그림과 계산을 한 단계씩 연결하기</h4>
+      <p className="mt-2 text-sm leading-6">원은 입력값, 연결선의 w는 가중치입니다. 합에 편향 b를 더한 가중합을 계단 함수에 넣습니다. 아래 조작은 설명만 바꾸며 답안과 완료 상태는 바꾸지 않습니다.</p>
+      <div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2">
+        <svg viewBox="0 0 300 430" className="mx-auto w-full max-w-80" role="img" aria-labelledby={titleId}>
+          <title id={titleId}>{'입력 ' + result.inputs.join(', ') + '에 가중치 ' + result.weights.join(', ') + '를 곱해 합 ' + result.productSum + ', 편향 ' + result.bias + '를 더한 가중합 ' + result.z + ', 계단 함수 출력 ' + result.output}</title>
+          <path d="M65 65 L65 105 L150 165 M235 65 L235 105 L150 165 M150 195 V245 M150 280 V320 M150 355 V390" fill="none" stroke="#94a3b8" strokeWidth="2" />
+          {result.inputs.map((input, index) => <g key={index}>
+            <circle cx={index === 0 ? 65 : 235} cy="40" r="25" fill={fill(0)} stroke={paint(0)} strokeWidth={scene === 0 ? 3 : 1.5} className={highlight} />
+            <text x={index === 0 ? 65 : 235} y="46" textAnchor="middle" fontSize="16">x{index + 1} = {input}</text>
+            <rect x={index === 0 ? 8 : 178} y="88" width="114" height="42" rx="8" fill={fill(1)} stroke={paint(1)} strokeWidth={scene === 1 ? 3 : 1} className={highlight} />
+            <text x={index === 0 ? 65 : 235} y="105" textAnchor="middle" fontSize="14">w{index + 1} = {result.weights[index]}</text>
+            <text x={index === 0 ? 65 : 235} y="122" textAnchor="middle" fontSize="14">x{index + 1} × w{index + 1} = {result.products[index]}</text>
+          </g>)}
+          <rect x="64" y="159" width="172" height="40" rx="10" fill={fill(2)} stroke={paint(2)} strokeWidth={scene === 2 ? 3 : 1} className={highlight} />
+          <text x="150" y="185" textAnchor="middle" fontSize="16">③ 곱의 합 = {result.productSum}</text>
+          <path d="M74 226 L108 250" stroke={paint(3)} strokeWidth="2" />
+          <text x="14" y="222" fontSize="15">b = {result.bias}</text>
+          <rect x="65" y="242" width="170" height="44" rx="10" fill={fill(3)} stroke={paint(3)} strokeWidth={scene === 3 ? 3 : 1} className={highlight} />
+          <text x="150" y="270" textAnchor="middle" fontSize="17">④ 가중합 z = {result.z}</text>
+          <rect x="50" y="316" width="200" height="46" rx="10" fill={fill(4)} stroke={paint(4)} strokeWidth={scene === 4 ? 3 : 1} className={highlight} />
+          <text x="150" y="335" textAnchor="middle" fontSize="15">⑤ 계단 함수</text>
+          <text x="150" y="354" textAnchor="middle" fontSize="14">z &lt; 0 → 0 / z ≥ 0 → 1</text>
+          <rect x="75" y="390" width="150" height="35" rx="10" fill={fill(4)} stroke={paint(4)} className={highlight} />
+          <text x="150" y="414" textAnchor="middle" fontSize="17">출력 = {result.output}</text>
+        </svg>
+        <div className="min-w-0">
+          <ol className="space-y-3">
+            {stages.map((stage, index) => <li key={stage.title} aria-current={scene === index ? 'step' : undefined} className={'rounded-xl border-2 p-3 ' + highlight + (scene === index ? ' border-indigo-600 bg-indigo-50' : ' border-slate-200')}>
+              <p className="font-black">{stage.title}{scene === index ? ' · 현재' : ''}</p>
+              <p className="mt-1 break-words font-mono leading-7">
+                {index === 0 && result.inputs.map((value, i) => 'x' + (i + 1) + ' = ' + value).join(', ')}
+                {index === 1 && result.products.map((value, i) => '(' + result.inputs[i] + ' × ' + result.weights[i] + ') = ' + value).join(', ')}
+                {index === 2 && <>{result.products.join(' + ')} = {result.productSum}</>}
+                {index === 3 && <>{result.productSum} + ({result.bias}) = {result.z}</>}
+                {index === 4 && <>z = {result.z} → 출력 {result.output}</>}
+              </p>
+            </li>)}
+          </ol>
+        </div>
+      </div>
+      <p className="mt-4 min-h-20 rounded-xl bg-indigo-50 p-4 leading-7" role="status" aria-live="polite"><strong>{stages[scene].title} · {scene + 1}/5</strong><br />{stages[scene].detail}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={scene === 0} onClick={() => setScene((value) => value - 1)} aria-label="퍼셉트론 풀이 이전">이전</Button>
+        <Button disabled={scene === stages.length - 1} onClick={() => setScene((value) => value + 1)} aria-label="퍼셉트론 풀이 다음">다음</Button>
+        <Button variant="secondary" onClick={() => setScene(0)} aria-label="퍼셉트론 풀이 다시 보기"><RotateCcw size={16} aria-hidden="true" />다시 보기</Button>
+      </div>
+    </section>
+  )
+}

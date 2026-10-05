@@ -22,7 +22,7 @@ export default function PoolingVisualizer({ input, poolSize, selectedRegion, che
     <div className="grid items-center gap-5 md:grid-cols-[1fr_auto_0.75fr]">
       <PixelGrid
         values={input}
-        label="4×4 특성 맵"
+        label="4×4 특징 맵"
         tone="feature"
         region={{ startRow: selectedRow * poolSize, startColumn: selectedColumn * poolSize, height: poolSize, width: poolSize }}
       />

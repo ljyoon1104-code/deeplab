@@ -126,7 +126,7 @@ function Percent({ value }: { value: number }) {
 
 function ProbabilityBars({ values, emphasis }: { values: readonly number[]; emphasis?: number }) {
   return (
-    <div className="grid gap-2" aria-label="숫자 0부터 9까지 실제 Softmax 확률">
+    <div className="grid gap-2" aria-label="숫자 0부터 9까지 소프트맥스(softmax) 함수의 실제 출력 확률">
       {values.map((value, digit) => (
         <div
           key={digit}
@@ -168,13 +168,13 @@ export function Lesson08Step1(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={1} intro="학습에 사용할 실제 데이터 수, 반복 횟수와 신경망 구조를 직접 정합니다.">
+    <StepFrame {...props} step={1} intro="훈련 데이터 수, 학습 횟수(Epoch), 신경망 구조를 정합니다. 모델 구조는 연결된 층과 뉴런 수를 뜻합니다.">
       <LabBadges />
-      <p className="mt-4 leading-7 text-slate-700">실제 MNIST 데이터와 실제 신경망으로 학습합니다. 학습 결과는 기기와 실행 시점에 따라 조금씩 달라질 수 있습니다.</p>
+      <p className="mt-4 leading-7 text-slate-700">Lesson 07의 전처리 원리를 이어서 딥러닝 모델 구성 → 학습 → 성능 평가를 수행합니다. 이 차시에서 데이터를 별도로 불러와 실제 신경망을 학습합니다. 교과서와 데이터 수·실행 환경·학습 조건이 다를 수 있어 정확도가 같을 필요는 없습니다.</p>
 
       <div className="mt-7 grid gap-7">
         <fieldset disabled={isBusy}>
-          <legend className="text-lg font-black text-slate-950">1. 학습 데이터 수</legend>
+          <legend className="text-lg font-black text-slate-950">1. 훈련 데이터(Train) 수</legend>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {MNIST_DATASET_SIZES.map((size) => {
               const descriptions: Record<MnistDatasetSize, string> = {
@@ -194,12 +194,12 @@ export function Lesson08Step1(props: CommonStepProps) {
               )
             })}
           </div>
-          <p className="mt-2 text-sm text-slate-500">데이터 수가 많다고 언제나 정확도가 높아지는 것은 아닙니다. 실제 결과로 비교해 봅니다.</p>
+          <p className="mt-2 text-sm text-slate-500">훈련 데이터는 모델이 가중치와 편향을 학습하는 데 사용합니다. 데이터 수가 많다고 언제나 정확도가 높아지는 것은 아니므로 실제 결과로 비교합니다.</p>
         </fieldset>
 
         <fieldset disabled={isBusy}>
-          <legend className="text-lg font-black text-slate-950">2. Epoch</legend>
-          <p className="mt-1 text-sm leading-6 text-slate-600">전체 학습 데이터를 한 번 사용하여 학습하는 것을 1 Epoch라고 합니다.</p>
+          <legend className="text-lg font-black text-slate-950">2. 학습 횟수(Epoch)</legend>
+          <p className="mt-1 text-sm leading-6 text-slate-600">학습 횟수(Epoch)는 훈련 데이터 전체를 반복해 학습하는 횟수입니다. 배치 사이즈(batch size)는 한 번에 처리하는 표본 수이며, 이 실습에서는 32개입니다. STEP 2에서는 실제로 처리한 배치 수가 늘어나고, 전체 훈련 데이터를 한 번 학습하면 1 Epoch가 완료됩니다.</p>
           <div className="mt-3 flex flex-wrap gap-3">
             {([1, 3, 5] as Lesson08Epochs[]).map((value) => (
               <button key={value} type="button" aria-pressed={epochs === value} onClick={() => { setEpochs(value); setTouched((item) => ({ ...item, epoch: true })) }} className={`min-h-12 min-w-20 rounded-xl border px-5 font-black ${epochs === value ? 'border-violet-500 bg-violet-600 text-white' : 'border-slate-200 bg-white text-slate-800'}`}>
@@ -211,6 +211,7 @@ export function Lesson08Step1(props: CommonStepProps) {
 
         <fieldset disabled={isBusy}>
           <legend className="text-lg font-black text-slate-950">3. 모델 구조</legend>
+          <p className="mt-2 text-sm leading-6 text-slate-600">구조의 784는 한 이미지의 픽셀 입력값 수, 가운데 숫자는 각 은닉층의 뉴런 수, 마지막 10은 숫자 0~9에 대응하는 클래스별 출력 수입니다.</p>
           <div className="mt-3 grid gap-3 lg:grid-cols-3">
             {(Object.keys(MODEL_OPTIONS) as Lesson08ModelType[]).map((type) => {
               const option = MODEL_OPTIONS[type]
@@ -223,18 +224,19 @@ export function Lesson08Step1(props: CommonStepProps) {
               )
             })}
           </div>
+          <p className="mt-3 text-sm leading-6 text-violet-900" aria-live="polite">현재 선택: <strong>{MODEL_OPTIONS[modelType].name}</strong> · {MODEL_OPTIONS[modelType].layers.map((count, index) => `은닉층 ${index + 1}: 뉴런 ${count}개`).join(' → ')}</p>
         </fieldset>
       </div>
 
       <div className="mt-7 rounded-2xl border border-violet-200 bg-violet-50 p-5">
         <h3 className="font-black text-violet-950">실행 조건 요약</h3>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-          <div><dt className="text-slate-500">Train</dt><dd className="font-black">{datasetSize.toLocaleString()}개</dd></div>
-          <div><dt className="text-slate-500">Epoch</dt><dd className="font-black">{epochs}</dd></div>
+          <div><dt className="text-slate-500">훈련 데이터(Train)</dt><dd className="font-black">{datasetSize.toLocaleString()}개</dd></div>
+          <div><dt className="text-slate-500">학습 횟수(Epoch)</dt><dd className="font-black">{epochs}</dd></div>
           <div><dt className="text-slate-500">모델</dt><dd className="font-black">{MODEL_OPTIONS[modelType].name}</dd></div>
           <div><dt className="text-slate-500">최적화 방법</dt><dd className="font-black">Adam</dd></div>
-          <div><dt className="text-slate-500">손실함수</dt><dd className="font-black">CCEE</dd></div>
-          <div><dt className="text-slate-500">배치 크기</dt><dd className="font-black">32</dd></div>
+          <div><dt className="text-slate-500">손실함수</dt><dd className="font-black">범주형 교차 엔트로피 오차(CCEE)</dd></div>
+          <div><dt className="text-slate-500">배치 사이즈(batch size)</dt><dd className="font-black">32</dd></div>
         </dl>
         <Button className="mt-5" onClick={confirm} disabled={!ready || isBusy}>
           <CheckCircle2 size={18} aria-hidden="true" /> 이 실행 조건 확인
@@ -242,7 +244,7 @@ export function Lesson08Step1(props: CommonStepProps) {
         {!ready ? <p className="mt-2 text-sm text-slate-600">세 종류의 조건을 각각 한 번 선택해 주세요.</p> : null}
       </div>
       {isBusy ? <Notice>학습이 끝날 때까지 현재 실행 조건은 잠겨 있습니다.</Notice> : null}
-      {props.isComplete || summaryConfirmed ? <Completion>Train 수, Epoch, 모델 구조를 선택하고 실행 조건을 확인했습니다.</Completion> : null}
+      {props.isComplete || summaryConfirmed ? <Completion>훈련 데이터 수, 학습 횟수, 모델 구조를 선택하고 실행 조건을 확인했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -278,16 +280,16 @@ export function Lesson08Step2(props: CommonStepProps) {
       : STATUS_LABELS[lab.status]
 
   return (
-    <StepFrame {...props} step={2} intro="선택한 실제 MNIST Train subset으로 새 신경망을 만들고 학습합니다.">
+    <StepFrame {...props} step={2} intro="선택한 실제 MNIST 훈련 데이터 일부로 새 신경망을 만들고 학습합니다. 데이터·모델 준비가 끝나면 실제 배치별 학습 진행이 표시됩니다.">
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <h3 className="flex items-center gap-2 text-lg font-black"><Database size={20} /> 실제 학습 흐름</h3>
           <ol className="mt-4 grid gap-2 text-sm leading-6 text-slate-700">
-            {['Train JSON 불러오기와 구조 확인', '픽셀값 ÷ 255, 입력 shape [N, 784]', 'label 원-핫, 정답 shape [N, 10]', '선택 구조로 새 모델 생성과 학습'].map((item, index) => (
+            {['훈련 데이터 불러오기와 구조 확인', '이미지 차원 변환·정규화: 픽셀값 ÷ 255, 입력 [N, 784]', '레이블 원-핫 인코딩, 정답 [N, 10]', '선택 구조로 새 모델 생성과 학습'].map((item, index) => (
               <li key={item} className="flex gap-3"><span className="font-black text-violet-700">{index + 1}</span><span>{item}</span></li>
             ))}
           </ol>
-          <p className="mt-4 text-sm leading-6 text-slate-600">Train은 가중치와 편향을 학습하는 데만 사용합니다. 새 실험은 이전 모델을 이어 쓰지 않고 새 모델로 시작합니다.</p>
+          <p className="mt-4 text-sm leading-6 text-slate-600">훈련 데이터로 가중치와 편향을 학습합니다. 테스트 데이터는 학습 후 평가에 사용합니다. 새 실험은 이전 모델을 이어 쓰지 않고 새 모델로 시작합니다.</p>
         </div>
 
         <div className="rounded-2xl border border-violet-200 bg-white p-5" aria-busy={running}>
@@ -297,12 +299,12 @@ export function Lesson08Step2(props: CommonStepProps) {
             <h3 className="text-xl font-black">{STATUS_LABELS[lab.status]}</h3>
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div><dt className="text-slate-500">Train sample</dt><dd className="font-black">{(lab.trainingResult?.config.datasetSize ?? lab.datasetSize).toLocaleString()}</dd></div>
+            <div><dt className="text-slate-500">훈련 표본 수</dt><dd className="font-black">{(lab.trainingResult?.config.datasetSize ?? lab.datasetSize).toLocaleString()}</dd></div>
             <div><dt className="text-slate-500">모델</dt><dd className="font-black">{MODEL_OPTIONS[lab.trainingResult?.config.modelType ?? lab.modelType].name}</dd></div>
-            <div><dt className="text-slate-500">Epoch</dt><dd className="font-black">{lab.currentEpoch} / {lab.trainingResult?.config.epochs ?? lab.epochs}</dd></div>
+            <div><dt className="text-slate-500">학습 횟수(Epoch)</dt><dd className="font-black">{lab.currentEpoch} / {lab.trainingResult?.config.epochs ?? lab.epochs}</dd></div>
             <div><dt className="text-slate-500">backend</dt><dd className="font-mono font-black">{lab.backend ?? '준비 전'}</dd></div>
-            <div><dt className="text-slate-500">현재 Loss</dt><dd className="font-mono font-black">{lab.liveMetric ? lab.liveMetric.loss.toFixed(4) : '—'}</dd></div>
-            <div><dt className="text-slate-500">현재 Accuracy</dt><dd className="font-mono font-black">{lab.liveMetric ? <Percent value={lab.liveMetric.accuracy} /> : '—'}</dd></div>
+            <div><dt className="text-slate-500">현재 훈련 오차(loss)</dt><dd className="font-mono font-black">{lab.liveMetric ? lab.liveMetric.loss.toFixed(4) : '—'}</dd></div>
+            <div><dt className="text-slate-500">현재 훈련 정확도(accuracy)</dt><dd className="font-mono font-black">{lab.liveMetric ? <Percent value={lab.liveMetric.accuracy} /> : '—'}</dd></div>
             <div className="col-span-2"><dt className="text-slate-500">경과 시간</dt><dd className="font-mono font-black">{(lab.elapsedMs / 1000).toFixed(1)}초</dd></div>
           </dl>
           <div className="mt-5">
@@ -343,8 +345,8 @@ export function Lesson08Step2(props: CommonStepProps) {
             ) : (
               <p className="mt-2 text-sm text-slate-600">
                 {running
-                  ? `${STATUS_LABELS[lab.status]}… 정확한 Batch 진행률이 준비되면 표시합니다.`
-                  : '학습을 시작하면 실제 Batch 완료 수로 진행률을 표시합니다.'}
+                  ? `${STATUS_LABELS[lab.status]}… 준비 중에는 퍼센트를 표시하지 않으며, 실제 배치 완료 수가 집계되면 진행률을 표시합니다.`
+                  : '학습을 시작하면 실제 배치 완료 수로 진행률을 표시합니다.'}
               </p>
             )}
           </div>
@@ -373,9 +375,9 @@ export function Lesson08Step2(props: CommonStepProps) {
         <div className="mt-7 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
           <h3 className="font-black text-emerald-950">실제 학습 완료 결과</h3>
           <dl className="mt-3 grid gap-3 sm:grid-cols-4">
-            <div><dt className="text-sm text-slate-600">최종 Train Loss</dt><dd className="font-mono text-lg font-black">{lab.trainingResult.finalLoss.toFixed(4)}</dd></div>
-            <div><dt className="text-sm text-slate-600">최종 Train Accuracy</dt><dd className="font-mono text-lg font-black"><Percent value={lab.trainingResult.finalAccuracy} /></dd></div>
-            <div><dt className="text-sm text-slate-600">완료 Epoch</dt><dd className="font-mono text-lg font-black">{lab.trainingResult.completedEpochs}</dd></div>
+            <div><dt className="text-sm text-slate-600">최종 훈련 오차(loss)</dt><dd className="font-mono text-lg font-black">{lab.trainingResult.finalLoss.toFixed(4)}</dd></div>
+            <div><dt className="text-sm text-slate-600">최종 훈련 정확도(accuracy)</dt><dd className="font-mono text-lg font-black"><Percent value={lab.trainingResult.finalAccuracy} /></dd></div>
+            <div><dt className="text-sm text-slate-600">완료한 학습 횟수(Epoch)</dt><dd className="font-mono text-lg font-black">{lab.trainingResult.completedEpochs}</dd></div>
             <div><dt className="text-sm text-slate-600">학습 시간</dt><dd className="font-mono text-lg font-black">{(lab.trainingResult.durationMs / 1000).toFixed(2)}초</dd></div>
           </dl>
           <Button className="mt-5" onClick={props.onComplete}>
@@ -386,7 +388,7 @@ export function Lesson08Step2(props: CommonStepProps) {
       {props.isComplete ? (
         <Completion>
           {lab.trainingResult
-            ? '실제 model.fit()이 완료되어 마지막 Loss와 Accuracy를 확인했습니다.'
+            ? '실제 학습이 완료되어 마지막 훈련 오차와 정확도를 확인했습니다.'
             : '이 STEP의 완료 기록이 저장되어 있습니다. 현재 메모리의 모델이 필요하면 실제 학습을 다시 실행하세요.'}
         </Completion>
       ) : null}
@@ -404,7 +406,7 @@ export function Lesson08Step3(props: CommonStepProps) {
   const [submitted, setSubmitted] = useState(false)
 
   if (!trainingResult) {
-    return <StepFrame {...props} step={3} intro="실제 epoch 기록을 그래프로 읽고 Loss와 Accuracy의 의미를 구분합니다."><ModelRequired /></StepFrame>
+    return <StepFrame {...props} step={3} intro="학습 횟수별 실제 기록을 그래프로 읽고 오차(loss)와 정확도(accuracy)의 의미를 구분합니다."><ModelRequired /></StepFrame>
   }
   const first = trainingResult.history[0]
   const last = trainingResult.history.at(-1) ?? first
@@ -416,33 +418,33 @@ export function Lesson08Step3(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={3} intro="callback에서 수집한 실제 epoch history만 이용해 두 지표의 변화를 살펴봅니다.">
+    <StepFrame {...props} step={3} intro="실제 학습에서 기록한 훈련 오차(loss)와 훈련 정확도(accuracy)를 비교합니다. 이 그래프는 테스트 데이터의 결과가 아닙니다.">
       {!modelReady ? <ModelRequired /> : null}
       <div className="grid gap-5 lg:grid-cols-2">
-        <TrainingMetricChart title="Epoch별 Loss" metric="loss" history={trainingResult.history} onInspect={() => setViewedLoss(true)} />
-        <TrainingMetricChart title="Epoch별 Accuracy" metric="accuracy" history={trainingResult.history} onInspect={() => setViewedAccuracy(true)} />
+        <TrainingMetricChart title="학습 횟수별 훈련 오차(loss)" metric="loss" history={trainingResult.history} onInspect={() => setViewedLoss(true)} />
+        <TrainingMetricChart title="학습 횟수별 훈련 정확도(accuracy)" metric="accuracy" history={trainingResult.history} onInspect={() => setViewedAccuracy(true)} />
       </div>
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
         <table className="min-w-full text-left text-sm">
           <caption className="px-4 py-3 text-left font-black">실제 history 값</caption>
-          <thead className="bg-slate-100"><tr><th className="px-4 py-3">Epoch</th><th className="px-4 py-3">Loss</th><th className="px-4 py-3">Accuracy</th></tr></thead>
+          <thead className="bg-slate-100"><tr><th className="px-4 py-3">Epoch</th><th className="px-4 py-3">오차(loss)</th><th className="px-4 py-3">정확도(accuracy)</th></tr></thead>
           <tbody>{trainingResult.history.map((item) => <tr key={item.epoch} className="border-t border-slate-200"><td className="px-4 py-3 font-black">{item.epoch}</td><td className="px-4 py-3 font-mono">{item.loss.toFixed(6)}</td><td className="px-4 py-3 font-mono"><Percent value={item.accuracy} /></td></tr>)}</tbody>
         </table>
       </div>
       <label className="mt-4 flex items-start gap-3 rounded-xl bg-slate-50 p-4">
         <input type="checkbox" className="mt-1 size-5" checked={lastChecked} onChange={(event) => setLastChecked(event.target.checked)} />
-        <span>마지막 Epoch의 Loss <strong>{last.loss.toFixed(4)}</strong>와 Accuracy <strong><Percent value={last.accuracy} /></strong>를 확인했습니다.</span>
+        <span>마지막 학습의 훈련 오차(loss) <strong>{last.loss.toFixed(4)}</strong>와 훈련 정확도(accuracy) <strong><Percent value={last.accuracy} /></strong>를 확인했습니다.</span>
       </label>
 
       <div className="mt-6 rounded-2xl border border-slate-200 p-5">
         <h3 className="font-black">이번 실행 결과 해석</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Loss는 틀린 정도, Accuracy는 맞힌 비율로 서로 같은 지표가 아닙니다. 각 지표의 첫 epoch와 마지막 epoch를 비교하세요.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">오차(loss)는 예측과 정답을 비교해 손실함수로 계산한 값입니다. 정확도(accuracy)는 해당 데이터에서 맞힌 비율로, 오차와 다른 지표입니다. 각 지표의 첫 학습과 마지막 학습을 비교하세요.</p>
         {(['loss', 'accuracy'] as const).map((metric) => {
           const value = metric === 'loss' ? lossReading : accuracyReading
           const setValue = metric === 'loss' ? setLossReading : setAccuracyReading
           return (
             <fieldset key={metric} className="mt-4">
-              <legend className="font-bold">{metric === 'loss' ? 'Loss' : 'Accuracy'}는 어떻게 달라졌나요?</legend>
+              <legend className="font-bold">{metric === 'loss' ? '오차(loss)' : '정확도(accuracy)'}는 어떻게 달라졌나요?</legend>
               <div className="mt-2 flex flex-wrap gap-2">
                 {([['down', '감소'], ['up', '증가'], ['similar', '거의 같음']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={value === key} onClick={() => { setValue(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 font-bold ${value === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
               </div>
@@ -450,10 +452,10 @@ export function Lesson08Step3(props: CommonStepProps) {
           )
         })}
         <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={!lossReading || !accuracyReading}>해석 제출</Button>
-        {submitted ? <Notice><p>실제 값 기준: Loss는 <strong>{classify(first.loss, last.loss) === 'down' ? '감소' : classify(first.loss, last.loss) === 'up' ? '증가' : '거의 같음'}</strong>, Accuracy는 <strong>{classify(first.accuracy, last.accuracy) === 'up' ? '증가' : classify(first.accuracy, last.accuracy) === 'down' ? '감소' : '거의 같음'}</strong>했습니다.</p><p className="mt-1">매 epoch가 같은 방향으로 움직인다고 보장할 수 없고, 다른 실행에서도 같은 값이 나온다고 보장할 수 없습니다.</p></Notice> : null}
+        {submitted ? <Notice><p>실제 값 기준: 훈련 오차는 <strong>{classify(first.loss, last.loss) === 'down' ? '감소' : classify(first.loss, last.loss) === 'up' ? '증가' : '거의 같음'}</strong>, 훈련 정확도는 <strong>{classify(first.accuracy, last.accuracy) === 'up' ? '증가' : classify(first.accuracy, last.accuracy) === 'down' ? '감소' : '거의 같음'}</strong>했습니다.</p><p className="mt-1">매 학습에서 같은 방향으로 움직인다고 보장할 수 없고, 다른 실행에서도 같은 값이 나온다고 보장할 수 없습니다.</p></Notice> : null}
         <Button className="mt-5" onClick={finish} disabled={!complete}>STEP 3 활동 완료</Button>
       </div>
-      {props.isComplete ? <Completion>두 실제 그래프와 마지막 값을 확인하고 Loss와 Accuracy를 구분해 해석했습니다.</Completion> : null}
+      {props.isComplete ? <Completion>두 실제 그래프와 마지막 값을 확인하고 오차와 정확도를 구분해 해석했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -467,10 +469,11 @@ export function Lesson08Step4(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={4} intro="학습에 넣지 않은 실제 Test 500개를 현재 모델의 predict()로 평가합니다.">
+    <StepFrame {...props} step={4} intro="학습에 사용하지 않은 실제 테스트 데이터(Test) 500개를 현재 모델로 예측해 성능을 평가합니다.">
+      <p className="mb-5 leading-7 text-slate-700">클래스별 확률은 한 이미지가 각 숫자일 가능성에 대한 모델의 예측입니다. 테스트 정확도는 여러 이미지의 예측을 실제 정답과 비교해 구한 정답 비율입니다. 평가 후 결과 카드에서 500개 중 맞힌 수와 정확도를 함께 읽고, STEP 5의 확률 막대에서는 선택한 한 이미지의 판단을 살펴봅니다.</p>
       {!modelReady ? <ModelRequired /> : (
         <>
-          <Notice>Train subset은 가중치와 편향 학습에만, Test 500은 학습이 끝난 현재 모델의 평가에만 사용합니다. Test 결과로 모델을 다시 학습하지 않습니다.</Notice>
+          <Notice>훈련 데이터 일부는 가중치와 편향 학습에, 테스트 데이터 500개는 학습이 끝난 현재 모델의 평가에 사용합니다. 테스트 결과로 모델을 다시 학습하지 않습니다.</Notice>
           <Button
             className="mt-5"
             onClick={() => void evaluateTest()}
@@ -478,12 +481,12 @@ export function Lesson08Step4(props: CommonStepProps) {
             aria-busy={status === 'evaluating'}
           >
             {status === 'evaluating' ? <LoaderCircle className="animate-spin" size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
-            {status === 'evaluating' ? 'Test 500개 평가 중…' : 'Test 500개로 평가하기'}
+            {status === 'evaluating' ? '테스트 데이터 500개 평가 중…' : '테스트 데이터 500개로 평가하기'}
           </Button>
           {status === 'evaluating' ? (
             <p className="mt-3 flex items-center gap-2 text-sm font-bold text-violet-800" role="status" aria-live="polite">
               <LoaderCircle className="animate-spin" size={17} aria-hidden="true" />
-              학습에 사용하지 않은 Test JSON을 불러와 실제 model.predict()를 실행하고 있습니다.
+              학습에 사용하지 않은 테스트 데이터를 불러와 현재 모델로 실제 예측하고 있습니다.
             </p>
           ) : null}
         </>
@@ -492,21 +495,21 @@ export function Lesson08Step4(props: CommonStepProps) {
       {evaluation && trainingResult ? (
         <div className="mt-7">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl bg-slate-100 p-5"><p className="text-sm text-slate-600">Test sample</p><p className="mt-1 text-2xl font-black">{evaluation.sampleCount}</p></div>
+            <div className="rounded-2xl bg-slate-100 p-5"><p className="text-sm text-slate-600">테스트 표본 수</p><p className="mt-1 text-2xl font-black">{evaluation.sampleCount}</p></div>
             <div className="rounded-2xl bg-emerald-50 p-5"><p className="text-sm text-emerald-800">정답 수</p><p className="mt-1 text-2xl font-black text-emerald-950">{evaluation.correct}</p></div>
             <div className="rounded-2xl bg-rose-50 p-5"><p className="text-sm text-rose-800">오답 수</p><p className="mt-1 text-2xl font-black text-rose-950">{evaluation.wrong}</p></div>
-            <div className="rounded-2xl bg-violet-50 p-5"><p className="text-sm text-violet-800">Test Accuracy</p><p className="mt-1 text-2xl font-black text-violet-950"><Percent value={evaluation.accuracy} /></p></div>
+            <div className="rounded-2xl bg-violet-50 p-5"><p className="text-sm text-violet-800">테스트 정확도(accuracy)</p><p className="mt-1 text-2xl font-black text-violet-950"><Percent value={evaluation.accuracy} /></p></div>
           </div>
-          <p className="mt-3 text-sm font-bold text-slate-700">{evaluation.correct} + {evaluation.wrong} = {evaluation.sampleCount} · Test Accuracy = {evaluation.correct} ÷ {evaluation.sampleCount} × 100</p>
+          <p className="mt-3 text-sm font-bold text-slate-700">{evaluation.correct} + {evaluation.wrong} = {evaluation.sampleCount} · 테스트 정확도(accuracy) = {evaluation.correct} ÷ {evaluation.sampleCount} × 100</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-cyan-200 p-5"><p className="text-sm text-slate-600">Train Accuracy</p><p className="mt-1 text-2xl font-black"><Percent value={trainingResult.finalAccuracy} /></p><p className="mt-2 text-sm leading-6 text-slate-600">학습에 사용한 데이터에서의 정확도</p></div>
-            <div className="rounded-2xl border border-violet-200 p-5"><p className="text-sm text-slate-600">Test Accuracy</p><p className="mt-1 text-2xl font-black"><Percent value={evaluation.accuracy} /></p><p className="mt-2 text-sm leading-6 text-slate-600">학습에 사용하지 않은 새로운 데이터에서의 정확도</p></div>
+            <div className="rounded-2xl border border-cyan-200 p-5"><p className="text-sm text-slate-600">훈련 정확도(accuracy)</p><p className="mt-1 text-2xl font-black"><Percent value={trainingResult.finalAccuracy} /></p><p className="mt-2 text-sm leading-6 text-slate-600">학습에 사용한 데이터에서의 정확도</p></div>
+            <div className="rounded-2xl border border-violet-200 p-5"><p className="text-sm text-slate-600">테스트 정확도(accuracy)</p><p className="mt-1 text-2xl font-black"><Percent value={evaluation.accuracy} /></p><p className="mt-2 text-sm leading-6 text-slate-600">학습에 사용하지 않은 새로운 데이터에서의 정확도</p></div>
           </div>
-          <label className="mt-4 flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" checked={compared} onChange={(event) => setCompared(event.target.checked)} className="mt-1 size-5" /><span>Train Accuracy와 Test Accuracy의 대상이 다름을 확인했습니다. 특정 정확도를 성공 기준으로 정하지 않습니다.</span></label>
+          <label className="mt-4 flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" checked={compared} onChange={(event) => setCompared(event.target.checked)} className="mt-1 size-5" /><span>훈련 정확도(accuracy)와 테스트 정확도(accuracy)의 대상이 다름을 확인했습니다. 특정 정확도를 성공 기준으로 정하지 않습니다.</span></label>
           <Button className="mt-5" disabled={!compared} onClick={finish}>STEP 4 활동 완료</Button>
         </div>
       ) : null}
-      {props.isComplete ? <Completion>현재 모델로 실제 Test 500개를 예측하고 Train·Test Accuracy를 비교했습니다.</Completion> : null}
+      {props.isComplete ? <Completion>현재 모델로 실제 테스트 데이터 500개를 예측하고 훈련·테스트 정확도를 비교했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -530,14 +533,15 @@ export function Lesson08Step5(props: CommonStepProps) {
 
   if (!evaluation) {
     return (
-      <StepFrame {...props} step={5} intro="실제 Test 예측에서 AI가 혼동한 숫자와 확률을 관찰합니다.">
-        {!modelReady ? <ModelRequired /> : <Notice>먼저 STEP 4에서 현재 모델을 Test 500개로 평가해 주세요.</Notice>}
+      <StepFrame {...props} step={5} intro="실제 테스트 예측에서 AI가 혼동한 숫자와 확률을 관찰합니다.">
+        {!modelReady ? <ModelRequired /> : <Notice>먼저 STEP 4에서 현재 모델을 테스트 데이터 500개로 평가해 주세요.</Notice>}
       </StepFrame>
     )
   }
 
   return (
-    <StepFrame {...props} step={5} intro="predictedLabel과 actualLabel이 다른 실제 Test sample만 살펴봅니다.">
+    <StepFrame {...props} step={5} intro="실제 레이블(정답)과 예측 숫자가 다른 테스트 표본을 살펴봅니다. 클래스별 출력 확률은 모델의 판단이며, 가장 높은 확률도 정답을 보장하지는 않습니다.">
+      <p className="mb-5 leading-7 text-slate-700">카드를 선택하면 그 이미지 한 장의 클래스별 확률 막대가 나타납니다. 이 확률은 STEP 4에서 여러 이미지의 정답 여부를 모아 구한 테스트 정확도와 다릅니다. 실제 레이블과 예측 숫자, 각 숫자의 확률을 함께 비교하세요.</p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-slate-500">실제 오분류</p>
@@ -548,7 +552,7 @@ export function Lesson08Step5(props: CommonStepProps) {
 
       {errors.length === 0 ? (
         <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-          <h3 className="font-black text-emerald-950">이번 실제 Test에서는 오분류가 없었습니다.</h3>
+          <h3 className="font-black text-emerald-950">이번 실제 테스트에서는 오분류가 없었습니다.</h3>
           <p className="mt-2 text-sm leading-6 text-emerald-900">가짜 오분류를 만들지 않습니다. 다른 실행에서는 결과가 달라질 수 있습니다.</p>
           <label className="mt-4 flex items-start gap-3"><input type="checkbox" className="mt-1 size-5" checked={noErrorConfirmed} onChange={(event) => setNoErrorConfirmed(event.target.checked)} /><span>오분류 0개라는 실제 결과를 확인했습니다.</span></label>
         </div>
@@ -585,14 +589,14 @@ export function Lesson08Step5(props: CommonStepProps) {
               <div>
                 <MnistCanvas sample={selected.sample} size={224} className="mx-auto" />
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div><dt className="text-slate-500">실제 정답</dt><dd className="text-xl font-black">{selected.actualLabel}</dd></div>
-                  <div><dt className="text-slate-500">AI 예측</dt><dd className="text-xl font-black">{selected.predictedLabel}</dd></div>
+                  <div><dt className="text-slate-500">실제 레이블(정답)</dt><dd className="text-xl font-black">{selected.actualLabel}</dd></div>
+                  <div><dt className="text-slate-500">예측 숫자</dt><dd className="text-xl font-black">{selected.predictedLabel}</dd></div>
                   <div><dt className="text-slate-500">가장 높은 확률</dt><dd className="font-mono font-black"><Percent value={selected.confidence} /></dd></div>
                   <div><dt className="text-slate-500">정답 클래스 확률</dt><dd className="font-mono font-black"><Percent value={selected.probabilities[selected.actualLabel]} /></dd></div>
                 </dl>
               </div>
               <div>
-                <h3 className="font-black">실제 Softmax 확률</h3>
+                <h3 className="font-black">소프트맥스(softmax) 함수의 실제 출력 확률</h3>
                 <ProbabilityBars values={selected.probabilities} emphasis={selected.predictedLabel} />
                 <label className="mt-4 flex items-start gap-3 rounded-xl bg-white p-3"><input type="checkbox" className="mt-1 size-5" checked={probabilitiesChecked} onChange={(event) => setProbabilitiesChecked(event.target.checked)} /><span className="text-sm leading-6">예측 숫자의 확률과 실제 정답 클래스의 확률을 비교했습니다.</span></label>
               </div>
@@ -612,7 +616,7 @@ export function Lesson08Step5(props: CommonStepProps) {
       )}
 
       <Button className="mt-6" disabled={!ready} onClick={props.onComplete}>STEP 5 활동 완료</Button>
-      {props.isComplete ? <Completion>실제 오분류 결과와 Softmax 확률을 관찰했습니다.</Completion> : null}
+      {props.isComplete ? <Completion>실제 오분류 결과와 소프트맥스 출력 확률을 관찰했습니다.</Completion> : null}
     </StepFrame>
   )
 }
@@ -636,13 +640,14 @@ export function Lesson08Step6(props: CommonStepProps) {
     : null
 
   return (
-    <StepFrame {...props} step={6} intro="검은 Canvas에 흰색으로 숫자를 그리고 현재 메모리의 실제 모델에 물어봅니다.">
+    <StepFrame {...props} step={6} intro="검은 캔버스에 흰색으로 손 글씨 숫자를 그리고, 방금 학습한 실제 모델로 예측합니다.">
+      <p className="mb-5 leading-7 text-slate-700">그림을 28×28 입력 형태로 맞춘 뒤 현재 학습된 모델이 예측합니다. 숫자의 크기·위치·획 모양에 따라 결과가 달라질 수 있습니다.</p>
       {!modelReady ? (
         <Notice><p className="font-black">먼저 STEP 1과 STEP 2에서 실제 모델을 학습해 주세요.</p><p className="mt-1">저장된 실험 기록만으로는 현재 모델을 복원할 수 없습니다.</p></Notice>
       ) : null}
       <div className="mt-5 grid gap-7 lg:grid-cols-[20rem_1fr]">
         <div>
-          <h3 className="mb-3 font-black">원래 Drawing Canvas</h3>
+          <h3 className="mb-3 font-black">숫자를 그리는 캔버스</h3>
           <DrawingCanvas
             disabled={!modelReady || isBusy}
             onClear={() => { clearDrawingPrediction(); setProbabilitiesChecked(false) }}
@@ -658,7 +663,7 @@ export function Lesson08Step6(props: CommonStepProps) {
 
         <div>
           {!drawingPrediction || !previewSample ? (
-            <div className="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-600">숫자를 그린 뒤 <strong className="ml-1">AI에게 물어보기</strong>를 누르면 실제 입력과 예측 결과가 나타납니다.</div>
+            <div className="flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-600"><p>숫자를 그린 뒤 <strong className="ml-1">AI에게 물어보기</strong>를 누르면 실제 입력과 예측 결과가 나타납니다.</p></div>
           ) : (
             <div className="grid gap-6">
               <div className="grid gap-5 rounded-2xl border border-violet-200 bg-violet-50 p-5 sm:grid-cols-[9rem_1fr]">
@@ -675,7 +680,7 @@ export function Lesson08Step6(props: CommonStepProps) {
               </div>
               <ProbabilityBars values={drawingPrediction.probabilities} emphasis={drawingPrediction.predictedLabel} />
               <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4"><input type="checkbox" className="mt-1 size-5" checked={probabilitiesChecked} onChange={(event) => setProbabilitiesChecked(event.target.checked)} /><span>0~9의 실제 확률과 가장 높은 확률을 확인했습니다.</span></label>
-              <Notice>모델은 틀릴 수 있으며, 직접 그린 획은 MNIST 이미지와 모양·위치·굵기가 다를 수 있습니다. 맞혀야 완료되는 활동이 아닙니다.</Notice>
+              <Notice>획 영역을 찾아 종횡비를 유지하며 긴 변을 약 20픽셀로 줄이고, 28×28 가운데에 놓은 뒤 밝기를 기준으로 중심을 보정합니다. 이 픽셀을 255로 나눈 784개 값이 실제 예측에 사용됩니다. 가장 높은 출력 확률도 정답을 보장하지 않으며, 맞혀야 완료되는 활동은 아닙니다.</Notice>
             </div>
           )}
         </div>
@@ -747,19 +752,19 @@ export function Lesson08Step7({
   const completedItems = [
     ['실제 MNIST 데이터', completedSteps.includes(1)],
     ['실제 신경망 학습', completedSteps.includes(2)],
-    ['실제 Loss와 Accuracy', completedSteps.includes(3)],
-    ['실제 Test 평가', completedSteps.includes(4)],
+    ['실제 오차와 정확도', completedSteps.includes(3)],
+    ['실제 테스트 평가', completedSteps.includes(4)],
     ['실제 오분류 분석', completedSteps.includes(5)],
     ['내 손글씨 실제 예측', completedSteps.includes(6)],
     ['실험 결과 비교', props.isComplete],
   ] as const
 
   return (
-    <StepFrame {...props} step={7} intro="최근 실제 학습 요약에서 두 실험을 골라 조건과 결과의 차이를 비교합니다.">
+    <StepFrame {...props} step={7} intro="저장된 실제 실험 두 개의 훈련 데이터 수·모델 구조·학습 횟수와 결과를 비교합니다. 모델이 크거나 학습 횟수가 많다고 항상 더 좋은 결과가 나오는 것은 아닙니다.">
       <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
         <h3 className="font-black text-cyan-950">권장 비교</h3>
-        <p className="mt-2 text-sm leading-6 text-cyan-900">실험 A: Train 500 · 기본 모델 · Epoch 3 / 실험 B: Train 2,000 · 기본 모델 · Epoch 3</p>
-        <p className="mt-1 text-sm leading-6 text-cyan-900">데이터 수의 영향을 볼 때는 모델과 Epoch를 같게, 모델 구조를 볼 때는 데이터 수와 Epoch를 같게 유지하세요. 새 실행은 상단 STEP 1과 STEP 2에서 시작할 수 있습니다.</p>
+        <p className="mt-2 text-sm leading-6 text-cyan-900">비교 예: 실험 A는 훈련 데이터 500개 · 기본 모델 · 3회 학습, 실험 B는 훈련 데이터 2,000개 · 기본 모델 · 3회 학습</p>
+        <p className="mt-1 text-sm leading-6 text-cyan-900">데이터 수의 영향을 볼 때는 모델과 학습 횟수를 같게, 모델 구조를 볼 때는 데이터 수와 학습 횟수를 같게 유지하세요. 새 실행은 상단 STEP 1과 STEP 2에서 시작할 수 있습니다.</p>
       </div>
       <p className="mt-4 text-sm leading-6 text-slate-600">실제 신경망 학습 결과는 초기 가중치와 실행 환경의 영향으로 같은 조건에서도 조금 달라질 수 있습니다.</p>
 
@@ -769,7 +774,7 @@ export function Lesson08Step7({
         <>
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             {([['A', experimentA, setExperimentA], ['B', experimentB, setExperimentB]] as const).map(([label, value, setter]) => (
-              <label key={label} className="rounded-2xl border border-slate-200 p-4"><span className="font-black">실험 {label}</span><select className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3" value={value} onChange={(event) => { setter(event.target.value); setSubmitted(false) }}><option value="">기록 선택</option>{experiments.map((record, index) => <option key={record.id} value={record.id}>{index + 1}. Train {record.trainSampleCount.toLocaleString()} · {modelName(record)} · {record.epochs} Epoch</option>)}</select></label>
+              <label key={label} className="rounded-2xl border border-slate-200 p-4"><span className="font-black">실험 {label}</span><select className="mt-2 min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3" value={value} onChange={(event) => { setter(event.target.value); setSubmitted(false) }}><option value="">기록 선택</option>{experiments.map((record, index) => <option key={record.id} value={record.id}>{index + 1}. 훈련 {record.trainSampleCount.toLocaleString()} · {modelName(record)} · {record.epochs} Epoch</option>)}</select></label>
             ))}
           </div>
 
@@ -782,13 +787,13 @@ export function Lesson08Step7({
                   <tbody>
                     {[
                       ['데이터 버전', recordA.datasetVersion, recordB.datasetVersion],
-                      ['Train sample', recordA.trainSampleCount.toLocaleString(), recordB.trainSampleCount.toLocaleString()],
+                      ['훈련 표본 수', recordA.trainSampleCount.toLocaleString(), recordB.trainSampleCount.toLocaleString()],
                       ['모델', modelName(recordA), modelName(recordB)],
-                      ['Epoch / batch', `${recordA.epochs} / ${recordA.batchSize}`, `${recordB.epochs} / ${recordB.batchSize}`],
-                      ['Train Loss', recordA.finalTrainLoss.toFixed(4), recordB.finalTrainLoss.toFixed(4)],
-                      ['Train Accuracy', `${(recordA.finalTrainAccuracy * 100).toFixed(2)}%`, `${(recordB.finalTrainAccuracy * 100).toFixed(2)}%`],
-                      ['Test Accuracy', recordA.testAccuracy === null ? '평가 전' : `${(recordA.testAccuracy * 100).toFixed(2)}%`, recordB.testAccuracy === null ? '평가 전' : `${(recordB.testAccuracy * 100).toFixed(2)}%`],
-                      ['Test 정답 / 오답', recordA.testCorrect === null ? '—' : `${recordA.testCorrect} / ${recordA.testWrong}`, recordB.testCorrect === null ? '—' : `${recordB.testCorrect} / ${recordB.testWrong}`],
+                      ['학습 횟수 / 배치 사이즈', `${recordA.epochs} / ${recordA.batchSize}`, `${recordB.epochs} / ${recordB.batchSize}`],
+                      ['훈련 오차(loss)', recordA.finalTrainLoss.toFixed(4), recordB.finalTrainLoss.toFixed(4)],
+                      ['훈련 정확도(accuracy)', `${(recordA.finalTrainAccuracy * 100).toFixed(2)}%`, `${(recordB.finalTrainAccuracy * 100).toFixed(2)}%`],
+                      ['테스트 정확도(accuracy)', recordA.testAccuracy === null ? '평가 전' : `${(recordA.testAccuracy * 100).toFixed(2)}%`, recordB.testAccuracy === null ? '평가 전' : `${(recordB.testAccuracy * 100).toFixed(2)}%`],
+                      ['테스트 정답 / 오답', recordA.testCorrect === null ? '—' : `${recordA.testCorrect} / ${recordA.testWrong}`, recordB.testCorrect === null ? '—' : `${recordB.testCorrect} / ${recordB.testWrong}`],
                       ['학습 시간', `${(recordA.durationMs / 1000).toFixed(2)}초`, `${(recordB.durationMs / 1000).toFixed(2)}초`],
                       ['실행 시각', new Date(recordA.timestamp).toLocaleString(), new Date(recordB.timestamp).toLocaleString()],
                     ].map(([item, a, b]) => <tr key={item} className="border-t border-slate-200"><th className="px-4 py-3 text-slate-600">{item}</th><td className="px-4 py-3 font-medium">{a}</td><td className="px-4 py-3 font-medium">{b}</td></tr>)}
@@ -799,17 +804,17 @@ export function Lesson08Step7({
               <fieldset className="mt-6 rounded-2xl border border-slate-200 p-5">
                 <legend className="px-2 font-black">어떤 학습 조건이 달랐나요?</legend>
                 <div className="flex flex-wrap gap-2">
-                  {([['data', 'Train 수'], ['model', '모델 구조'], ['epoch', 'Epoch'], ['multiple', '둘 이상'], ['same', '같은 조건']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={difference === key} onClick={() => { setDifference(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 font-bold ${difference === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
+                  {([['data', '훈련 데이터 수'], ['model', '모델 구조'], ['epoch', 'Epoch'], ['multiple', '둘 이상'], ['same', '같은 조건']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={difference === key} onClick={() => { setDifference(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 font-bold ${difference === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
                 </div>
               </fieldset>
               <fieldset className="mt-5 rounded-2xl border border-slate-200 p-5">
-                <legend className="px-2 font-black">실제 Train Accuracy 차이를 어떻게 읽었나요?</legend>
+                <legend className="px-2 font-black">실제 훈련 정확도(accuracy) 차이를 어떻게 읽었나요?</legend>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {([['a', '실험 A가 더 높다'], ['b', '실험 B가 더 높다'], ['similar', '거의 비슷하다'], ['not-comparable', '조건이 여러 개 달라 단일 원인으로 해석하기 어렵다']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={interpretation === key} onClick={() => { setInterpretation(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 text-left font-bold ${interpretation === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
                 </div>
               </fieldset>
               <Button className="mt-5" disabled={!difference || !interpretation} onClick={() => setSubmitted(true)}>비교 해석 제출</Button>
-              {submitted ? <Notice><p>실제 조건 비교 결과: <strong>{actualDifference(recordA, recordB) === 'data' ? 'Train 수' : actualDifference(recordA, recordB) === 'model' ? '모델 구조' : actualDifference(recordA, recordB) === 'epoch' ? 'Epoch' : actualDifference(recordA, recordB) === 'multiple' ? '둘 이상의 조건' : '같은 조건'}</strong>{actualDifference(recordA, recordB) === 'multiple' ? '이 달라 하나의 조건만 원인이라고 단정할 수 없습니다.' : '을 중심으로 비교할 수 있습니다.'}</p></Notice> : null}
+              {submitted ? <Notice><p>실제 조건 비교 결과: <strong>{actualDifference(recordA, recordB) === 'data' ? '훈련 데이터 수' : actualDifference(recordA, recordB) === 'model' ? '모델 구조' : actualDifference(recordA, recordB) === 'epoch' ? 'Epoch' : actualDifference(recordA, recordB) === 'multiple' ? '둘 이상의 조건' : '같은 조건'}</strong>{actualDifference(recordA, recordB) === 'multiple' ? '이 달라 하나의 조건만 원인이라고 단정할 수 없습니다.' : '을 중심으로 비교할 수 있습니다.'}</p></Notice> : null}
             </>
           ) : <Notice>서로 다른 두 실험을 선택해 주세요.</Notice>}
         </>

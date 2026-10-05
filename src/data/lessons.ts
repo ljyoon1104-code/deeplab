@@ -34,7 +34,7 @@ export const lessons: LessonMetadata[] = [
   {
     id: '03',
     title: '활성화 함수에 따라 출력이 달라질까?',
-    description: 'Step · ReLU · Sigmoid · Softmax',
+    description: '계단 · 렐루 · 시그모이드 · 소프트맥스',
     group: 'foundations',
   },
   {
@@ -58,13 +58,13 @@ export const lessons: LessonMetadata[] = [
   {
     id: '07',
     title: '손글씨 AI 모델 만들기 ①',
-    description: 'MNIST · 전처리 · 모델 구성',
+    description: 'MNIST · 차원 변환 · 정규화 · 원-핫 인코딩',
     group: 'practice',
   },
   {
     id: '08',
     title: '손글씨 AI 모델 만들기 ②',
-    description: '학습 · Loss · Accuracy · 평가',
+    description: '모델 구성 · 학습 · 오차 · 정확도 · 평가',
     group: 'practice',
   },
   {

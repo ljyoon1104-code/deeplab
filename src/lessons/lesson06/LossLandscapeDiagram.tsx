@@ -5,8 +5,8 @@ export function LossLandscapeDiagram({
 }) {
   return (
     <svg
-      viewBox="0 0 680 300"
-      className="h-auto w-full"
+      viewBox="0 0 340 300"
+      className="mx-auto h-auto w-full max-w-[26rem]"
       role="img"
       aria-labelledby="loss-landscape-title loss-landscape-description"
     >
@@ -32,38 +32,38 @@ export function LossLandscapeDiagram({
         </marker>
       </defs>
       <path
-        d="M60 54 Q190 238 340 238 Q490 238 620 54 L620 270 L60 270 Z"
+        d="M30 54 Q95 238 170 238 Q245 238 310 54 L310 270 L30 270 Z"
         fill="url(#loss-area)"
       />
       <path
-        d="M60 54 Q190 238 340 238 Q490 238 620 54"
+        d="M30 54 Q95 238 170 238 Q245 238 310 54"
         fill="none"
         stroke="#6366f1"
         strokeWidth="6"
         strokeLinecap="round"
       />
-      <circle cx="500" cy="186" r="12" fill="#e11d48" stroke="white" strokeWidth="5" />
-      <text x="500" y="155" textAnchor="middle" fontSize="17" fontWeight="800" fill="#9f1239">
+      <circle cx="250" cy="186" r="9" fill="#e11d48" stroke="white" strokeWidth="4" />
+      <text x="250" y="155" textAnchor="middle" fontSize="20" fontWeight="800" fill="#9f1239">
         현재 위치
       </text>
       {showDirection && (
         <line
-          x1="470"
+          x1="235"
           y1="196"
-          x2="392"
+          x2="196"
           y2="225"
           stroke="#4f46e5"
           strokeWidth="5"
           markerEnd="url(#loss-arrow)"
         />
       )}
-      <text x="340" y="264" textAnchor="middle" fontSize="16" fontWeight="800" fill="#0f766e">
+      <text x="170" y="264" textAnchor="middle" fontSize="20" fontWeight="800" fill="#0f766e">
         Loss가 작은 곳
       </text>
-      <text x="68" y="38" fontSize="15" fontWeight="700" fill="#64748b">
+      <text x="34" y="38" fontSize="20" fontWeight="700" fill="#64748b">
         Loss 큼
       </text>
-      <text x="548" y="38" fontSize="15" fontWeight="700" fill="#64748b">
+      <text x="310" y="38" textAnchor="end" fontSize="20" fontWeight="700" fill="#64748b">
         Loss 큼
       </text>
     </svg>

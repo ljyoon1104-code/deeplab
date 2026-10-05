@@ -19,7 +19,6 @@ export const NLP_ACTIVITY_CARDS = [
 
 export const WORDS = ['좋은', '친구는', '별처럼', '삶을', '빛나게', '해'] as const
 export const INDEX_ACTIVITY_WORDS = ['좋은', '별처럼', '해'] as const
-export const UNREGISTERED_WORD = '새로운' as const
 
 export const EMBEDDING_POINTS = [
   { word: '친구', x: 31, y: 38 },
@@ -103,11 +102,11 @@ export const LESSON11_QUIZ = [
     explanation: '같은 글자라도 함께 쓰인 단어와 문장 상황이 달라지면 문맥에서 선택되는 의미가 달라집니다.',
   },
   {
-    id: 7,
-    question: '단어 목록에 없는 “새로운”이 들어오면 알맞은 판단은?',
-    options: ['임의의 기존 인덱스에 바로 연결하지 않고, 실제 시스템에서는 <UNK> 같은 별도 처리가 필요할 수 있다.', '반드시 인덱스 0으로 바꾼다.', '단어를 삭제하면 된다.', '모든 단어의 인덱스를 바꾼다.'],
-    answer: 0,
-    explanation: '등록되지 않은 단어를 기존 단어와 같은 번호로 임의 연결하면 뜻이 섞입니다. 실제 시스템에서는 미등록 단어를 위한 별도 처리를 둘 수 있습니다.',
+    id: 17, // 기존 미등록 단어 문항(7)의 저장 답안을 재사용하지 않습니다.
+    question: '“영수는 서울에 3번 간 적이 있다.”에서 사람·장소·숫자를 찾는 과정은?',
+    options: ['단어 빈도수만 세기', '의미·개체명 분석', '원-핫 벡터 길이 늘리기', '픽셀 밝기 계산'],
+    answer: 1,
+    explanation: '영수(사람), 서울(장소), 3번(숫자)처럼 단어가 가리키는 개체의 종류를 파악하는 것은 의미·개체명 분석과 연결됩니다.',
   },
   {
     id: 8,
@@ -123,4 +122,11 @@ export const LESSON11_QUIZ = [
     answer: 0,
     explanation: '두 문장은 비슷한 단어를 쓰지만 순서와 관계가 달라 누가 누구를 도왔는지가 달라집니다.',
   },
+] as const
+
+export const SEMANTIC_STAGES = [
+  { title: '형태소 분석', description: '문장을 형태소로 나누고 조사·접미사 등을 분리하여 단어의 기본 형태를 파악합니다.', example: '교과서: The small dog quickly ran home to his owner.를 작은 단위로 나누어 살펴봅니다.' },
+  { title: '구문 분석', description: '단어 사이 문법적 관계와 문장 속 역할을 파악합니다.', example: '교과서의 dog와 ran처럼 누가 어떤 행동을 했는지 관계를 봅니다. 아래 어순 활동에 적용합니다.' },
+  { title: '의미·개체명 분석', description: '단어·구문의 뜻과 조합, 사람·장소·숫자 등 개체를 파악합니다.', example: '교과서: ‘사과를 먹는다’와 ‘기차를 먹는다’를 비교하고, ‘영수는 서울에 3번 간 적이 있다’에서 사람·장소·숫자를 찾습니다.' },
+  { title: '담화·의도 분석', description: '개별 문장을 넘어 전체 대화의 맥락에서 의도와 요청을 파악합니다.', example: '앞뒤 문장과 상황을 함께 확인합니다. 아래의 ‘배’와 ‘눈’ 활동은 문맥이 의미 판단에 필요한 이유를 연습합니다.' },
 ] as const

@@ -211,9 +211,35 @@ function RadioOption({ selected, onClick, children }: { selected: boolean; onCli
   )
 }
 
+function ModelIntroduction() {
+  return <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 sm:p-5" aria-label="모델과 학습, 예측의 관계">
+    <h3 className="text-xl font-black">사진이 예측 결과가 되기까지</h3>
+    <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div><dt className="font-black">모델</dt><dd className="mt-1 leading-7">입력을 받아 예측을 계산하는 구조입니다.</dd></div>
+      <div><dt className="font-black">학습</dt><dd className="mt-1 leading-7">데이터로 모델의 판단에 필요한 기준을 조정하는 과정입니다.</dd></div>
+      <div><dt className="font-black">예측</dt><dd className="mt-1 leading-7">모델이 입력에 대해 내놓은 결과입니다.</dd></div>
+      <div><dt className="font-black">레이블</dt><dd className="mt-1 leading-7">학습·평가에서 예측과 비교하는 실제 정답 정보입니다.</dd></div>
+    </dl>
+    <figure className="mt-5">
+      <figcaption className="font-bold">고양이·강아지 분류의 설명용 그림</figcaption>
+      <div className="mt-3 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
+        <div className="rounded-xl border border-cyan-300 bg-white p-4 text-center"><Cat size={48} className="mx-auto text-cyan-700" aria-hidden="true" /><p className="mt-2 font-black">① 입력 이미지</p><p className="mt-1 text-sm">분류할 동물 사진</p></div>
+        <ArrowRight className="hidden text-indigo-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-indigo-700 md:hidden" aria-hidden="true" />
+        <div className="min-w-0 rounded-xl border-2 border-indigo-500 bg-white p-4 text-center">
+          <svg viewBox="0 0 160 70" className="mx-auto h-14 w-full max-w-40" role="img" aria-label="입력을 받아 결과를 계산하는 모델"><path d="M20 15 L80 20 M20 15 L80 50 M20 55 L80 20 M20 55 L80 50 M80 20 L140 35 M80 50 L140 35" stroke="#6366f1" fill="none" strokeWidth="2" />{[[20,15],[20,55],[80,20],[80,50],[140,35]].map(([x,y]) => <circle key={x + '-' + y} cx={x} cy={y} r="9" fill="#e0e7ff" stroke="#4338ca" />)}</svg>
+          <p className="mt-2 font-black">② 모델</p><p className="mt-1 text-sm">학습한 기준으로 계산</p>
+        </div>
+        <ArrowRight className="hidden text-indigo-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-indigo-700 md:hidden" aria-hidden="true" />
+        <div className="rounded-xl border border-emerald-300 bg-white p-4 text-center"><Cat size={48} className="mx-auto text-emerald-700" aria-hidden="true" /><p className="mt-2 font-black">③ 예측 결과</p><p className="mt-1 text-sm">예: ‘고양이’라고 판단</p></div>
+      </div>
+      <div className="mt-3 rounded-xl border-2 border-dashed border-amber-400 bg-amber-50 p-4 leading-7"><strong>정답을 알고 있을 때 비교:</strong> 예측 ‘고양이’ ↔ 실제 레이블 ‘고양이’<br />레이블은 비교할 정답이지, 새 이미지를 예측할 때 반드시 모델에 함께 넣어야 하는 입력이 아닙니다.</div>
+    </figure>
+  </section>
+}
+
 export function Lesson01Step1(props: CommonStepProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [assignments, setAssignments] = useState<Record<string, ObservationRole>>({})
+  const [assignments, setAssignments] = useState<Record<string, ObservationRole>>({ ears: observationCards[0].answer })
   const [result, setResult] = useState<ActivityResult>('idle')
 
   const assign = (role: ObservationRole) => {
@@ -238,6 +264,7 @@ export function Lesson01Step1(props: CommonStepProps) {
         </ul>
       </section>
 
+      <ModelIntroduction />
       <section className="mt-9" aria-labelledby="animal-clues-title">
         <h3 id="animal-clues-title" className="text-xl font-black text-slate-950">사진 분류 상황</h3>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -249,12 +276,14 @@ export function Lesson01Step1(props: CommonStepProps) {
       <section className="mt-9" aria-labelledby="observation-classification-title">
         <h3 id="observation-classification-title" className="text-xl font-black text-slate-950">정보의 역할을 분류하세요</h3>
         <p className="mt-2 leading-7 text-slate-600">‘파일 이름에 포함된 cat’처럼 정답을 직접 드러내는 정보는 실제 특징으로 쓰면 새 사진에서 잘못된 판단을 만들 수 있습니다.</p>
-        <ClassificationBoard items={observationCards} categories={observationRoles} assignments={assignments} selectedId={selectedId} onSelect={setSelectedId} onAssign={(role) => assign(role as ObservationRole)} />
+        <div className="mt-4 rounded-xl bg-indigo-50 p-4 leading-7"><p><strong>데이터</strong>는 고양이·강아지 사진, <strong>특징</strong>은 분류에 도움이 되는 모양·무늬 정보, <strong>레이블</strong>은 학습·평가에서 예측과 비교할 정답 이름입니다.</p><p className="mt-2"><strong>안내 예: {observationCards[0].label} → {observationRoles.find((role) => role.id === observationCards[0].answer)?.label}</strong><br />{observationCards[0].explanation} 나머지 카드를 같은 기준으로 분류하세요.</p></div>
+        <ClassificationBoard items={observationCards.slice(1)} categories={observationRoles} assignments={assignments} selectedId={selectedId} onSelect={setSelectedId} onAssign={(role) => assign(role as ObservationRole)} />
         <Button className="mt-6" onClick={submit}>분류 제출</Button>
-        <ActivityFeedback result={result} incomplete="모든 정보를 한 영역에 분류한 뒤 제출하세요." incorrect="몇몇 정보의 역할이 맞지 않습니다. 사진에서 보이는 정보, 촬영 상황 정보, 정답 라벨을 다시 비교해 보세요." correct="정확합니다. 사진의 특징과 정답 라벨은 역할이 다르며, 파일 이름은 정답을 새어 나가게 하는 불안정한 정보입니다." />
+        {result === 'incorrect' && <ul className="mt-4 space-y-2 text-sm text-rose-800">{observationCards.filter((card) => assignments[card.id] !== card.answer).map((card) => <li key={card.id}>✕ {card.label}: {card.explanation}</li>)}</ul>}
+        <ActivityFeedback result={result} incomplete="안내 예를 제외한 여섯 정보를 모두 분류한 뒤 제출하세요." incorrect="몇몇 정보의 역할이 맞지 않습니다. 사진에서 보이는 정보, 촬영 상황 정보, 정답 레이블을 다시 비교해 보세요." correct="정확합니다. 사진의 특징과 정답 레이블은 역할이 다르며, 파일 이름은 정답을 새어 나가게 하는 불안정한 정보입니다." />
         {result === 'correct' && !props.isComplete && <Button className="mt-4" onClick={props.onComplete}><Check size={18} aria-hidden="true" />피드백 확인하고 STEP 완료</Button>}
       </section>
-      {props.isComplete && <StepCompletionMessage>관찰 가능한 특징, 불안정한 정보, 정답 라벨을 구분했습니다.</StepCompletionMessage>}
+      {props.isComplete && <StepCompletionMessage>관찰 가능한 특징, 불안정한 정보, 정답 레이블을 구분했습니다.</StepCompletionMessage>}
     </StepFrame>
   )
 }
@@ -280,6 +309,7 @@ export function Lesson01Step2(props: CommonStepProps) {
 
   return (
     <StepFrame {...props} step={2} intro="데이터 → 특징 → 모델 → 결과의 흐름을 직접 완성하고, 각 단계가 맡는 실제 예시를 연결합니다.">
+      <p className="mb-5 rounded-xl bg-indigo-50 p-4 leading-7">앞에서 본 고양이·강아지 사진이 데이터입니다. 사진의 모양·무늬처럼 분류에 도움이 되는 정보가 특징이고, 모델은 이를 바탕으로 예측 결과를 계산합니다. 데이터를 준비하고 → 특징을 다루고 → 모델이 패턴을 학습한 뒤 → 예측 결과를 만드는 흐름으로 연결하세요.</p>
       <FlowOrder label="기계학습 Signal Flow" order={order} tokens={flowStages} onChange={(next) => { setOrder(next as FlowStageId[]); setResult('idle') }} />
       <section className="mt-8" aria-labelledby="flow-example-title">
         <h3 id="flow-example-title" className="text-xl font-black text-slate-950">단계와 예시 연결</h3>
@@ -297,7 +327,7 @@ export function Lesson01Step2(props: CommonStepProps) {
         </div>
       </section>
       <fieldset className="mt-8 rounded-2xl border border-slate-200 p-5">
-        <legend className="px-1 text-lg font-black leading-7 text-slate-950">한 단계가 빠진 잘못된 흐름은 어느 것인가요?</legend>
+        <legend className="px-1 text-lg font-black leading-7 text-slate-950">사람이 특징을 설계하는 위 과정에서, 특징 단계 표시가 빠진 흐름은 어느 것인가요?</legend>
         <div className="mt-4 grid gap-3">
           {[
             ['missing-feature', '데이터 → 모델 → 결과'],
@@ -350,7 +380,7 @@ export function Lesson01Step3(props: CommonStepProps) {
       </section>
       <section className="mt-8 rounded-2xl border border-slate-200 p-5" aria-labelledby="final-feature-title">
         <h3 id="final-feature-title" className="text-lg font-black text-slate-950">최종 특징 3개를 선택하세요</h3>
-        <p className="mt-2 leading-6 text-slate-600">대상 자체의 모양을 나타내는, 비교적 안정적인 특징 세 가지를 고르세요. {finalFeatures.length}/3 선택</p>
+        <p className="mt-2 leading-6 text-slate-600">이번 연습에서는 대상 자체의 모양을 나타내는, 비교적 안정적인 특징 세 가지를 고르세요. 이 세 특징이 모든 이미지 분류의 유일한 정답이라는 뜻은 아닙니다. 문제와 데이터가 달라지면 도움이 되는 특징도 달라집니다. {finalFeatures.length}/3 선택</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           {featureCards.map((card) => <RadioOption key={card.id} selected={finalFeatures.includes(card.id)} onClick={() => toggleFeature(card.id)}>{card.label}</RadioOption>)}
         </div>
@@ -361,7 +391,7 @@ export function Lesson01Step3(props: CommonStepProps) {
         <div className="mt-4 grid gap-3">
           <RadioOption selected={backgroundDecision === 'background-learned'} onClick={() => { setBackgroundDecision('background-learned'); setResult('idle') }}>모델이 동물보다 배경을 배웠을 수 있어, 새 장소에서 잘못 예측할 위험이 있다.</RadioOption>
           <RadioOption selected={backgroundDecision === 'better'} onClick={() => { setBackgroundDecision('better'); setResult('idle') }}>배경색까지 이용했으므로 언제나 더 좋은 모델이다.</RadioOption>
-          <RadioOption selected={backgroundDecision === 'label'} onClick={() => { setBackgroundDecision('label'); setResult('idle') }}>배경색이 정답 라벨이므로 예측이 바뀌어야 한다.</RadioOption>
+          <RadioOption selected={backgroundDecision === 'label'} onClick={() => { setBackgroundDecision('label'); setResult('idle') }}>배경색이 정답 레이블이므로 예측이 바뀌어야 한다.</RadioOption>
         </div>
       </fieldset>
       <Button className="mt-6" onClick={submit}>특징 선택 제출</Button>
@@ -387,8 +417,6 @@ const deepLearningTokens = [
 const comparisonQuestions = [
   { id: 'designer', question: '특징을 주로 설계하는 쪽은?', options: [{ id: 'ml-human', label: '기계학습에서는 사람이 특징 설계에 더 관여한다.' }, { id: 'dl-human', label: '딥러닝에서는 사람이 모든 특징을 하나씩 직접 설계한다.' }], answer: 'ml-human' },
   { id: 'input', question: '이미지 분류의 입력 형태로 알맞은 설명은?', options: [{ id: 'input-correct', label: '기계학습은 사람이 만든 특징값을, 딥러닝은 원본 이미지 픽셀을 주로 입력으로 사용할 수 있다.' }, { id: 'input-wrong', label: '딥러닝은 이미지 픽셀을 사용할 수 없다.' }], answer: 'input-correct' },
-  { id: 'data', question: '두 방법 모두 데이터와 학습이 필요한가요?', options: [{ id: 'yes', label: '그렇다.' }, { id: 'no', label: '딥러닝에만 필요하다.' }], answer: 'yes' },
-  { id: 'evaluation', question: '두 방법 모두 결과 평가가 필요한가요?', options: [{ id: 'yes', label: '그렇다. 새로운 데이터로 확인해야 한다.' }, { id: 'no', label: '학습 결과만 보면 된다.' }], answer: 'yes' },
   { id: 'always-better', question: '딥러닝은 모든 문제에서 항상 더 좋은가요?', options: [{ id: 'no', label: '아니다. 데이터와 문제 조건에 맞춰 판단해야 한다.' }, { id: 'yes', label: '그렇다. 복잡한 모델은 언제나 유리하다.' }], answer: 'no' },
 ]
 
@@ -411,13 +439,14 @@ export function Lesson01Step4(props: CommonStepProps) {
 
   return (
     <StepFrame {...props} step={4} intro="같은 이미지 분류 문제를 기계학습과 딥러닝의 흐름으로 비교하고, 사람이 맡는 준비와 신경망의 학습을 구분합니다.">
+      <p className="mb-5 leading-7 text-slate-700">교과서 96쪽의 핵심 차이는 특징을 다루는 방식입니다. 일반적인 기계학습은 사람이 특징을 설계해 특징값을 제공하고, 딥러닝은 신경망의 여러 층이 데이터에서 특징을 학습합니다.</p>
       <div className="grid gap-5 xl:grid-cols-2">
         <FlowOrder label="기계학습 흐름" order={mlOrder} tokens={machineLearningTokens} onChange={(next) => { setMlOrder(next); setResult('idle') }} />
         <FlowOrder label="딥러닝 흐름" order={dlOrder} tokens={deepLearningTokens} onChange={(next) => { setDlOrder(next); setResult('idle') }} />
       </div>
       <div className="mt-6 rounded-2xl bg-indigo-50 p-5 text-slate-800">
         <Lightbulb className="float-left mr-3 mt-1 text-indigo-700" size={22} aria-hidden="true" />
-        <p className="leading-7">딥러닝도 사람이 데이터와 라벨을 준비하고, 모델 구조와 학습 조건을 정합니다. 신경망이 데이터에서 표현을 학습한다고 해서 사람이 준비할 일이 사라지는 것은 아닙니다.</p>
+        <p className="leading-7">두 방법 모두 데이터로 학습하고 새로운 데이터로 결과를 평가해야 합니다. 딥러닝도 사람이 데이터와 레이블을 준비하고, 모델 구조와 학습 조건을 정합니다. 신경망이 데이터에서 표현을 학습한다고 해서 사람이 준비할 일이 사라지는 것은 아닙니다.</p>
       </div>
       <section className="mt-8" aria-labelledby="comparison-judgment-title">
         <h3 id="comparison-judgment-title" className="text-xl font-black text-slate-950">공통점과 차이를 판단하세요</h3>
@@ -431,7 +460,7 @@ export function Lesson01Step4(props: CommonStepProps) {
         </div>
       </section>
       <Button className="mt-6" onClick={submit}>비교 제출</Button>
-      <ActivityFeedback result={result} incomplete="두 흐름과 다섯 가지 판단을 모두 완성한 뒤 제출하세요." incorrect="특징을 다루는 방식의 차이와, 두 방법 모두 데이터·학습·평가가 필요하다는 공통점을 다시 확인해 보세요." correct="정확합니다. 딥러닝은 여러 층에서 표현을 학습하지만, 어떤 방법이든 데이터 준비와 새로운 데이터 평가는 중요합니다." />
+      <ActivityFeedback result={result} incomplete="두 흐름과 세 가지 판단을 모두 완성한 뒤 제출하세요." incorrect="특징을 다루는 방식의 차이와, 두 방법 모두 데이터·학습·평가가 필요하다는 공통점을 다시 확인해 보세요." correct="정확합니다. 딥러닝은 여러 층에서 표현을 학습하지만, 어떤 방법이든 데이터 준비와 새로운 데이터 평가는 중요합니다." />
       {props.isComplete && <StepCompletionMessage>기계학습과 딥러닝의 흐름, 공통점, 차이를 비교했습니다.</StepCompletionMessage>}
     </StepFrame>
   )
@@ -462,20 +491,14 @@ export function Lesson01Step5(props: CommonStepProps) {
 }
 
 export function Lesson01Step6(props: CommonStepProps) {
-  const [checkedCriteria, setCheckedCriteria] = useState<string[]>([])
   const [methods, setMethods] = useState<Record<string, MethodChoice>>({})
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [result, setResult] = useState<ActivityResult>('idle')
-  const criteriaReady = checkedCriteria.length === decisionCriteria.length
 
-  const toggleCriterion = (criterion: string) => {
-    setCheckedCriteria((current) => current.includes(criterion) ? current.filter((item) => item !== criterion) : [...current, criterion])
-    setResult('idle')
-  }
   const submit = () => {
     const casesComplete = methodCases.every((item) => methods[item.id] && reasons[item.id])
     const casesCorrect = methodCases.every((item) => methods[item.id] === item.answer && reasons[item.id] === item.reasonAnswer)
-    if (!criteriaReady || !casesComplete) return setResult('incomplete')
+    if (!casesComplete) return setResult('incomplete')
     if (casesCorrect) {
       setResult('correct')
       props.onComplete()
@@ -486,11 +509,10 @@ export function Lesson01Step6(props: CommonStepProps) {
     <StepFrame {...props} step={6} intro="방법 이름을 외우기보다 데이터와 문제 조건을 근거로 규칙 기반 방법, 기계학습, 딥러닝 중 적절한 방법을 판단합니다.">
       <section aria-labelledby="criteria-title" className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-5">
         <h3 id="criteria-title" className="text-xl font-black text-slate-950">선택 전, 판단 조건을 확인하세요</h3>
-        <p className="mt-2 leading-7 text-slate-700">아래 다섯 조건을 모두 확인해야 사례의 방법을 선택할 수 있습니다.</p>
+        <p className="mt-2 leading-7 text-slate-700">다섯 조건은 선택을 돕는 참고 기준입니다. 사례에서 중요한 조건을 찾아 방법과 이유를 고르세요.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {decisionCriteria.map((criterion) => <RadioOption key={criterion} selected={checkedCriteria.includes(criterion)} onClick={() => toggleCriterion(criterion)}>{criterion}</RadioOption>)}
+          {decisionCriteria.map((criterion) => <p key={criterion} className="rounded-xl bg-white p-3 font-bold">{criterion}</p>)}
         </div>
-        <p className="mt-4 text-sm font-bold text-indigo-800">{checkedCriteria.length} / {decisionCriteria.length} 조건 확인</p>
       </section>
       <div className="mt-8 space-y-6">
         {methodCases.map((item) => (
@@ -498,7 +520,7 @@ export function Lesson01Step6(props: CommonStepProps) {
             <h3 id={`method-case-${item.id}`} className="text-lg font-black text-slate-950">{item.title}</h3>
             <p className="mt-2 leading-7 text-slate-700">{item.description}</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              {methodChoices.map((choice) => <Button key={choice.id} variant={methods[item.id] === choice.id ? 'primary' : 'secondary'} className="h-auto min-h-14 whitespace-normal text-left leading-6" disabled={!criteriaReady} aria-pressed={methods[item.id] === choice.id} onClick={() => { setMethods((current) => ({ ...current, [item.id]: choice.id })); setResult('idle') }}>{choice.label}</Button>)}
+              {methodChoices.map((choice) => <Button key={choice.id} variant={methods[item.id] === choice.id ? 'primary' : 'secondary'} className="h-auto min-h-14 whitespace-normal text-left leading-6" aria-pressed={methods[item.id] === choice.id} onClick={() => { setMethods((current) => ({ ...current, [item.id]: choice.id })); setResult('idle') }}>{choice.label}</Button>)}
             </div>
             <fieldset className="mt-5">
               <legend className="font-bold text-slate-900">핵심 근거를 하나 고르세요</legend>
@@ -508,7 +530,7 @@ export function Lesson01Step6(props: CommonStepProps) {
         ))}
       </div>
       <Button className="mt-6" onClick={submit}>방법 선택 제출</Button>
-      <ActivityFeedback result={result} incomplete="다섯 판단 조건을 확인하고, 세 사례의 방법과 근거를 모두 고른 뒤 제출하세요." incorrect="복잡한 모델이 언제나 좋은 것은 아닙니다. 데이터의 형태·양, 패턴 복잡성, 설명 가능성, 자원을 사례와 다시 연결해 보세요." correct="정확합니다. 정해진 조건에는 규칙을, 소규모 표 데이터에는 일반 기계학습을, 많은 복잡한 이미지에는 딥러닝을 우선 검토할 수 있습니다." />
+      <ActivityFeedback result={result} incomplete="세 사례의 방법과 핵심 근거를 모두 고른 뒤 제출하세요." incorrect="복잡한 모델이 언제나 좋은 것은 아닙니다. 데이터의 형태·양, 패턴 복잡성, 설명 가능성, 자원을 사례와 다시 연결해 보세요." correct="정확합니다. 정해진 조건에는 규칙을, 소규모 표 데이터에는 일반 기계학습을, 많은 복잡한 이미지에는 딥러닝을 우선 검토할 수 있습니다." />
       {props.isComplete && <StepCompletionMessage>문제의 조건을 근거로 세 가지 방법을 판단했습니다.</StepCompletionMessage>}
     </StepFrame>
   )
@@ -523,9 +545,9 @@ type ProjectField = keyof typeof projectOptions
 
 const projectFields: { id: ProjectField; title: string; prompt: string }[] = [
   { id: 'data', title: '1. 수집할 데이터', prompt: '어떤 이미지를 모아야 할까요?' },
-  { id: 'label', title: '2. 정답 라벨', prompt: '각 이미지에 붙일 정답 이름은 무엇일까요?' },
+  { id: 'label', title: '2. 정답 레이블', prompt: '각 이미지에 붙일 정답 이름은 무엇일까요?' },
   { id: 'avoid', title: '3. 입력으로 사용하면 안 되는 정보', prompt: '정답을 몰래 알려 주는 정보는 무엇일까요?' },
-  { id: 'method', title: '4. 사용할 학습 방식', prompt: '이 이미지 분류 문제에 우선 검토할 방법은 무엇일까요?' },
+  { id: 'method', title: '4. 사용할 학습 방식', prompt: '사람이 특징을 하나씩 설계하는 대신, 많은 이미지에서 신경망이 특징을 학습하게 하려면 어떤 방법일까요?' },
   { id: 'evaluation', title: '5. 결과 평가 방법', prompt: '어떻게 실제 사용 가능성을 확인할까요?' },
 ]
 
@@ -573,10 +595,10 @@ export function Lesson01Step7({ priorStepsComplete, onCompletionReadyChange, ...
   const submitQuiz = (questionId: string) => setQuizSubmitted((current) => current.includes(questionId) ? current : [...current, questionId])
 
   return (
-    <StepFrame {...props} step={7} intro="새로운 이미지 분류 문제를 설계하며 데이터·라벨·특징·학습 방식·평가·한계를 하나의 흐름으로 연결합니다.">
+    <StepFrame {...props} step={7} intro="새로운 이미지 분류 문제를 설계하며 데이터·레이블·특징·학습 방식·평가·한계를 하나의 흐름으로 연결합니다.">
       <section className="rounded-2xl border border-cyan-200 bg-cyan-50/50 p-5" aria-labelledby="project-title">
         <h3 id="project-title" className="text-xl font-black text-slate-950">미니 AI 프로젝트 · 학교 분리수거 분류</h3>
-        <p className="mt-2 leading-7 text-slate-700">분리수거함에 들어온 물체의 이미지를 보고 <strong>종이·플라스틱·캔</strong>으로 분류하는 시스템을 설계합니다.</p>
+        <p className="mt-2 leading-7 text-slate-700">다양한 물체 이미지가 충분히 있고, 여러 층이 시각 특징을 학습하게 하려 합니다. 분리수거함에 들어온 물체의 이미지를 보고 <strong>종이·플라스틱·캔</strong>으로 분류하는 시스템을 설계합니다.</p>
       </section>
       <div className="mt-7 space-y-6">
         {projectFields.map((field) => (

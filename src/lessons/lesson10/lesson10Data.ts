@@ -30,7 +30,7 @@ export const GAN_ROLE_CARDS = [
   { id: 'distinguish', text: '실제 데이터와 생성 데이터를 구분한다.', answer: 'discriminator' },
   { id: 'judge-better', text: '구분 결과를 통해 더 정확하게 판단하도록 학습한다.', answer: 'discriminator' },
   { id: 'actual-reference', text: '감별자가 비교 기준으로 받는 실제 사례다.', answer: 'real-data' },
-  { id: 'improve-direction', text: '감별 판단이 생성자에게 다음 결과를 개선할 방향을 준다.', answer: 'feedback' },
+  { id: 'improve-direction', text: '감별 결과를 바탕으로 생성자와 감별자의 가중치가 조정된다.', answer: 'feedback' },
 ] as const
 
 export const REAL_PATTERN = ['○', '●', '○', '●'] as const
@@ -51,8 +51,8 @@ export const GAN_ROUNDS = [
   {
     round: 3,
     generated: ['○', '○', '●', '△'],
-    judgment: '이전보다 비슷해졌지만 구분할 특징이 남아 있음',
-    improvement: '두 번째와 네 번째 위치의 모양 차이를 줄이려고 함',
+    judgment: '네 도형 중 세 개가 원 모양이지만 위치와 채움의 차이가 남아 있음',
+    improvement: '두 번째·세 번째·네 번째 위치를 실제 패턴과 비교해 모양과 순서의 차이를 줄이려고 함',
   },
   {
     round: 4,
@@ -80,13 +80,13 @@ export const SPEECH_METHOD_SCENARIOS = [
 ] as const
 
 export const SERVICE_SCENARIOS = [
-  { id: 'voice-answer', text: '음성 질문을 받아 텍스트 답변을 만든다.', answer: ['음성 인식', '생성형 언어 모델'] },
-  { id: 'image-create', text: '설명을 받아 새로운 이미지를 만든다.', answer: ['이미지 생성 모델'] },
-  { id: 'call-summary', text: '통화 내용을 글로 바꾸고 핵심을 요약한다.', answer: ['음성 인식', '생성형 언어 모델'] },
+  { id: 'voice-answer', text: '음성 질문을 받아 텍스트 답변을 만든다.', answer: ['음성 인식', '자연어 처리'] },
+  { id: 'image-create', text: '설명을 받아 새로운 이미지를 만든다.', answer: ['이미지 생성'] },
+  { id: 'call-summary', text: '통화 내용을 글로 바꾸고 핵심을 요약한다.', answer: ['음성 인식', '자연어 처리'] },
   { id: 'photo-class', text: '사진 속 객체 종류를 판단한다.', answer: ['이미지 분류'] },
 ] as const
 
-export const TECHNOLOGY_CARDS = ['음성 인식', '자연어 처리', '생성형 언어 모델', '이미지 분류', '이미지 생성 모델', 'GAN', '규칙 기반 처리'] as const
+export const TECHNOLOGY_CARDS = ['음성 인식', '자연어 처리', '이미지 분류', '이미지 생성'] as const
 
 export type LanguageProcess = 'speech-recognition' | 'natural-language'
 

@@ -78,7 +78,7 @@ export const outputCases = [
     id: 'spam',
     title: '스팸 메일인가 아닌가',
     type: '이진 분류',
-    output: '출력 하나 또는 두 상태',
+    output: '출력 뉴런 1개',
     activation: 'Sigmoid',
   },
   {

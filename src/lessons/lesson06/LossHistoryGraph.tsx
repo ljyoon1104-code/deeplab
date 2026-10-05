@@ -35,7 +35,7 @@ export function LossHistoryGraph({
     .join(' ')
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+    <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h3 className="text-lg font-black text-slate-950">{title}</h3>
@@ -49,8 +49,9 @@ export function LossHistoryGraph({
             : `초기 Loss ${formatTrainingValue(history[0].loss)}`}
         </p>
       </div>
+      <div className="mt-4 overflow-x-auto rounded-xl focus-visible:outline-3 focus-visible:outline-indigo-600" tabIndex={0} role="region" aria-label={`${title} · 좁은 화면에서는 좌우로 스크롤`}>
       <svg
-        className="mt-4 h-auto w-full"
+        className="h-auto w-full min-w-[42.5rem]"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
         aria-labelledby={`loss-history-title-${idSuffix} loss-history-description-${idSuffix}`}
@@ -156,6 +157,7 @@ export function LossHistoryGraph({
           Loss
         </text>
       </svg>
+      </div>
     </div>
   )
 }

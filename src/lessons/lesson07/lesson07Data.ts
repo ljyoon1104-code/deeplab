@@ -2,18 +2,18 @@ export const lesson07StepTitles = [
   '데이터셋 크기와 분포 해석',
   '같은 숫자도 모양이 다른 이유',
   '28×28 좌표와 픽셀 위치 계산',
-  'Flatten과 위치 보존',
+  '차원 변환과 위치 보존',
   '정규화 계산과 필요성',
-  'Label과 원-핫 Target',
+  '레이블과 원-핫 정답 데이터',
   '모델에 들어가는 한 쌍 구성',
 ] as const
 
 export const lesson07Objectives = [
-  '실제 MNIST Train subset의 크기와 숫자별 분포를 해석한다.',
+  '실제 MNIST 훈련 데이터(Train) 일부의 크기와 숫자별 분포를 해석한다.',
   '실제 28×28 이미지의 좌표와 행 우선 index를 서로 계산한다.',
-  '원본 픽셀을 보존한 채 0~1 범위의 INPUT을 계산한다.',
-  '실제 label을 길이 10의 원-핫 TARGET으로 연결한다.',
-  '학습에 쓰지 않은 Test 데이터로 평가해야 하는 이유를 설명한다.',
+  '원본 픽셀을 보존한 채 정규화로 0~1 범위의 입력 데이터(INPUT)를 계산한다.',
+  '실제 레이블을 원-핫 인코딩하여 길이 10의 정답 데이터(TARGET)로 연결한다.',
+  '학습에 쓰지 않은 테스트 데이터(Test)로 평가해야 하는 이유를 설명한다.',
 ] as const
 
 export const problemSolvingFlow = [
@@ -35,17 +35,17 @@ export const datasetSizeDescriptions = {
 export const lesson07FinalQuiz = [
   {
     id: 'sample-label',
-    question: 'MNIST에서 표본(sample)과 label의 관계로 알맞은 것은?',
+    question: 'MNIST에서 표본(sample)과 레이블의 관계로 알맞은 것은?',
     options: [
-      ['a', '표본은 28×28 픽셀 이미지이고, label은 그 이미지의 실제 숫자다.', true],
-      ['b', 'label은 이미지의 784개 픽셀값이다.', false],
+      ['a', '표본은 28×28 픽셀 이미지이고, 레이블은 그 이미지의 실제 숫자다.', true],
+      ['b', '레이블은 이미지의 784개 픽셀값이다.', false],
       ['c', '표본은 모델이 예측한 확률이다.', false],
     ],
-    explanation: '표본은 입력 이미지이고 label은 그 이미지가 나타내는 실제 정답입니다.',
+    explanation: '표본은 입력 이미지이고 레이블은 그 이미지가 나타내는 실제 정답입니다.',
   },
   {
     id: 'image-length',
-    question: '28×28 MNIST 이미지의 flatten 배열 길이는?',
+    question: '28×28 MNIST 이미지를 차원 변환한 배열 길이는?',
     options: [['a', '56', false], ['b', '784', true], ['c', '28', false]],
     explanation: '28행과 28열의 모든 칸을 한 줄로 잇기 때문에 28×28=784개입니다.',
   },
@@ -58,25 +58,25 @@ export const lesson07FinalQuiz = [
   {
     id: 'normalization',
     question: '정규화가 하는 일로 알맞은 것은?',
-    options: [['a', '픽셀 위치와 label을 바꾼다.', false], ['b', '원본값을 덮어쓴다.', false], ['c', '새 배열의 값 범위를 0~1에 맞춘다.', true]],
-    explanation: '정규화는 픽셀의 순서나 label을 바꾸지 않고, 별도의 값 배열을 만듭니다.',
+    options: [['a', '픽셀 위치와 레이블을 바꾼다.', false], ['b', '원본값을 덮어쓴다.', false], ['c', '새 배열의 값 범위를 0~1에 맞춘다.', true]],
+    explanation: '정규화는 픽셀의 순서나 레이블을 바꾸지 않고, 별도의 값 배열을 만듭니다.',
   },
   {
     id: 'one-hot',
-    question: '원-핫 TARGET의 특징으로 알맞은 것은?',
-    options: [['a', '길이 10이고 실제 label 위치에만 1이 있다.', true], ['b', '모든 위치에 1이 있다.', false], ['c', '이미지의 밝기를 나타낸다.', false]],
+    question: '원-핫 정답 데이터(TARGET)의 특징으로 알맞은 것은?',
+    options: [['a', '길이 10이고 실제 레이블 위치에만 1이 있다.', true], ['b', '모든 위치에 1이 있다.', false], ['c', '이미지의 밝기를 나타낸다.', false]],
     explanation: '원-핫 벡터는 실제 정답 클래스 하나를 1의 위치로 나타냅니다.',
   },
   {
     id: 'input-target',
     question: '신경망 학습 준비에서 INPUT과 TARGET의 연결은?',
-    options: [['a', 'INPUT=원-핫, TARGET=정규화 픽셀', false], ['b', 'INPUT=정규화 픽셀, TARGET=실제 label의 원-핫', true], ['c', '둘 다 모델 예측 확률', false]],
-    explanation: '입력은 이미지에서 만든 정규화 배열이고, target은 실제 정답을 나타냅니다.',
+    options: [['a', 'INPUT=원-핫, TARGET=정규화 픽셀', false], ['b', 'INPUT=정규화 픽셀, TARGET=실제 레이블의 원-핫', true], ['c', '둘 다 모델 예측 확률', false]],
+    explanation: '입력은 이미지에서 만든 정규화 배열이고, 정답 데이터(TARGET)는 실제 정답을 나타냅니다.',
   },
   {
     id: 'train-test',
-    question: 'Train과 Test 데이터를 구분하는 가장 중요한 이유는?',
-    options: [['a', 'Test는 Train보다 항상 픽셀이 밝아서', false], ['b', '새로운 데이터에서의 동작을 확인하려고', true], ['c', 'Test의 label을 학습 중에 바꾸려고', false]],
-    explanation: '학습에 사용하지 않은 Test로 평가해야 모델이 학습 사진만 외운 것은 아닌지 확인할 수 있습니다.',
+    question: '훈련 데이터와 테스트 데이터를 구분하는 가장 중요한 이유는?',
+    options: [['a', '테스트 데이터는 훈련 데이터보다 항상 픽셀이 밝아서', false], ['b', '새로운 데이터에서의 동작을 확인하려고', true], ['c', '테스트 데이터의 레이블을 학습 중에 바꾸려고', false]],
+    explanation: '학습에 사용하지 않은 테스트 데이터로 평가해야 모델이 학습 사진만 외운 것은 아닌지 확인할 수 있습니다.',
   },
 ] as const

@@ -30,21 +30,17 @@ export const ATTENTION_EXAMPLES = [
 
 export const CONTEXT_EXAMPLES = [
   { id: 'short', title: '짧은 문장', text: '철수는 배가 고파서 밥을 먹었다.', person: '철수', middle: '배가 고픔', ending: '밥을 먹음', reason: '배가 고팠기 때문' },
-  { id: 'long', title: '긴 문장', text: '철수는 아침부터 학교 행사와 동아리 활동을 하고 친구들과 운동까지 한 뒤 집에 돌아와서 매우 배가 고팠기 때문에 밥을 먹었다.', person: '철수', middle: '학교 행사·동아리·운동', ending: '밥을 먹음', reason: '긴 활동 뒤 매우 배가 고팠기 때문' },
+  { id: 'long', title: '긴 문장', text: '철수는 아침을 먹지 못해 매우 배가 고팠다. 학교 행사 준비를 돕고, 동아리 친구들과 발표 자료를 정리한 뒤, 운동장에 놓인 물건을 교실로 옮겼다. 집에 돌아온 철수는 먼저 밥을 먹었다.', person: '철수', middle: '학교 행사·동아리·운동', ending: '밥을 먹음', reason: '아침을 먹지 못해 매우 배가 고팠기 때문' },
 ] as const
 
 export type ModelRelation = 'rnn' | 'transformer' | 'both'
 export const MODEL_RELATION_CARDS = [
   { id: 'state', text: '이전 단계의 상태 정보를 다음 단계로 전달한다.', answer: 'rnn' },
-  { id: 'sequential', text: '단어를 순차적으로 처리하는 구조에 더 가깝다.', answer: 'rnn' },
   { id: 'attention', text: 'Attention을 이용해 문장 안 여러 단어의 관계를 살펴본다.', answer: 'transformer' },
-  { id: 'parallel', text: '여러 단어 관계를 병렬적으로 계산하기에 적합하다.', answer: 'transformer' },
+  { id: 'context-evidence', text: '긴 문맥의 관련 정보를 활용하지만 항상 완벽히 이해한다고 보장할 수는 없다.', answer: 'both' },
   { id: 'sequence', text: '문장과 같은 순서가 있는 데이터를 처리하는 데 활용할 수 있다.', answer: 'both' },
-  { id: 'llm-base', text: '현대의 많은 대형 언어 모델에서 핵심 기반 구조로 활용된다.', answer: 'transformer' },
-  { id: 'context', text: '텍스트의 문맥을 처리하는 데 활용할 수 있다.', answer: 'both' },
   { id: 'learn', text: '데이터로부터 언어 패턴을 학습한다.', answer: 'both' },
   { id: 'numeric', text: '입력을 숫자 표현으로 바꾸어 처리한다.', answer: 'both' },
-  { id: 'limit', text: '긴 문맥을 항상 완벽하게 처리한다고 보장할 수는 없다.', answer: 'both' },
   { id: 'quality', text: '학습 데이터의 품질이 결과에 영향을 준다.', answer: 'both' },
 ] as const
 
@@ -101,9 +97,23 @@ export const LESSON12_QUIZ = [
   { id: 3, question: 'Attention의 핵심 아이디어로 적절한 것은?', options: ['문장에서 중요한 단어 관계를 더 크게 반영한다.', '모든 단어를 삭제한다.', '이미지를 작은 영역으로 나눈다.', 'Loss를 항상 0으로 만든다.'], answer: 0, explanation: 'Attention은 현재 처리에 중요한 단어 관계를 더 크게 반영하며 다른 단어를 모두 삭제하지 않습니다.' },
   { id: 4, question: 'Transformer에 대한 설명으로 적절한 것은?', options: ['문장 안 여러 단어의 관계를 효율적으로 처리하는 데 활용된다.', 'GAN의 감별자만을 의미한다.', '음성을 녹음하는 장치이다.', '픽셀을 정규화하는 방법이다.'], answer: 0, explanation: 'Transformer는 Attention을 이용해 입력 문장의 여러 단어 관계를 효율적으로 처리하는 데 적합합니다.' },
   { id: 5, question: '생성형 언어 모델이 문장을 만드는 원리를 쉽게 설명한 것은?', options: ['문맥을 바탕으로 다음 단어의 가능성을 예측하며 문장을 이어 간다.', '모든 문장을 미리 저장했다가 그대로 복사한다.', '이미지를 합성곱한다.', 'Loss 값만 출력한다.'], answer: 0, explanation: '생성형 언어 모델은 현재 문맥에서 다음 단어 또는 토큰의 가능성을 예측하고 선택한 결과를 새 문맥에 더해 생성을 이어갈 수 있습니다.' },
-  { id: 6, question: '대형 언어 모델 LLM에 대한 설명으로 적절한 것은?', options: ['매우 큰 규모의 텍스트 데이터를 학습한 언어 모델이다.', '이미지 분류만 가능한 모델이다.', '단어 하나만 저장하는 모델이다.', 'GAN의 생성자를 의미한다.'], answer: 0, explanation: 'LLM은 매우 큰 규모의 텍스트 데이터를 학습한 대규모 언어 모델입니다.' },
+  { id: 6, question: '대형 언어 모델 LLM에 대한 설명으로 적절한 것은?', options: ['매우 큰 규모의 텍스트 데이터를 학습한 언어 모델이다.', '이미지 분류만 가능한 모델이다.', '단어 하나만 저장하는 모델이다.', 'GAN의 생성자를 의미한다.'], answer: 0, explanation: 'LLM은 매우 큰 규모의 텍스트 데이터를 학습한 대형 언어 모델입니다.' },
   { id: 7, question: '다음 단어 확률이 가장 높다는 뜻으로 알맞은 것은?', options: ['그 문맥에서 더 가능성이 큰 후보라는 뜻이며 사실 검증 결과는 아니다.', '반드시 사실이라는 뜻이다.', '다른 후보는 절대 선택할 수 없다는 뜻이다.', '문장 전체를 이미 이해했다는 보장이다.'], answer: 0, explanation: '확률은 문맥에서의 가능성을 나타낼 뿐, 실제 세계의 사실 여부를 검증하지는 않습니다.' },
   { id: 8, question: 'RNN과 Transformer의 차이를 가장 잘 설명한 것은?', options: ['RNN은 이전 상태를 순서대로 전달하고, Transformer는 Attention으로 여러 단어 관계를 처리하는 데 적합하다.', '두 구조는 언제나 같은 순서로만 처리한다.', 'Transformer는 텍스트를 숫자로 바꾸지 않는다.', 'RNN은 문장을 전혀 처리하지 못한다.'], answer: 0, explanation: '두 구조 모두 언어 패턴 학습에 활용될 수 있지만, 이전 상태 전달과 Attention 중심 관계 처리는 구분되는 관점입니다.' },
   { id: 9, question: '생성형 AI와 LLM의 관계로 알맞은 것은?', options: ['LLM은 텍스트 생성에 활용되는 모델이며, 생성형 AI는 이미지·음성 등을 포함하는 더 넓은 범주다.', '생성형 AI와 LLM은 완전히 같은 뜻이다.', 'Transformer는 생성형 AI보다 더 넓은 범주다.', 'LLM은 음성 인식과 같은 뜻이다.'], answer: 0, explanation: '생성형 AI는 새로운 콘텐츠를 만드는 넓은 기술 범주이며, LLM은 그중 텍스트 생성에 활용될 수 있는 언어 모델입니다.' },
   { id: 10, question: 'Deep Learning Lab 07~08차시에서 다룬 핵심은?', options: ['MNIST 데이터 준비와 모델 학습·평가', '단어 빈도수와 임베딩', 'GAN 생성자와 감별자', 'CNN 필터와 최대 풀링'], answer: 0, explanation: '07차시는 MNIST 데이터·전처리, 08차시는 MNIST 모델 학습과 평가를 다룹니다.' },
+] as const
+
+export const conceptDescription = (value: string) =>
+  value === '매우 큰 텍스트 데이터와 큰 모델 규모를 사용하는 대규모 언어 모델'
+    ? '매우 큰 규모의 텍스트 데이터를 학습한 대형 언어 모델'
+    : value
+
+export const NLP_DEVELOPMENT = ['RNN', 'LSTM', 'Seq2Seq', 'Attention', 'Transformer', 'GPT-1', 'BERT', 'GPT-3'] as const
+
+export const GENERATION_PHASES = [
+  { title: '형태소 분석', detail: '입력 텍스트를 단어나 형태소로 나누어 처리할 단위를 준비합니다.' },
+  { title: '임베딩', detail: '처리 단위를 숫자로 표현하고 단어의 관계를 나타내는 공간에 배치합니다.' },
+  { title: '언어 모델', detail: '학습된 모델이 현재 문맥과 단어 관계를 바탕으로 다음 단어의 가능성을 예측합니다.' },
+  { title: '확률적 선택', detail: '후보 확률을 이용해 다음 단어를 선택합니다. 선택 결과를 새 문맥에 더하고 생성을 반복합니다.' },
 ] as const

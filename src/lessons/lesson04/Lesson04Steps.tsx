@@ -16,8 +16,10 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { TinyNetworkWalkthrough } from './TinyNetworkWalkthrough'
 import {
   hiddenProcessCards,
+  irisCards,
   lesson04Objectives,
   lesson04Quiz,
   lesson04StepTitles,
@@ -184,6 +186,14 @@ export function Lesson04Step1(props: CommonStepProps) {
 
       <section className="mt-9" aria-labelledby="single-multiple-title">
         <h3 id="single-multiple-title" className="text-xl font-black text-slate-950">하나에서 여러 개로</h3>
+        <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4 leading-7">
+          <p><strong>인공신경망(ANN)</strong>은 여러 인공 뉴런을 서로 연결한 구조입니다. Lesson 02의 한 뉴런이 만든 출력이 다음 뉴런의 입력이 됩니다.</p>
+          <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div><dt className="font-black">○ 원 · 노드</dt><dd>입력층은 데이터를 전달합니다. 이번 예제의 은닉층·출력층 뉴런은 가중합과 활성화 함수로 처리합니다.</dd></div>
+            <div><dt className="font-black">─ 선 · 연결</dt><dd>값이 전달되는 길이며 각 연결에 가중치가 있습니다.</dd></div>
+            <div><dt className="font-black">층 · 이름과 테두리</dt><dd>노드를 역할에 따라 묶습니다. 그림이 세로로 배치돼도 입력층·은닉층·출력층 이름으로 구분하세요.</dd></div>
+          </dl>
+        </div>
         <div className="mt-5">
           <SimpleFlow items={['입력', '퍼셉트론', '출력']} label="단일 퍼셉트론" />
         </div>
@@ -264,9 +274,9 @@ export function Lesson04Step2(props: CommonStepProps) {
   const [activeLayer, setActiveLayer] = useState<(typeof networkLayers)[number] | null>(null)
   const [irisInputs, setIrisInputs] = useState<number | null>(null)
   const [digitOutputs, setDigitOutputs] = useState<number | null>(null)
-  const [spamModes, setSpamModes] = useState<string[]>([])
+  const [spamOutputOne, setSpamOutputOne] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const countsCorrect = irisInputs === 4 && digitOutputs === 10 && spamModes.includes('one') && spamModes.includes('two')
+  const countsCorrect = irisInputs === 4 && digitOutputs === 10 && spamOutputOne
 
   useEffect(() => {
     if (!props.isComplete && viewed.length === networkLayers.length && submitted && countsCorrect) props.onComplete()
@@ -284,6 +294,18 @@ export function Lesson04Step2(props: CommonStepProps) {
       intro="입력층, 은닉층, 출력층을 차례로 눌러 각 층의 노드와 역할을 확인합니다."
     >
       <NeuralNetworkDiagram layers={networkLayers} label="인공신경망의 세 층" />
+
+      <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+        <h3 className="font-black text-indigo-950">① 교과서 기본 과정</h3>
+        <div className="mt-4 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
+          {['입력층', '은닉층', '출력층'].map((item, index, items) => <div key={item} className="contents"><span className="flex min-h-11 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 text-center text-sm font-black">{item}</span>{index < items.length - 1 ? <><ArrowDown className="mx-auto text-cyan-700 lg:hidden" size={18} aria-hidden="true" /><ArrowRight className="hidden shrink-0 text-cyan-700 lg:block" size={18} aria-hidden="true" /></> : null}</div>)}
+        </div>
+        <h3 className="mt-7 font-black text-indigo-950">② 과정 자세히 보기</h3>
+        <p className="mt-2 text-sm leading-6 text-indigo-900">아래 과정은 교과서의 기본 과정을 계산과 활동 순서에 따라 더 자세히 나눈 것입니다.</p>
+        <div className="mt-4 flex flex-col items-stretch gap-2 lg:flex-row lg:items-center">
+          {['입력 뉴런', '은닉 뉴런의 가중합', '렐루(ReLU) 적용', '다음 층의 입력', '출력층 계산', '최종 예측'].map((item, index, items) => <div key={item} className="contents"><span className="flex min-h-11 items-center justify-center rounded-xl border border-indigo-200 bg-white px-3 text-center text-sm font-black">{item}</span>{index < items.length - 1 ? <><ArrowDown className="mx-auto text-cyan-700 lg:hidden" size={18} aria-hidden="true" /><ArrowRight className="hidden shrink-0 text-cyan-700 lg:block" size={18} aria-hidden="true" /></> : null}</div>)}
+        </div>
+      </section>
 
       <section className="mt-7" aria-labelledby="layer-explore-title">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -333,7 +355,7 @@ export function Lesson04Step2(props: CommonStepProps) {
         </div>
       </section>
 
-      <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="node-count-title"><h3 id="node-count-title" className="text-xl font-black text-indigo-950">문제에 맞는 입력·출력 뉴런 수</h3><div className="mt-5 grid gap-5 lg:grid-cols-3"><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">붓꽃 특징 4개</legend><p className="mt-1 text-sm text-slate-600">입력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[3,4,10].map((value) => <Button key={value} variant={irisInputs === value ? 'primary' : 'secondary'} aria-pressed={irisInputs === value} onClick={() => { setIrisInputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">숫자 0~9 분류</legend><p className="mt-1 text-sm text-slate-600">클래스별 출력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[1,4,10].map((value) => <Button key={value} variant={digitOutputs === value ? 'primary' : 'secondary'} aria-pressed={digitOutputs === value} onClick={() => { setDigitOutputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">스팸/정상 분류</legend><p className="mt-1 text-sm text-slate-600">가능한 두 표현을 모두 고르세요.</p><div className="mt-3 grid gap-2">{[['one','스팸 확률 1개'],['two','두 클래스 확률 2개']].map(([id,label]) => <Button key={id} variant={spamModes.includes(id) ? 'primary' : 'secondary'} aria-pressed={spamModes.includes(id)} onClick={() => { setSpamModes((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items,id]); setSubmitted(false) }}>{spamModes.includes(id) ? <Check size={18} aria-hidden="true" /> : null}{label}</Button>)}</div></fieldset></div><Button className="mt-5" disabled={irisInputs === null || digitOutputs === null || spamModes.length === 0} onClick={() => setSubmitted(true)}>뉴런 수 설계 제출</Button>{submitted && <AnswerFeedback correct={countsCorrect} explanation={countsCorrect ? '입력 뉴런은 특징 수, 다중 분류 출력 뉴런은 클래스 수와 맞추었습니다. 이진 분류는 한 확률 또는 두 클래스 표현이 가능합니다.' : '입력은 특징 개수, 다중 분류 출력은 클래스 개수를 기준으로 다시 선택하세요. 스팸/정상은 두 표현이 모두 가능합니다.'} />}</section>
+      <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="node-count-title"><h3 id="node-count-title" className="text-xl font-black text-indigo-950">문제에 맞는 입력·출력 뉴런 수</h3><div className="mt-5 grid gap-5 lg:grid-cols-3"><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">붓꽃 특징 4개</legend><p className="mt-1 text-sm text-slate-600">입력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[3,4,10].map((value) => <Button key={value} variant={irisInputs === value ? 'primary' : 'secondary'} aria-pressed={irisInputs === value} onClick={() => { setIrisInputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">숫자 0~9 분류</legend><p className="mt-1 text-sm text-slate-600">클래스별 출력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[1,4,10].map((value) => <Button key={value} variant={digitOutputs === value ? 'primary' : 'secondary'} aria-pressed={digitOutputs === value} onClick={() => { setDigitOutputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">스팸/정상 이진 분류</legend><p className="mt-1 text-sm text-slate-600">스팸일 확률을 만들 출력 뉴런을 선택하세요.</p><div className="mt-3 grid gap-2"><Button variant={spamOutputOne ? 'primary' : 'secondary'} aria-pressed={spamOutputOne} onClick={() => { setSpamOutputOne(true); setSubmitted(false) }}>{spamOutputOne ? <Check size={18} aria-hidden="true" /> : null}출력 뉴런 1개</Button></div><p className="mt-3 text-sm font-bold text-slate-700">출력 뉴런 1개 → 시그모이드(sigmoid) → 스팸일 확률 0~1</p></fieldset></div><Button className="mt-5" disabled={irisInputs === null || digitOutputs === null || !spamOutputOne} onClick={() => setSubmitted(true)}>뉴런 수 설계 제출</Button>{submitted && <AnswerFeedback correct={countsCorrect} explanation={countsCorrect ? '입력 뉴런은 특징 수, 다중 분류 출력 뉴런은 클래스 수와 맞추었습니다. 이진 분류는 출력 뉴런 1개와 시그모이드로 스팸일 확률을 만듭니다.' : '입력은 특징 개수, 다중 분류 출력은 클래스 개수를 기준으로 다시 선택하세요. 스팸/정상은 출력 뉴런 1개와 시그모이드를 연결하세요.'} />}</section>
 
       <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950">
         <Lightbulb className="mt-0.5 shrink-0" size={22} aria-hidden="true" />
@@ -365,19 +387,40 @@ const independentNetwork: TinyNetworkConfig = {
   outputActivation: 'sigmoid',
 }
 
-function TinyNetworkExercise({ config, guided, onSolved }: { config: TinyNetworkConfig; guided: boolean; onSolved: () => void }) {
+function TinyNetworkExercise({ config, guided, onSolved }: { config: TinyNetworkConfig; guided: boolean; onSolved: (correct: boolean) => void }) {
   const result = forwardTinyNetwork(config)
   const expected = [result.hidden[0].z, result.hidden[0].output, result.hidden[1].z, result.hidden[1].output, result.outputZ, result.output]
-  const labels = ['은닉 뉴런 1의 가중합', '은닉 뉴런 1의 ReLU 출력', '은닉 뉴런 2의 가중합', '은닉 뉴런 2의 ReLU 출력', '출력층 가중합', config.outputActivation === 'step' ? '계단 함수 최종 출력' : 'Sigmoid 최종 출력']
-  const [answers, setAnswers] = useState(Array(expected.length).fill(''))
+  const labels = ['은닉 뉴런 1의 가중합', '은닉 뉴런 1의 렐루 출력', '은닉 뉴런 2의 가중합', '은닉 뉴런 2의 렐루 출력', '출력층 가중합', '계단 함수 최종 출력']
+  const required = guided ? [2, 3, 4, 5] : [0, 1, 2, 3, 4]
+  const [answers, setAnswers] = useState<string[]>(Array(expected.length).fill(''))
   const [submitted, setSubmitted] = useState(false)
-  const correct = answers.every((answer, index) => networkNumberMatches(answer, expected[index]))
-  const submit = () => { setSubmitted(true); if (correct) onSolved() }
-  return <><div className="rounded-2xl bg-slate-900 p-5 text-white"><p className="font-black">입력 [{config.inputs.join(', ')}] · 은닉층 ReLU · 출력층 {config.outputActivation === 'step' ? '계단 함수' : 'Sigmoid'}</p><div className="mt-4 grid gap-3 md:grid-cols-2"><p className="rounded-xl bg-slate-800 p-3 font-mono text-sm">H1: 가중치 [{config.hiddenWeights[0].join(', ')}], b={config.hiddenBiases[0]}</p><p className="rounded-xl bg-slate-800 p-3 font-mono text-sm">H2: 가중치 [{config.hiddenWeights[1].join(', ')}], b={config.hiddenBiases[1]}</p><p className="rounded-xl bg-slate-800 p-3 font-mono text-sm md:col-span-2">출력층: 가중치 [{config.outputWeights.join(', ')}], b={config.outputBias}</p></div>{guided ? <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm leading-6 text-slate-200"><li>각 은닉 뉴런에서 입력×가중치의 합과 편향으로 z를 구합니다.</li><li>두 z에 ReLU를 적용합니다.</li><li>두 ReLU 출력을 출력층의 새 입력으로 사용합니다.</li></ol> : null}</div><div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{labels.map((label,index) => { const fieldCorrect = networkNumberMatches(answers[index], expected[index]); return <label key={label} className="block"><span className="mb-2 block text-sm font-bold">{label}</span><input type="text" inputMode="decimal" value={answers[index]} onChange={(event) => { setAnswers((items) => items.map((answer,item) => item===index ? event.target.value : answer)); setSubmitted(false) }} aria-invalid={submitted && !fieldCorrect || undefined} className={`min-h-12 w-full rounded-xl border px-4 font-black ${submitted ? fieldCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white'}`} />{submitted ? <span className={`mt-1 block text-sm font-semibold ${fieldCorrect ? 'text-emerald-700' : 'text-rose-700'}`}>{fieldCorrect ? '✓ 맞음' : '✕ 이 계산 단계 확인'}</span> : null}</label>})}</div><Button className="mt-5" disabled={answers.some((answer) => parseNetworkNumber(answer) === null)} onClick={submit}>전체 순전파 제출</Button>{submitted && <AnswerFeedback correct={correct} explanation={correct ? `두 은닉 출력으로 출력층 z=${result.outputZ}을 만들고 최종 출력 ${typeof result.output === 'number' ? result.output.toFixed(config.outputActivation === 'sigmoid' ? 2 : 0) : result.output}을 구했습니다.` : '✕ 표시된 첫 단계부터 다시 계산하세요. ReLU를 적용한 값이 다음 층의 입력이 됩니다.'} />}</>
+  const correct = required.every((index) => networkNumberMatches(answers[index], expected[index]))
+  const hints = ['각 입력×가중치의 합에 첫 은닉 뉴런의 편향을 더하세요.', '렐루는 음수를 0으로, 0 이상은 그대로 보냅니다.', '같은 입력에 두 번째 뉴런의 가중치와 편향을 적용하세요.', '두 번째 가중합에 렐루를 적용하세요.', '원래 입력이 아니라 두 은닉 뉴런의 출력을 새 입력으로 사용하세요.', '출력층 가중합이 0 이상이면 1, 음수이면 0입니다.']
+  return <>
+    <div className="rounded-2xl bg-slate-900 p-5 text-white">
+      <p className="font-black">입력 [{config.inputs.join(', ')}] → 은닉층 렐루(ReLU) 함수 → 출력층 {config.outputActivation === 'step' ? '계단 함수' : '시그모이드(sigmoid) 함수'}</p>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <p className="rounded-xl bg-slate-800 p-3 font-mono text-sm">H1: 가중치 [{config.hiddenWeights[0].join(', ')}], b={config.hiddenBiases[0]}</p>
+        <p className="rounded-xl bg-slate-800 p-3 font-mono text-sm">H2: 가중치 [{config.hiddenWeights[1].join(', ')}], b={config.hiddenBiases[1]}</p>
+        <p className="rounded-xl bg-slate-800 p-3 font-mono text-sm md:col-span-2">출력층: 가중치 [{config.outputWeights.join(', ')}], b={config.outputBias}</p>
+      </div>
+      {guided && <div className="mt-5 rounded-xl bg-indigo-900 p-4 leading-7"><h4 className="font-black">완성 풀이 · 첫 은닉 뉴런 H1</h4><p>{config.inputs[0]} × {config.hiddenWeights[0][0]} + {config.inputs[1]} × ({config.hiddenWeights[0][1]}) + ({config.hiddenBiases[0]}) = {result.hidden[0].z}</p><p>렐루({result.hidden[0].z}) = {result.hidden[0].output} → 이 값이 다음 층의 첫 입력이 됩니다.</p><p>같은 방법으로 H2를 계산하세요. 출력층에서는 H1·H2의 출력에 새 가중치를 곱하고 출력층 편향을 더합니다.</p></div>}
+    </div>
+    <TinyNetworkWalkthrough config={config} result={result} guided={guided} revealAnswers={submitted && correct} />
+    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      {required.map((index) => {
+        const fieldCorrect = networkNumberMatches(answers[index], expected[index])
+        return <label key={labels[index]} className="block"><span className="mb-2 block text-sm font-bold">{labels[index]}</span><input type="text" inputMode="decimal" value={answers[index]} onChange={(event) => {setAnswers((items) => items.map((answer, item) => item === index ? event.target.value : answer));setSubmitted(false);onSolved(false)}} aria-invalid={submitted && !fieldCorrect || undefined} aria-describedby={submitted ? `network-${guided ? 'guided' : 'independent'}-${index}-hint` : undefined} className={`min-h-12 w-full rounded-xl border px-4 font-black focus-visible:outline-3 focus-visible:outline-indigo-600 ${submitted ? fieldCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white'}`} />{submitted && <span id={`network-${guided ? 'guided' : 'independent'}-${index}-hint`} className={`mt-1 block text-sm font-semibold ${fieldCorrect ? 'text-emerald-700' : 'text-rose-700'}`}>{fieldCorrect ? '✓ 맞음' : `✕ ${hints[index]}`}</span>}</label>
+      })}
+    </div>
+    {config.outputActivation === 'sigmoid' && <p className="mt-5 rounded-xl bg-indigo-50 p-4 leading-7">시그모이드 함수의 출력은 앱이 계산해 제공합니다: 약 <strong>{result.output.toFixed(2)}</strong>. 지수 계산은 하지 않습니다. 은닉층의 출력과 출력층 가중합을 구한 뒤, 이 확률이 무엇을 뜻하는지 아래에서 판단하세요.</p>}
+    <Button className="mt-5" disabled={required.some((index) => parseNetworkNumber(answers[index]) === null)} onClick={() => {setSubmitted(true);onSolved(correct)}}>전체 순전파 제출</Button>
+    {submitted && <AnswerFeedback correct={correct} explanation={correct ? `은닉층에서 처리한 두 값이 출력층 입력이 됩니다. 출력층 가중합 ${result.outputZ} → 최종 출력 ${result.output.toFixed(config.outputActivation === 'sigmoid' ? 2 : 0)}입니다.` : '✕ 표시된 필드의 힌트를 따라 수정한 뒤 다시 제출하세요. 입력층은 데이터를 받고, 은닉층·출력층은 각자의 가중치·편향과 활성화 함수를 사용합니다.'} />}
+  </>
 }
 
 export function Lesson04Step3(props: CommonStepProps) {
-  return <StepFrame {...props} step={3} intro="입력 2개→은닉 뉴런 2개→출력 뉴런 1개의 작은 신경망을 안내에 따라 계산합니다."><NeuralNetworkDiagram layers={[{ id: 'g-input', label: '입력층', role: '2개 입력', nodeCount: 2, tone: 'indigo' }, { id: 'g-hidden', label: '은닉층', role: 'ReLU 뉴런 2개', nodeCount: 2, tone: 'cyan' }, { id: 'g-output', label: '출력층', role: '계단 함수 1개', nodeCount: 1, tone: 'emerald' }]} label="안내된 작은 신경망" compact /><div className="mt-6"><TinyNetworkExercise config={guidedNetwork} guided onSolved={props.onComplete} /></div>{props.isComplete ? <StepCompletionMessage>두 은닉 뉴런과 출력 뉴런을 연결한 순전파를 안내에 따라 계산했습니다.</StepCompletionMessage> : null}</StepFrame>
+  return <StepFrame {...props} step={3} intro="입력 2개→은닉 뉴런 2개→출력 뉴런 1개의 작은 신경망을 안내에 따라 계산합니다."><NeuralNetworkDiagram layers={[{ id: 'g-input', label: '입력층', role: '2개 입력', nodeCount: 2, tone: 'indigo' }, { id: 'g-hidden', label: '은닉층', role: 'ReLU 뉴런 2개', nodeCount: 2, tone: 'cyan' }, { id: 'g-output', label: '출력층', role: '계단 함수 1개', nodeCount: 1, tone: 'emerald' }]} label="안내된 작은 신경망" compact /><div className="mt-6"><TinyNetworkExercise config={guidedNetwork} guided onSolved={(correct) => { if (correct) props.onComplete() }} /></div>{props.isComplete ? <StepCompletionMessage>두 은닉 뉴런과 출력 뉴런을 연결한 순전파를 안내에 따라 계산했습니다.</StepCompletionMessage> : null}</StepFrame>
 }
 
 export function Lesson04SequenceReference(props: CommonStepProps) {
@@ -539,7 +582,7 @@ export function Lesson04Step4(props: CommonStepProps) {
     if (!props.isComplete && ready) props.onComplete()
   }, [props, ready])
 
-  return <StepFrame {...props} step={4} intro="같은 크기의 두 번째 신경망은 안내 없이 계산하고, Sigmoid 출력의 의미까지 해석합니다."><NeuralNetworkDiagram layers={[{ id: 'i-input', label: '입력층', role: '2개 입력', nodeCount: 2, tone: 'indigo' }, { id: 'i-hidden', label: '은닉층', role: 'ReLU 뉴런 2개', nodeCount: 2, tone: 'cyan' }, { id: 'i-output', label: '출력층', role: 'Sigmoid 1개', nodeCount: 1, tone: 'emerald' }]} label="독립 계산 작은 신경망" compact /><div className="mt-6"><TinyNetworkExercise config={independentNetwork} guided={false} onSolved={() => setCalculationSolved(true)} /></div><fieldset className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">계산된 Sigmoid 출력 약 {result.output.toFixed(2)}의 해석은?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={interpretation === 'class1' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'class1'} onClick={() => { setInterpretation('class1'); setInterpretationSubmitted(false) }}>0.5보다 커서 클래스 1 쪽</Button><Button variant={interpretation === 'class0' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'class0'} onClick={() => { setInterpretation('class0'); setInterpretationSubmitted(false) }}>0.5보다 커서 클래스 0 쪽</Button></div><Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>결과 해석 제출</Button>{interpretationSubmitted && <AnswerFeedback correct={interpretation === 'class1'} explanation={interpretation === 'class1' ? 'Sigmoid 값이 0.5보다 크므로 이 기준에서는 클래스 1 쪽으로 해석합니다.' : 'Sigmoid에서 0.5를 기준으로 어느 쪽 확률이 더 큰지 다시 확인하세요.'} />}</fieldset>{props.isComplete ? <StepCompletionMessage>두 번째 작은 신경망의 순전파를 독립적으로 계산하고 출력 확률을 해석했습니다.</StepCompletionMessage> : null}</StepFrame>
+  return <StepFrame {...props} step={4} intro="같은 구조에서 가중합과 렐루 출력을 스스로 계산합니다. 시그모이드 출력은 제공된 값을 보고 한 클래스일 확률로 해석합니다."><NeuralNetworkDiagram layers={[{ id: 'i-input', label: '입력층', role: '2개 입력', nodeCount: 2, tone: 'indigo' }, { id: 'i-hidden', label: '은닉층', role: 'ReLU 뉴런 2개', nodeCount: 2, tone: 'cyan' }, { id: 'i-output', label: '출력층', role: 'Sigmoid 1개', nodeCount: 1, tone: 'emerald' }]} label="독립 계산 작은 신경망" compact /><div className="mt-6"><TinyNetworkExercise config={independentNetwork} guided={false} onSolved={setCalculationSolved} /></div><fieldset className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">계산된 시그모이드 출력 약 {result.output.toFixed(2)}의 해석은?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={interpretation === 'class1' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'class1'} onClick={() => { setInterpretation('class1'); setInterpretationSubmitted(false) }}>클래스 1일 확률이 0.5보다 크다</Button><Button variant={interpretation === 'class0' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'class0'} onClick={() => { setInterpretation('class0'); setInterpretationSubmitted(false) }}>클래스 0일 확률이 0.5보다 크다</Button></div><Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>결과 해석 제출</Button>{interpretationSubmitted && <AnswerFeedback correct={interpretation === 'class1'} explanation={interpretation === 'class1' ? '이 출력은 클래스 1일 확률을 나타냅니다. 0.5를 분류 기준으로 쓰면 클래스 1로 예측하지만, 실제 정답인지는 레이블과 비교해야 합니다.' : 'Sigmoid에서 0.5를 기준으로 어느 쪽 확률이 더 큰지 다시 확인하세요.'} />}</fieldset>{props.isComplete ? <StepCompletionMessage>두 번째 작은 신경망의 순전파를 독립적으로 계산하고 출력 확률을 해석했습니다.</StepCompletionMessage> : null}</StepFrame>
 }
 
 type OutputField = 'type' | 'output' | 'activation'
@@ -552,7 +595,7 @@ interface OutputSelection {
 
 const outputOptions: Record<OutputField, readonly string[]> = {
   type: ['회귀', '이진 분류', '다중 분류'],
-  output: ['연속적인 수치 출력', '출력 하나 또는 두 상태', '클래스별 출력'],
+  output: ['연속적인 수치 출력', '출력 뉴런 1개', '클래스별 출력'],
   activation: ['출력값을 그대로 사용', 'Sigmoid', 'Softmax'],
 }
 
@@ -572,7 +615,8 @@ export function Lesson04Step5(props: CommonStepProps) {
   })
   const allCorrect = outputCases.every((item) => {
     const answer = answers[item.id]
-    return answer?.type === item.type && answer.output === item.output && answer.activation === item.activation
+    if (!answer) return false
+    return answer.type === item.type && answer.output === item.output && answer.activation === item.activation
   })
 
   const choose = (caseId: string, field: OutputField, value: string) => {
@@ -601,11 +645,11 @@ export function Lesson04Step5(props: CommonStepProps) {
           label="사례 1 · 회귀 출력층"
         />
         <SimpleFlow
-          items={['스팸 메일 입력', '은닉층', '출력 하나 또는 두 상태', 'Sigmoid', '스팸 / 정상']}
+          items={['스팸 메일 입력', '은닉층', '출력 뉴런 1개', '시그모이드(sigmoid)', '스팸일 확률 0~1']}
           label="사례 2 · 이진 분류 출력층"
         />
         <SimpleFlow
-          items={['동물 사진 입력', '은닉층', '클래스별 출력', 'Softmax', '고양이 / 강아지 / 토끼 확률']}
+          items={['동물 사진 입력', '은닉층', '클래스별 출력', '소프트맥스(softmax)', '고양이 / 강아지 / 토끼 확률']}
           label="사례 3 · 다중 분류 출력층"
         />
       </div>
@@ -637,7 +681,7 @@ export function Lesson04Step5(props: CommonStepProps) {
                               : 'border-slate-200 bg-white text-slate-800 hover:border-indigo-300'
                           }`}
                         >
-                          {option}
+                          {option === 'Sigmoid' ? '시그모이드(sigmoid)' : option === 'Softmax' ? '소프트맥스(softmax)' : option}
                         </button>
                       ))}
                     </div>
@@ -865,9 +909,10 @@ export function Lesson04Step7({
   const detailsCorrect = detailConnections.every((item) => details[item.id] === item.answer)
   const allQuizSubmitted = quizSubmitted.every(Boolean)
   const allQuizCorrect = lesson04Quiz.every((quiz, index) => quizAnswers[index] === quiz.answer)
-  const relevantFeatures = ['꽃잎 색', '꽃잎 수', '꽃잎 길이', '잎 모양']
-  const designCorrect = features.length >= 3 && features.every((feature) => relevantFeatures.includes(feature)) && inputCount === features.length && (hiddenLayers === 1 || hiddenLayers === 2) && hiddenActivation === 'ReLU' && outputCount === 3 && outputActivation === 'Softmax' && designReason === 'three-classes'
+  const relevantFeatures = irisCards.filter((card) => card.target === 'input').map((card) => card.label as string)
+  const designCorrect = features.length === relevantFeatures.length && features.every((feature) => relevantFeatures.includes(feature)) && inputCount === features.length && (hiddenLayers === 1 || hiddenLayers === 2) && hiddenActivation === 'ReLU' && outputCount === 3 && outputActivation === 'Softmax' && designReason === 'three-classes'
   const completionReady =
+    priorStepsComplete &&
     structureSubmitted &&
     structureCorrect &&
     detailsSubmitted &&
@@ -982,19 +1027,19 @@ export function Lesson04Step7({
         )}
       </section>
 
-      <section className="mt-10 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 sm:p-6" aria-labelledby="new-network-design-title"><h3 id="new-network-design-title" className="text-xl font-black text-indigo-950">3. 새로운 꽃 사진 분류 신경망 설계</h3><p className="mt-2 leading-7 text-slate-700">장미·튤립·해바라기 중 하나를 분류합니다. 합리적인 은닉층 수는 여러 가지가 가능합니다.</p><fieldset className="mt-5"><legend className="font-black">사용할 입력 특징을 3개 이상 선택</legend><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[...relevantFeatures,'사진 파일명'].map((feature) => <Button key={feature} variant={features.includes(feature) ? 'primary' : 'secondary'} aria-pressed={features.includes(feature)} onClick={() => { setFeatures((items) => items.includes(feature) ? items.filter((item) => item !== feature) : [...items,feature]); setDesignSubmitted(false) }}>{features.includes(feature) ? <Check size={18} aria-hidden="true" /> : null}{feature}</Button>)}</div></fieldset><div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{[
+      <section className="mt-10 rounded-2xl border border-indigo-200 bg-indigo-50 p-5 sm:p-6" aria-labelledby="new-network-design-title"><h3 id="new-network-design-title" className="text-xl font-black text-indigo-950">2. 붓꽃 종류 분류 신경망 설계</h3><p className="mt-2 leading-7 text-slate-700">꽃받침 길이·너비와 꽃잎 길이·너비, 네 수치로 붓꽃을 Setosa·Versicolor·Virginica의 세 종류로 분류합니다. 이번 작은 설계에서는 은닉층 1개 또는 2개를 검토합니다. 실제로 어느 구조가 좋은지는 결과를 평가해야 합니다.</p><fieldset className="mt-5"><legend className="font-black">사용할 네 수치 특징을 모두 선택</legend><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{[...relevantFeatures,'사진 파일명'].map((feature) => <Button key={feature} variant={features.includes(feature) ? 'primary' : 'secondary'} aria-pressed={features.includes(feature)} onClick={() => { setFeatures((items) => items.includes(feature) ? items.filter((item) => item !== feature) : [...items,feature]); setDesignSubmitted(false) }}>{features.includes(feature) ? <Check size={18} aria-hidden="true" /> : null}{feature}</Button>)}</div></fieldset><div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{[
         { label: '입력 뉴런 수', value: inputCount ?? '', set: (value: string) => setInputCount(Number(value)), options: ['2','3','4','5'] },
         { label: '은닉층 수', value: hiddenLayers ?? '', set: (value: string) => setHiddenLayers(Number(value)), options: ['0','1','2','5'] },
         { label: '은닉층 활성화 함수', value: hiddenActivation ?? '', set: setHiddenActivation, options: ['ReLU','Sigmoid','Softmax'] },
         { label: '출력 뉴런 수', value: outputCount ?? '', set: (value: string) => setOutputCount(Number(value)), options: ['1','2','3','10'] },
         { label: '출력층 활성화 함수', value: outputActivation ?? '', set: setOutputActivation, options: ['ReLU','Sigmoid','Softmax'] },
         { label: '이 구조를 고른 이유', value: designReason ?? '', set: setDesignReason, options: ['three-classes','many-layers','file-name'], optionLabels: ['세 클래스를 확률로 비교해야 해서','층이 많을수록 항상 좋아서','파일명만 보면 되어서'] },
-      ].map((field) => <label key={field.label} className="block"><span className="text-sm font-bold">{field.label}</span><select value={field.value} onChange={(event) => { field.set(event.target.value); setDesignSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{field.options.map((option,index) => <option key={option} value={option}>{field.optionLabels?.[index] ?? option}</option>)}</select></label>)}</div><Button className="mt-5" disabled={features.length < 3 || inputCount === null || hiddenLayers === null || !hiddenActivation || outputCount === null || !outputActivation || !designReason} onClick={() => setDesignSubmitted(true)}>내 구조 검사</Button>{designSubmitted && <AnswerFeedback correct={designCorrect} explanation={designCorrect ? `선택한 특징 ${features.length}개와 입력 뉴런 수를 맞추고, ReLU 은닉층과 3개 Softmax 출력을 구성했습니다.` : '입력 뉴런 수는 선택한 유효 특징 수와 같아야 합니다. 세 꽃 종류를 분류하므로 출력 3개와 Softmax가 필요합니다. 은닉층 1~2개는 모두 허용됩니다.'} />}</section>
+      ].map((field) => <label key={field.label} className="block"><span className="text-sm font-bold">{field.label}</span><select value={field.value} onChange={(event) => { field.set(event.target.value); setDesignSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{field.options.map((option,index) => <option key={option} value={option}>{field.optionLabels?.[index] ?? (option === 'ReLU' ? '렐루(ReLU) 함수' : option === 'Sigmoid' ? '시그모이드(sigmoid) 함수' : option === 'Softmax' ? '소프트맥스(softmax) 함수' : option)}</option>)}</select></label>)}</div><Button className="mt-5" disabled={features.length !== relevantFeatures.length || inputCount === null || hiddenLayers === null || !hiddenActivation || outputCount === null || !outputActivation || !designReason} onClick={() => setDesignSubmitted(true)}>내 구조 검사</Button>{designSubmitted && <AnswerFeedback correct={designCorrect} explanation={designCorrect ? `선택한 특징 ${features.length}개와 입력 뉴런 수를 맞추고, 렐루 은닉층과 3개 소프트맥스 출력을 구성했습니다.` : '입력 뉴런 수는 선택한 유효 특징 수와 같아야 합니다. 네 수치 특징을 빠짐없이 선택해 입력 4개를 만들고, 세 붓꽃 종류에 대응하는 출력 3개와 소프트맥스가 필요합니다. 은닉층 1~2개는 모두 허용됩니다.'} />}</section>
 
       <section className="mt-10" aria-labelledby="detail-connection-title">
         <div className="flex items-center gap-3">
           <Link2 className="text-indigo-600" size={24} aria-hidden="true" />
-          <h3 id="detail-connection-title" className="text-xl font-black text-slate-950">2. 역할과 활성화 함수 연결</h3>
+          <h3 id="detail-connection-title" className="text-xl font-black text-slate-950">3. 역할과 활성화 함수 연결</h3>
         </div>
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           {detailConnections.map((item) => (
