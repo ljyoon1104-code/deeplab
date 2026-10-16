@@ -4,6 +4,7 @@ setlocal EnableExtensions
 set "APP_ROOT=%~dp0"
 set "APP_URL=http://localhost:5173/deeplab/"
 set "PACKAGE_COMMAND="
+set "DEV_ARGUMENTS=-- --port 5173 --strictPort --open /deeplab/"
 set "POWERSHELL_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 
 cd /d "%APP_ROOT%" || goto :path_error
@@ -16,7 +17,10 @@ if not errorlevel 1 set "PACKAGE_COMMAND=npm.cmd"
 
 if not defined PACKAGE_COMMAND (
   where pnpm.cmd >nul 2>&1
-  if not errorlevel 1 set "PACKAGE_COMMAND=pnpm.cmd"
+  if not errorlevel 1 (
+    set "PACKAGE_COMMAND=pnpm.cmd"
+    set "DEV_ARGUMENTS=--port 5173 --strictPort --open /deeplab/"
+  )
 )
 
 if not defined PACKAGE_COMMAND goto :missing_node
@@ -27,21 +31,15 @@ if not exist "%APP_ROOT%node_modules\" (
   if errorlevel 1 goto :install_failed
 )
 
-start "Deep Learning Lab Dev Server" /D "%APP_ROOT%" cmd.exe /k %PACKAGE_COMMAND% run dev
-
-call :wait_for_server
-if errorlevel 1 goto :server_failed
+start "Deep Learning Lab Dev Server" /D "%APP_ROOT%" cmd.exe /k %PACKAGE_COMMAND% run dev %DEV_ARGUMENTS%
+exit /b 0
 
 :open_browser
 start "" "%APP_URL%"
 exit /b 0
 
 :server_ready
-"%POWERSHELL_EXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "try { $response = Invoke-WebRequest -UseBasicParsing -Uri $env:APP_URL -TimeoutSec 2; if ($response.StatusCode -ge 200) { exit 0 } } catch {}; exit 1"
-exit /b %errorlevel%
-
-:wait_for_server
-"%POWERSHELL_EXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "for ($i = 0; $i -lt 60; $i++) { try { $response = Invoke-WebRequest -UseBasicParsing -Uri $env:APP_URL -TimeoutSec 1; if ($response.StatusCode -ge 200) { exit 0 } } catch {}; Start-Sleep -Seconds 1 }; exit 1"
+"%POWERSHELL_EXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "try { $response = Invoke-WebRequest -UseBasicParsing -Uri $env:APP_URL -TimeoutSec 2; if ($response.StatusCode -eq 200 -and $response.Content.Contains('<title>Deep Learning Lab</title>')) { exit 0 } } catch {}; exit 1"
 exit /b %errorlevel%
 
 :missing_node
@@ -52,12 +50,6 @@ exit /b 1
 
 :install_failed
 echo Package installation failed.
-pause
-exit /b 1
-
-:server_failed
-echo The development server did not become ready.
-echo Check the Deep Learning Lab Dev Server window for details.
 pause
 exit /b 1
 

@@ -1,0 +1,82 @@
+[
+  {
+    "slide": 1,
+    "text": "기계학습\n딥러닝\nⅡ.\n \n인공지능과 학습"
+  },
+  {
+    "slide": 2,
+    "text": "음성 인식\n2-3\n110\n쪽\n음성 인식\n핵심 요소\n딥러닝을 기반으로 하는 음성 인식 기술 구현\n방식을 설명할 수 있다\n.\n음성 인식 기술의 변화를 설명할 수 있다\n.\n학습 목표\n인공지능이 잰말놀이처럼 어려운 발음도 잘 알아들을 수 있을까\n?"
+  },
+  {
+    "slide": 3,
+    "text": "음성 인식\n2-3\n110\n쪽\n인공지능은 사람의 말소리를 어떻게 텍스트로 바꿀까\n?\n01\n음성 주파수를 분석하여 음소를 추출하고 텍스트로 변환한다\n.\n음성 인식\n: \n사람의 말소리를 분석하여 텍스트 데이터로 바꾸는 것\n초기 음성 인식 기술\n: \n같은 음소라도 사람마다 다르게 발음하거나 말소리의 크기\n, \n어조가 다르면 단어가 다르게 인식되어 정확도가 떨어짐\n.\n대량의 음성 데이터를 인공신경망으로 학습한 \n딥러닝\n 모델이 등장하면서 음성 인식의 정확도가 크게 향상됨\n."
+  },
+  {
+    "slide": 4,
+    "text": "음성 인식\n2-3\n110\n쪽\n문이 닫힙니다\n."
+  },
+  {
+    "slide": 5,
+    "text": "음성 인식\n2-3\n110\n쪽\n문이 다칩니다\n.\n이미 저장되어 있는 \n주파수\n 정보에 따라 해당 텍스트로 변환\n패턴 인식 \nif-then \n방식\n딥러닝\n 방식\n \n문이 다칩니다\n.\n \n문이 닫힙니다\n.\n추출된 \n음소\n를 바탕으로 다양한 경우를\n 고려하여 확률이 높은 텍스트로 변환\n자주 쓰이는 표현인\n‘\n문이 닫힙니다\n.\n’\n로 변환\n[▲\n그림Ⅱ\n–\n30] if-then \n방식과 \n딥러닝\n 방식"
+  },
+  {
+    "slide": 6,
+    "text": "음성 인식\n2-3\n111\n쪽\n음성 인식은 어디에 활용될까\n?\n02\n음성 인식은 스피커\n, \n스마트폰 등 여러 기기에서 활용되고 있다\n.\n음성 인식 기술을 활용하면 음성만으로 기기를 제어하거나 말소리를 텍스트 데이터로 변환할 수 있다\n.\n[▲\n그림Ⅱ\n–\n31] \n음성 인식의 활용\n기기 제어\n외국어 교육\n자막 생성\n텍스트 기록"
+  },
+  {
+    "slide": 7,
+    "text": "음성 인식\n2-3\n111\n쪽\n다음 글을 읽고\n, \n음성 인식 기술을 효과적으로 활용한 사례를 찾아보자\n.\nAI \n음성 인식 전자 의무 기록 시대 연다\n 우리나라 \nA \n스타트업이\n 개발한 음성 인식 전자 의무 기록 시스템은 음성 인식 기술을 기반으로 진료 시 별도의 의무 기록을 입력할 필요 없이 환자와 마주하면서 바로 진료를 할 수 있도록 돕는다\n. \n또 이 시스템을 이용하여 전문용어와 복잡한 의료 용어도 음성으로 \n98% \n이상 인식하여 의무 기록을 작성한다\n. "
+  },
+  {
+    "slide": 8,
+    "text": "음성 인식\n2-3\n111\n쪽\n➊\n \n위 글에서 \n딥러닝\n 기술을 사용하여 효과적으로 해결한 문제는 무엇인지 적어 보자\n.\n환자의 진료 및 처방 기록을 음성 인식 기술을 사용하여 입력함으로써 기록 손실이나 누락을 방지하고\n, \n의료진의 업무 피로를 낮춤\n예시 답안\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 9,
+    "text": "음성 인식\n2-3\n111\n쪽\n❷\n \n인터넷 검색으로 음성 인식 기술을 효과적으로 활용한 사례 한 가지를 찾아서 적어 보자\n.\n학교생활기록부를 기반으로 맞춤형 질문을 제공해 면접을 대비할 수 있도록 돕는 대화형 인공지능은 음성인식 기술로 수험생의 답변을 텍스트로 변환\n, \n답변 내용을 평가해 면접 연습 \n결과지를\n 제공한다\n.\n예시 답안\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 10,
+    "text": "음성 인식\n2-3\n112\n쪽\n정확한 발음을 연습하는 데 도움을 주는 인공지능 프로그램을 만들어 보자\n.\n➊ \n문제 상황을 읽고 문제 해결에 도움을 줄 방법을 적어 보자\n.\n{2D5ABB26-0587-4C30-8999-92F81FD0307C}\n문제 상황\n방법\n발음이 정확하지 않아 발표에 자신감을 잃은 친구를 어떻게 도울 수 있을까\n?\n정확한 발음 연습을 돕는 \n입풀기\n 운동을 함께 한다\n.\n잰말놀이를\n 하며 긴장을 풀어본다\n. \n등\n예시 답안\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 11,
+    "text": "음성 인식\n2-3\n112\n쪽\n❷ \n위 문제 해결에 음성 인식 기술을 활용한다면 어떤 장점이 있을지 적어 보자\n.\n혼자서도 정확한 발음 연습을 할 수 있다\n.\n원하는 만큼 여러 문장을 반복해서 발음 연습을 할 수 있다\n. \n등\n예시 답안\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 12,
+    "text": "음성 인식\n2-3\n112\n쪽\n❸ \n정확한 발음을 연습할 수 있는 프로그램을 설계해 보자\n.\n{2D5ABB26-0587-4C30-8999-92F81FD0307C}\n입력\n처리\n출력\n ‘\n잰말놀이\n’ 문장을 녹음한 오디오 파일을 준비한다\n.\n(\n잰말놀이\n 문장은 자유롭게 준비한다\n.)\n오디오 파일의 음성을 인식하여 사용자가 읽은 ‘\n잰말놀이\n’ 문장과 일치하는지 확인한다\n.\n인식한 결과와 읽은 문장 내용이 일치하면 ‘완벽한 발음입니다\n!’\n를 출력하고\n, \n일치하지 않으면 ‘연습이 필요합니다\n!’\n를 출력한다\n."
+  },
+  {
+    "slide": 13,
+    "text": "음성 인식\n2-3\n112\n쪽\n❹ \n잰말놀이\n 문장을 스마트폰으로 녹음한 후\n, \n컴퓨터로 옮겨 오디오 파일\n(play1)\n을 만들어 보자\n.\n예\n내가 그린 기린 그림은 잘 그린 기린 그림이고 네가 그린 기린 그림은 잘 못 그린 기린 그림이다\n."
+  },
+  {
+    "slide": 14,
+    "text": "음성 인식\n2-3\n112\n쪽\n❺ \n오디오 파일을 \n코랩\n 노트북에 업로드해 보자\n.\n{2D5ABB26-0587-4C30-8999-92F81FD0307C}\n \n①\n②\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 15,
+    "text": "음성 인식\n2-3\n112\n쪽\n❻ \n만약 오디오 파일의 확장자가 \n'm4a'\n라면 \npydub\n \n라이브러리를 사용하여 \n'wav'\n로 변환해 보자\n.\n{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}\n▷\n1\n2\n3\n4\n5\n!pip install \npydub\n \n# \npydub\n \n라이브러리 설치\nm4a_file = 'play1.m4a'; \nwav_file\n = 'play1.wav'\nfrom \npydub\n import \nAudioSegment\ntrack = \nAudioSegment.from_file\n(m4a_file, format = 'm4a') \n# \n경로와 파일 형식 \n형식\n 지정\nfile_handle\n = \ntrack.export\n(\nwav_file\n, format = 'wav') \n# 'm4a'\n를 \n'wav'\n로 \n확장자\n 변환"
+  },
+  {
+    "slide": 16,
+    "text": "음성 인식\n2-3\n112\n쪽\n❼ \nspeechrecognition\n \n라이브러리를 사용하여 오디오 파일의 음성을 인식해 보자\n.\n{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}\n▷\n1\n2\n3\n4\n5\n6\n7\n8\n9\n# \n음성 인식\n!pip install \nspeechrecognition\n \n# \n음성 인식 모델을 불러올 수 있는 라이브러리 설치\nimport \nspeech_recognition\n as \nsr\nr = \nsr.Recognizer\n()\nsound = \nsr.AudioFile\n('play1.wav')\nwith sound as source:\n audio = \nr.record\n(source)\nprint(\nr.recognize_google\n(audio, language = '\nko\n-KR'))"
+  },
+  {
+    "slide": 17,
+    "text": "음성 인식\n2-3\n113\n쪽\n❽ \n음성 인식 결과와 읽은 문장을 비교하여 일치 여부를 출력해 보자\n.\n{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}\n▷\n1\n2\n3\n4\n5\n6\n7\n# \n음성 인식 결과 비교 \ntext = '\n내가 그린 기린 그림은 잘 그린 기린 그림이고 네가 그린 기린\n          \n그림은 잘 못 그린 기린 그림이다\n'\ns_text\n = \nr.recognize_google\n(audio, language = '\nko\n-KR')\nif text == \ns_text\n:\n print('\n완벽한 발음입니다\n!')\nelse:\n print('\n연습이 필요합니다\n!')"
+  },
+  {
+    "slide": 18,
+    "text": "음성 인식\n2-3\n113\n쪽\n❾ \n다른 \n잰말놀이\n 문장을 읽고 녹음한 후\n, \n친구에게 들려주고 정확한 발음으로 들리는지 물어보자\n. \n또 해당 음성 파일을 \n코랩에\n 업로드하여 음성 인식 인공지능의 판단 결과를 확인해 보자\n.\n{2D5ABB26-0587-4C30-8999-92F81FD0307C}\n친구가 들은 결과\n음성 인식 인공지능이 인식한 결과\n상표 붙인 큰 깡통은 깐 깡통인가\n? \n안 깐 깡통인가\n?\n내가 그린 구름 그림은 \n새털구름\n 그린 구름 그림이고\n, \n네가 그린 구름 그림은 \n깃털구름\n 그린 구름 그림이다\n.\n예시 답안\nstyle.visibility\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 19,
+    "text": "음성 인식\n2-3\n113\n쪽\n음성 인식\n은 사람의 말소리를 분석하여 텍스트 데이터로 바꾸는 것을 말한다\n.\n√\n√\n음성 인식은 \n사물 인터넷\n이나\n \n자연어 처리 \n등의 기술과 융합하여 다양한 분야에서 활용되고 있다\n.\nstyle.visibility\nstyle.visibility\nstyle.visibility"
+  },
+  {
+    "slide": 20,
+    "text": "2-4. \n자연어 처리\n에서 만나요\n."
+  }
+]

@@ -52,8 +52,9 @@ export function ResetProgressDialog() {
             </Button>
           </div>
           <p className="mt-4 leading-7 text-slate-600">
-            저장된 STEP 위치와 완료 기록이 모두 삭제됩니다. 이 작업은 되돌릴 수
-            없습니다.
+            이 브라우저의 현재 주소에 저장된 STEP 위치, 완료 기록, 실습 답안·선택,
+            MNIST 실험 기록이 모두 삭제됩니다. 다른 주소의 기록은 유지됩니다.
+            이 작업은 되돌릴 수 없습니다.
           </p>
           <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <Button variant="secondary" onClick={() => setIsOpen(false)}>

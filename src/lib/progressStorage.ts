@@ -3,6 +3,7 @@ import type { LessonProgress, ProgressRecord } from '../types/progress'
 
 const STORAGE_KEY = 'deep-learning-lab:progress:v1'
 const COMPLETION_VERSION_KEY = 'deep-learning-lab:completion-versions:v1'
+const APP_STORAGE_PREFIX = 'deep-learning-lab:'
 const STEP_COUNT = 7
 
 /**
@@ -137,8 +138,13 @@ export const progressStorage = {
 
   clear() {
     try {
-      window.localStorage.removeItem(STORAGE_KEY)
-      window.localStorage.removeItem(COMPLETION_VERSION_KEY)
+      const storage = window.localStorage
+      const keys: string[] = []
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = storage.key(index)
+        if (key?.startsWith(APP_STORAGE_PREFIX)) keys.push(key)
+      }
+      for (const key of keys) storage.removeItem(key)
     } catch {
       // 저장소가 제한된 브라우저에서는 메모리 상태만 초기화합니다.
     }

@@ -114,7 +114,7 @@ export function HomePage() {
                 </h2>
               </div>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                이 브라우저에 저장된 STEP 위치와 완료 기록을 관리합니다.
+            현재 주소에 저장된 학습 진행, 실습 답안·선택과 실험 기록을 관리합니다.
               </p>
             </div>
             <ResetProgressDialog />
