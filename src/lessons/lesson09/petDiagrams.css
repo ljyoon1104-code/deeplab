@@ -1,0 +1,12 @@
+@keyframes pet-pool-to-output {
+  from { transform: translateY(0); }
+  to { transform: translateY(18px); }
+}
+
+.pet-pool-value {
+  animation: pet-pool-to-output 450ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-pool-value { animation: none; }
+}

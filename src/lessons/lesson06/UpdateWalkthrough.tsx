@@ -23,7 +23,7 @@ const stages = [
 const descriptions = [
   '입력 x1·x2와 비교 기준인 실젯값 y는 유지됩니다. 실젯값을 바꾸어서 오차를 줄이는 것이 아닙니다.',
   '학습 전 가중치와 편향으로 순전파해 예측값을 만들고, 실젯값과 비교하여 오차를 계산했습니다.',
-  '역전파는 오차에 관한 정보로 수정 방향을 계산합니다. 경사 하강법으로 실제 조정한 가중치와 편향이 학습 후 영역에 표시됩니다. 입력 데이터가 뒤로 이동한다는 뜻은 아닙니다.',
+  '역전파로 구한 기울기에 학습률을 곱한 값을 기존 값에서 빼는 경사 하강법을 사용했습니다. 기울기는 변화 정보이고, 학습률까지 적용한 값이 실제 수정량입니다. 학습 후 영역에서 바뀐 가중치와 편향을 확인하세요.',
   '조정된 가중치와 편향에 같은 입력을 넣어 다시 순전파했습니다. 새 가중합과 예측값을 얻고, 같은 실젯값과 비교하여 새 오차를 계산했습니다.',
 ] as const
 
@@ -46,7 +46,7 @@ export function UpdateWalkthrough({ example, beforeValues, afterValues }: Update
         ))}
       </ol>
       <p className="mt-3 text-sm leading-6 text-slate-600">
-        순방향은 입력을 이용한 계산, 역방향은 오차 정보로 수정 방향을 구하는 과정입니다. 값 조정 뒤에는 다시 순전파합니다.
+        순전파는 예측 계산, 역전파는 기울기 계산입니다. 값을 수정한 다음에는 같은 입력으로 다시 예측합니다.
       </p>
       <div className={`mt-4 rounded-xl border-2 p-3 transition-colors duration-150 motion-reduce:transition-none ${stage === 0 ? highlight : 'border-slate-200'}`}>
         <p className="font-black">고정 · 입력과 실젯값</p>

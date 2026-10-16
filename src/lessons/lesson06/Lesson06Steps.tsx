@@ -12,7 +12,7 @@ import {
   TrendingDown,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -566,13 +566,12 @@ export function Lesson06Step3(props: CommonStepProps) {
       <div className="rounded-2xl bg-indigo-50 p-5">
         <h3 className="text-xl font-black text-indigo-950">역전파</h3>
         <p className="mt-2 leading-7 text-slate-800">
-          예측의 오차 정보를 출력 쪽에서 앞쪽으로 전달하여 각 연결이 오차에
-          얼마나 영향을 주었는지 계산하고, 가중치와 편향을 수정하는 과정을
-          역전파라고 합니다.
+          역전파는 출력에서 앞쪽으로 계산을 따라가며 각 파라미터의 기울기를 구하는 과정입니다.
+          기울기는 가중치·편향을 조금 바꿀 때 손실이 어느 방향으로 얼마나 변하는지 알려 주는 정보입니다.
         </p>
       </div>
 
-      <p className="mt-5 leading-7 text-slate-700">순전파로 예측을 만든 다음 손실함수로 실젯값과 비교해 오차를 계산합니다. 역전파는 이 오차 정보를 이용하는 다음 과정입니다.</p>
+      <p className="mt-5 leading-7 text-slate-700">역전파로 구한 기울기 등을 이용해 값을 수정하는 방법을 <strong>옵티마이저</strong>라고 합니다. 이번에는 그 방법 중 하나인 경사 하강법을 사용합니다.</p>
       <div className="mt-7 space-y-5">
         <section aria-labelledby="forward-flow-title">
           <h3 id="forward-flow-title" className="font-black text-slate-950">
@@ -587,16 +586,16 @@ export function Lesson06Step3(props: CommonStepProps) {
         </section>
         <section aria-labelledby="backward-flow-title">
           <h3 id="backward-flow-title" className="font-black text-slate-950">
-            역전파 · 오차에 관한 정보로 수정 방향 계산
+            역전파로 기울기 계산 → 경사 하강법으로 수정
           </h3>
           <div className="mt-3">
             <FlowChain
               tone="rose"
               label="오차에 관한 정보로 앞쪽 연결의 수정 방향을 계산하는 역전파"
               items={[
-                '오차(loss)의 오차 정보',
+                '손실함수의 계산 정보',
                 '출력 쪽 → 앞쪽',
-                '수정 방향 계산',
+                '기울기 계산',
                 '경사 하강법으로 값 수정',
                 '다시 순전파',
               ]}
@@ -606,9 +605,7 @@ export function Lesson06Step3(props: CommonStepProps) {
       </div>
 
       <p className="mt-5 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-700">
-        역전파는 오차(loss) 숫자 하나가 선을 따라 이동하거나 데이터를 뒤집는 과정이
-        아닙니다. 정답을 바꾸는 과정도 아니며, 오차에 대한 정보를 뒤에서 앞으로
-        전달해 수정 방향을 계산합니다.
+        역전파는 데이터나 정답을 바꾸지 않습니다. 손실값 하나를 뒤로 옮기는 것이 아니라, 각 연결이 손실에 미치는 영향을 계산합니다.
       </p>
 
       <section className="mt-8" aria-labelledby="pass-sort-title">
@@ -762,7 +759,7 @@ export function Lesson06Step4(props: CommonStepProps) {
         <div className="mt-4 grid gap-3">{([{id:'adjust',label:'계산한 오차가 줄어드는 방향으로 가중치와 편향을 조정한다.'},{id:'answer',label:'예측과 같아지도록 입력과 실젯값을 바꾼다.'}] as const).map((item) => <Button key={item.id} variant={meaning === item.id ? 'primary' : 'secondary'} aria-pressed={meaning === item.id} onClick={() => {setMeaning(item.id);setMeaningSubmitted(false)}}>{item.label}</Button>)}</div>
         <Button className="mt-4" disabled={!meaning} onClick={() => setMeaningSubmitted(true)}>방향의 의미 제출</Button>
         {meaningSubmitted && <AnswerFeedback correct={meaning === 'adjust'} explanation={meaning === 'adjust' ? '경사 하강법은 오차가 작아지는 방향으로 모델의 가중치와 편향을 조정하는 방법입니다.' : '실젯값은 비교 기준입니다. 그 값을 바꾸는 대신 모델 안의 가중치와 편향을 조정합니다.'} />}
-        <p className="mt-4 text-sm leading-6">다음 실험은 한 번 조정하는 크기(학습률)를 {LEARNING_RATE}로 고정합니다. 이 값의 비교나 수식 유도는 하지 않습니다. 한 번의 조정으로 언제나 최적 모델이 되는 것은 아닙니다.</p>
+        <p className="mt-4 text-sm leading-6"><strong>학습률</strong>은 기울기에 적용할 수정 크기를 조절하는 값입니다. 여기서는 {LEARNING_RATE}로 고정하지만, 매번 가중치를 {LEARNING_RATE}만큼 바꾸는 뜻은 아닙니다. 실제 수정량은 기울기에도 달려 있습니다.</p>
       </fieldset>
 
       {props.isComplete && (
@@ -866,8 +863,7 @@ export function Lesson06Step5(props: CommonStepProps) {
           ))}
         </dl>
         <p className="mt-4 text-sm leading-6 text-slate-600">
-          활성화 함수는 시그모이드(sigmoid), 손실함수는 이진 교차 엔트로피 오차(BCEE)를 사용합니다. Lesson 05에서
-          다룬 BCEE와 같은 계산입니다.
+          활성화 함수는 시그모이드, 손실함수는 Lesson 05의 BCEE입니다. 초기화는 시작값을 정하는 일이고 학습은 그 값을 조정하는 일입니다. 여기서는 변화를 비교하기 위해 같은 초기값에서 시작합니다.
         </p>
       </div>
 
@@ -966,8 +962,7 @@ export function Lesson06Step5(props: CommonStepProps) {
           입력과 실젯값은 유지됩니다. 가중치와 편향을 조정한 뒤 같은 입력으로 다시 순전파하면 새로운 가중합·예측값·오차가 계산됩니다.
         </p>
         <p className="mt-2 leading-7 text-slate-600">
-          학생에게 미분식을 계산시키지 않지만, 버튼은 현재 예측과 정답에서 얻은
-          실제 오차 정보를 이용해 가중치와 편향을 업데이트합니다.
+          버튼을 누르면 현재 모델과 BCEE에서 구한 기울기로 값을 수정합니다. 표시된 근삿값이 아닌 내부 원래 값으로 계산하므로, 미분식을 손으로 계산할 필요는 없습니다.
         </p>
         <Button className="mt-5" disabled={!forwardRun || !predictionSubmitted || trainingResult !== null} onClick={runTraining}>
           <TrendingDown size={18} aria-hidden="true" />
@@ -991,6 +986,12 @@ export function Lesson06Step5(props: CommonStepProps) {
             <p className="mt-4 rounded-xl bg-rose-50 p-4 font-bold text-rose-950">
               예측값과 실젯값의 방향을 나타내는 차이: {formatTrainingValue(trainingResult.error)}. 이 부호 있는 차이와 손실함수로 계산한 오차(loss)는 서로 다른 값입니다.
             </p>
+            <details className="mt-3 rounded-xl border border-slate-200 p-4">
+              <summary className="min-h-11 cursor-pointer py-2 font-bold">w₁의 기울기와 실제 수정량 비교하기</summary>
+              <p className="mt-2 leading-7">현재 예측 약 {formatTrainingValue(trainingResult.before.prediction)}와 정답 {TRAINING_EXAMPLE.y}의 차이에 입력 {TRAINING_EXAMPLE.x1}을 곱하면, 이 뉴런의 w₁ 기울기는 약 {formatTrainingValue(trainingResult.error * TRAINING_EXAMPLE.x1)}입니다.</p>
+              <p className="mt-2 break-words leading-7">새 w₁ = 기존 w₁ − 학습률 × 기울기입니다. 여기서는 {INITIAL_PARAMETERS.w1}에서 약 {formatTrainingValue(LEARNING_RATE * trainingResult.error * TRAINING_EXAMPLE.x1, 4)}을 빼므로 약 {formatTrainingValue(trainingResult.nextParameters.w1, 4)}이 됩니다. 음수를 빼서 값이 커집니다.</p>
+              <p className="mt-2 leading-7">이는 현재 시그모이드+BCEE 뉴런의 계산입니다. 모든 신경망에서 ‘예측−정답’이 모든 가중치의 기울기인 것은 아닙니다. 위 숫자는 표시할 때만 반올림했습니다.</p>
+            </details>
             <UpdateWalkthrough
               example={TRAINING_EXAMPLE}
               beforeValues={beforeValues}
@@ -1042,7 +1043,7 @@ export function Lesson06Step5(props: CommonStepProps) {
         <legend className="font-black">학습 전후 결과가 달라진 이유는?</legend>
         <div className="mt-4 grid gap-3">{([{id:'parameters',label:'가중치와 편향을 조정하고 다시 순전파해 새 예측값과 오차를 계산했기 때문이다.'},{id:'target',label:'손실함수가 실젯값이나 현재 예측을 직접 정답으로 고쳤기 때문이다.'}] as const).map((item) => <Button key={item.id} variant={interpretation === item.id ? 'primary' : 'secondary'} aria-pressed={interpretation === item.id} onClick={() => {setInterpretation(item.id);setInterpretationSubmitted(false)}}>{item.label}</Button>)}</div>
         <Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>학습 결과 해석 제출</Button>
-        {interpretationSubmitted && <AnswerFeedback correct={interpretation === 'parameters'} explanation={interpretation === 'parameters' ? '가중치와 편향을 조정한 뒤 같은 입력으로 다시 계산했습니다. 오차 계산은 비교, 역전파는 오차를 줄이기 위한 수정 과정입니다.' : '위의 입력과 실젯값은 그대로입니다. 전후 표에서 바뀐 가중치·편향과 다음 순전파의 예측값을 비교한 뒤 다시 제출하세요.'} />}
+        {interpretationSubmitted && <AnswerFeedback correct={interpretation === 'parameters'} explanation={interpretation === 'parameters' ? '역전파로 기울기를 구하고 경사 하강법으로 가중치와 편향을 수정한 뒤, 같은 입력으로 다시 계산했습니다.' : '위의 입력과 실젯값은 그대로입니다. 전후 표에서 바뀐 가중치·편향과 다음 순전파의 예측값을 비교한 뒤 다시 제출하세요.'} />}
       </fieldset>}
 
       {props.isComplete && (
@@ -1264,11 +1265,41 @@ const shuffledLearningCards = [
   learningFlowCards[8],
 ]
 
+
+type ReviewItem = { label: string; purpose?: string; done: boolean | null; remaining?: string }
+function ReviewNavigation({ label, items, current, onChange }: { label: string; items: ReviewItem[]; current: number; onChange: (index: number) => void }) {
+  const heading = useRef<HTMLParagraphElement>(null)
+  const move = (index: number) => {
+    onChange(index)
+    requestAnimationFrame(() => {
+      heading.current?.focus({ preventScroll: true })
+      heading.current?.scrollIntoView({ block: 'start' })
+    })
+  }
+  return <div className="my-5 min-w-0">
+    <nav aria-label={label} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+      <div className={`grid gap-2 ${label === '확인 문제 이동' ? 'grid-cols-2 sm:grid-cols-4' : 'sm:grid-cols-2'}`}>
+        {items.map((item, index) => <button key={item.label} type="button" aria-current={current === index ? 'step' : undefined} onClick={() => move(index)} className={`min-h-11 min-w-0 rounded-lg border-2 p-3 text-left text-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${current === index ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white'}`}>
+          <span className="block break-keep font-bold">{item.label} · {item.done === null ? '참고 · 제출 없음' : item.done ? '✓ 정답 제출' : '○ 남음'}</span>
+          {item.done === false && <span className="mt-1 block leading-5">{item.remaining}</span>}
+        </button>)}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={current === 0} onClick={() => move(current - 1)}>이전 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+        <Button variant="secondary" disabled={current === items.length - 1} onClick={() => move(current + 1)}>다음 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+      </div>
+    </nav>
+    <p ref={heading} tabIndex={-1} className="mt-5 scroll-mt-64 leading-7 text-slate-700 focus-visible:outline-2 focus-visible:outline-indigo-600 md:scroll-mt-44">{items[current].purpose ?? items[current].label}</p>
+  </div>
+}
+
 export function Lesson06Step7({
   priorStepsComplete,
   onCompletionReadyChange,
   ...props
 }: Step7Props) {
+  const [section, setSection] = useState(0)
+  const [quizIndex, setQuizIndex] = useState(0)
   const [order, setOrder] = useState<string[]>([])
   const [orderSubmitted, setOrderSubmitted] = useState(false)
   const [quizAnswers, setQuizAnswers] = useState<Array<string | null>>(
@@ -1320,12 +1351,13 @@ export function Lesson06Step7({
       step={7}
       intro="입력부터 반복 학습까지 1~6차시의 개념을 하나의 흐름으로 연결합니다."
     >
-      <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
-        <h3 className="font-black text-indigo-950">교과서 기본 과정과 세부 활동 연결</h3>
-        <div className="mt-4"><FlowChain label="교과서 기본 학습 과정" items={learningPhases.map((phase) => phase.label)} /></div>
-        <dl className="mt-4 grid gap-3 lg:grid-cols-3">{learningPhases.map((phase) => <div key={phase.label} className="rounded-xl bg-white p-4"><dt className="font-black">{phase.label}</dt><dd className="mt-2 leading-7">{phase.detail}</dd></div>)}</dl>
-        <p className="mt-4 leading-7">다음 카드는 이 세 과정의 세부 활동입니다. 자료 준비·초기화는 반복 전에, 새 데이터 평가는 훈련 후에 연결합니다. 서로 다른 두 학습 순서를 외우는 활동이 아닙니다.</p>
-      </section>
+      <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
+        { label: '1. 전체 학습 흐름 배열', purpose: '열 개 카드를 학습 순서대로 배치하고 확인하세요.', done: orderSubmitted && orderCorrect, remaining: '열 카드 배치 후 전체 흐름 확인' },
+        { label: '2. 네 개념의 역할과 결과 해석', purpose: '예측값·오차·기울기·바뀐 파라미터의 역할을 구분하세요.', done: null, remaining: '' },
+        { label: '3. 확인 문제', purpose: '학습 과정과 결과의 의미를 판단해 문제마다 제출하세요.', done: allQuizSubmitted && allQuizCorrect, remaining: '모든 문제 정답 제출' },
+      ]} />
+      <div hidden={section !== 0} aria-label="소구간 1 내용">
+      <p className="mb-5 leading-7 text-slate-700">교과서의 순전파·오차 계산·역전파를 아래 열 카드로 자세히 나누었습니다. 자료 준비·초기화는 반복 전에, 새 데이터 평가는 훈련 후에 이어집니다.</p>
       <section aria-labelledby="full-learning-flow-title">
         <h3
           id="full-learning-flow-title"
@@ -1333,9 +1365,6 @@ export function Lesson06Step7({
         >
           1. 딥러닝 학습 흐름 배열
         </h3>
-        <p className="mt-2 leading-7 text-slate-600">
-          열 카드를 학습이 진행되는 순서대로 선택하세요.
-        </p>
         <div className="mt-5 grid gap-6 lg:grid-cols-2">
           <div>
             <p className="font-black text-slate-800">배치할 카드</p>
@@ -1416,6 +1445,8 @@ export function Lesson06Step7({
         )}
       </section>
 
+      </div>
+      <div hidden={section !== 1} aria-label="소구간 2 내용">
       <section className="mt-10" aria-labelledby="four-concepts-title">
         <h3 id="four-concepts-title" className="text-xl font-black text-slate-950">
           2. 네 개념의 서로 다른 역할
@@ -1424,7 +1455,7 @@ export function Lesson06Step7({
           {[
             ['순전파', '입력에서 예측값을 만드는 과정'],
             ['손실함수', '예측이 얼마나 틀렸는지 계산'],
-            ['역전파', '오차 정보를 이용해 수정 방향을 계산'],
+            ['역전파', '각 파라미터가 손실에 미치는 영향을 기울기로 계산합니다.'],
             ['경사 하강법', '손실을 줄이는 방향으로 가중치와 편향을 조정'],
           ].map(([name, description]) => (
             <div
@@ -1438,6 +1469,12 @@ export function Lesson06Step7({
         </div>
       </section>
 
+            <section className="mt-10 rounded-xl bg-indigo-50 p-5" aria-labelledby="final-loop-title">
+        <h3 id="final-loop-title" className="font-black">학습 결과 해석</h3>
+        <p className="mt-3 leading-7">순전파 → 오차 계산 → 역전파를 반복하며 가중치와 편향을 조정합니다. 예측값은 조정 뒤의 다음 순전파에서 달라집니다. 손실함수가 현재 예측을 직접 수정하는 것이 아닙니다. 훈련 후에는 사용하지 않은 테스트 데이터로 결과를 확인합니다.</p>
+      </section>
+      </div>
+      <div hidden={section !== 2} aria-label="소구간 3 내용">
       <section className="mt-10" aria-labelledby="lesson06-quiz-title">
         <h3 id="lesson06-quiz-title" className="text-xl font-black text-slate-950">
           3. 확인 문제 {lesson06Quiz.length}개
@@ -1445,9 +1482,10 @@ export function Lesson06Step7({
         <p className="mt-2 leading-7 text-slate-600">
           오답은 해설을 읽고 답을 바꾸어 다시 제출할 수 있습니다.
         </p>
+        <ReviewNavigation label="확인 문제 이동" current={quizIndex} onChange={setQuizIndex} items={lesson06Quiz.map((question, index) => ({ label: `문제 ${index + 1}`, done: quizSubmitted[index] && quizAnswers[index] === question.answer, remaining: quizSubmitted[index] ? '오답 수정 후 재제출' : '선택 후 제출' }))} />
         <div className="mt-5 space-y-6">
           {lesson06Quiz.map((quiz, index) => (
-            <fieldset
+            <fieldset hidden={quizIndex !== index}
               key={quiz.question}
               className="rounded-2xl border border-slate-200 p-5 sm:p-6"
             >
@@ -1493,11 +1531,9 @@ export function Lesson06Step7({
         </div>
       </section>
 
-      <section className="mt-10 rounded-xl bg-indigo-50 p-5" aria-labelledby="final-loop-title">
-        <h3 id="final-loop-title" className="font-black">학습 결과 해석</h3>
-        <p className="mt-3 leading-7">순전파 → 오차 계산 → 역전파를 반복하며 가중치와 편향을 조정합니다. 예측값은 조정 뒤의 다음 순전파에서 달라집니다. 손실함수가 현재 예측을 직접 수정하는 것이 아닙니다. 훈련 후에는 사용하지 않은 테스트 데이터로 결과를 확인합니다.</p>
-      </section>
 
+
+      </div>
       {completionReady && !props.isComplete && (
         <div
           className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950"

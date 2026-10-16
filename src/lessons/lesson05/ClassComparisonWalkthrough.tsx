@@ -28,18 +28,17 @@ export function ClassComparisonWalkthrough({
     `실제 레이블은 ${targetLabel}입니다. 두 배열 모두 ${targetIndex + 1}번째 칸이 이 클래스를 뜻합니다.`,
     `원-핫 실젯값 [${target.join(', ')}]에서 ${targetLabel}의 칸만 1입니다. 이 1은 모델의 예측 확률이 아니라 정답 위치 표시입니다.`,
     `${presetLabel}에서 같은 ${targetIndex + 1}번째 열의 예측 확률은 ${targetProbability.toFixed(2)}입니다. 이 클래스에 모델이 부여했다고 가정한 확률입니다.`,
-    `${presetLabel}의 정답 위치 확률 ${targetProbability.toFixed(2)}를 기존 CCEE 함수로 계산한 오차(loss)는 약 ${formatLoss(loss)}입니다. 원-핫을 확률로 바꾸는 것이 아니라 두 값을 비교합니다.`,
+    `정답 위치의 확률 ${targetProbability.toFixed(2)}로 계산한 CCEE 손실은 약 ${formatLoss(loss)}입니다. 확률이 아니라 예측을 평가한 값이며, 예측이나 정답 자체를 고치지는 않습니다.`,
   ]
   const highlight = 'border-indigo-500 bg-indigo-50 ring-2 ring-inset ring-indigo-500'
 
   return (
     <section className="mt-7 min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5" aria-labelledby="class-comparison-title">
       <h3 id="class-comparison-title" className="text-lg font-black text-slate-950">
-        정답과 예측을 나란히 보기
+        정답·예측 확률·손실을 한곳에서 비교하기
       </h3>
       <p className="mt-2 text-sm leading-6 text-slate-700">
-        두 배열의 같은 칸은 같은 붓꽃 종류를 뜻합니다. 원-핫의 1은 실제 정답 위치이고,
-        예측 확률은 모델이 각 종류라고 판단한 정도입니다. 같은 클래스 순서로 놓아야 올바르게 비교할 수 있습니다.
+        같은 열은 같은 붓꽃 종류입니다. 설명을 넘기며 정답의 1 → 같은 열의 확률 → 손실을 따라가 보세요.
       </p>
       <ol className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="비교 설명 순서">
         {stages.map((title, index) => (
@@ -94,7 +93,8 @@ export function ClassComparisonWalkthrough({
       </table>
 
       <p className={`mt-4 rounded-xl border-2 p-3 font-bold transition-colors duration-150 motion-reduce:transition-none ${stage === 3 ? highlight : 'border-slate-200 bg-slate-50'}`}>
-        {targetLabel}의 확률 {targetProbability.toFixed(2)}로 계산한 CCEE 오차(loss): 약 {formatLoss(loss)}
+        {targetLabel}의 확률 {targetProbability.toFixed(2)} → 손실값 −ln({targetProbability.toFixed(2)}) ≈ {formatLoss(loss)}
+        <span className="mt-2 block text-sm font-normal leading-6">정답 위치의 확률이 높을수록 손실은 작아집니다. 손실값은 예측을 평가한 결과이며 확률이나 정확도가 아닙니다. 로그 계산은 앱이 합니다.</span>
       </p>
       <p className="mt-4 leading-7 text-slate-800" aria-live="polite" aria-atomic="true">
         <strong>{stage + 1}/4 · {stages[stage]}: </strong>{descriptions[stage]}
@@ -104,7 +104,7 @@ export function ClassComparisonWalkthrough({
         <Button disabled={stage === stages.length - 1} onClick={() => setStage((value) => value + 1)} aria-label="클래스 비교 다음 설명">다음</Button>
         <Button variant="secondary" onClick={() => setStage(0)} aria-label="클래스 비교 설명 다시 보기">다시 보기</Button>
       </div>
-      <p className="mt-3 text-xs leading-5 text-slate-500">설명 조작은 관찰 횟수나 답안을 바꾸지 않습니다. 아래 예측 선택 활동은 그대로 진행하세요.</p>
+      <p className="mt-3 text-xs leading-5 text-slate-500">설명 이동은 예측 관찰 횟수나 답안을 바꾸지 않습니다.</p>
     </section>
   )
 }

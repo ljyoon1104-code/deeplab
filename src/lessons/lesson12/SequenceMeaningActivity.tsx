@@ -1,13 +1,17 @@
 import { SEQUENCE_SENTENCES } from './lesson12Data'
+import { SentenceRelation } from './Lesson12Guides'
 
 export default function SequenceMeaningActivity({ assignments, onChoose }: { assignments: Record<string, string>; onChoose: (key: string, value: string) => void }) {
-  return <div className="grid gap-4 md:grid-cols-2">{SEQUENCE_SENTENCES.map((item) => {
+  return <div className="grid gap-4 md:grid-cols-2">{SEQUENCE_SENTENCES.map((item, index) => {
     const subjectKey = `${item.id}:subject`
     const objectKey = `${item.id}:object`
     const subjectCorrect = assignments[subjectKey] === item.subject
     const objectCorrect = assignments[objectKey] === item.object
     const answered = assignments[subjectKey] && assignments[objectKey]
-    return <fieldset key={item.id} className="rounded-2xl border border-slate-200 p-5"><legend className="px-2 font-black">{item.sentence}</legend>{([{ key: subjectKey, label: item.subjectLabel, answer: item.subject }, { key: objectKey, label: item.objectLabel, answer: item.object }]).map((role) => <div key={role.key} className="mt-4"><p className="text-sm font-bold">{role.label}</p><div className="mt-2 grid grid-cols-2 gap-2">{item.choices.map((choice) => <button key={choice} type="button" aria-pressed={assignments[role.key] === choice} onClick={() => onChoose(role.key, choice)} className={`min-h-11 rounded-xl border font-bold ${assignments[role.key] === choice ? 'border-violet-600 bg-violet-50' : 'border-slate-300 bg-white'}`}>{choice}</button>)}</div></div>)}{answered ? <p className={`mt-4 text-sm font-bold ${subjectCorrect && objectCorrect ? 'text-emerald-700' : 'text-rose-700'}`} role="status">{subjectCorrect && objectCorrect ? `✓ ${item.action} 행동의 주체와 대상을 정확히 구분했습니다.` : '✕ 조사와 단어 순서를 다시 확인하세요.'}</p> : null}</fieldset>
+    return <fieldset key={item.id} className="min-w-0 rounded-2xl border border-slate-200 p-5"><legend className="px-2 font-black">{index === 0 ? '안내 예시' : '직접 판단'} · {item.sentence}</legend>
+      {index === 0 || (subjectCorrect && objectCorrect) ? <SentenceRelation subject={item.subject} object={item.object} action={item.action} /> : <p className="mt-3 text-sm leading-6">관계 그림: 주체·대상 정답 후 공개</p>}
+      {index === 0 ? <p className="mt-3 text-sm leading-6">‘나는’이 행동하는 쪽이고 ‘너를’이 그 대상입니다. 안내를 아래 선택에 적용한 뒤, 나머지 문장은 직접 판단하세요.</p> : null}
+      {([{ key: subjectKey, label: item.subjectLabel, answer: item.subject }, { key: objectKey, label: item.objectLabel, answer: item.object }]).map((role) => <div key={role.key} className="mt-4"><p className="text-sm font-bold">{role.label}</p><div className="mt-2 grid grid-cols-2 gap-2">{item.choices.map((choice) => <button key={choice} type="button" aria-pressed={assignments[role.key] === choice} onClick={() => onChoose(role.key, choice)} className={`min-h-11 rounded-xl border font-bold ${assignments[role.key] === choice ? 'border-violet-600 bg-violet-50' : 'border-slate-300 bg-white'}`}>{choice}</button>)}</div></div>)}{answered ? <p className={`mt-4 text-sm font-bold ${subjectCorrect && objectCorrect ? 'text-emerald-700' : 'text-rose-700'}`} role="status">{subjectCorrect && objectCorrect ? `✓ ${item.action} 행동의 주체와 대상을 정확히 구분했습니다.` : `✕ ${!subjectCorrect ? '행동하는 쪽' : '행동을 받는 쪽'}을 다시 살펴보세요. 누가(은·는·이·가), 누구를(을·를)에 해당하는지 문장과 연결하세요.`}</p> : null}</fieldset>
   })}</div>
 }
 

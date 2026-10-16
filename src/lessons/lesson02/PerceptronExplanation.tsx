@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { ArrowDown, ArrowRight, RotateCcw } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import type { PerceptronCalculation } from './perceptronMath'
 
@@ -7,40 +7,10 @@ export function NeuronIntroduction() {
   return (
     <section className="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-4 sm:p-5" aria-label="뉴런에서 인공신경망까지">
       <h3 className="text-xl font-black">한 뉴런의 정보 처리를 계산으로 표현하면?</h3>
-      <p className="mt-3 leading-7">퍼셉트론은 뉴런의 정보 처리 방식을 단순화한 인공 뉴런입니다. 여러 인공 뉴런을 연결하면 인공신경망(ANN)이 됩니다. 교과서 91~92쪽 그림의 관계를 아래처럼 나타낼 수 있습니다.</p>
-      <div className="mt-4 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr]">
-        <figure className="min-w-0 rounded-xl border border-cyan-200 bg-white p-3">
-          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="여러 방향에서 정보를 받아 다음 뉴런으로 전달하는 뉴런의 단순한 모습">
-            <path d="M15 15 L50 32 L82 55 M15 55 L82 55 M20 95 L50 78 L82 55 M110 55 L180 55 L205 25 M180 55 L205 55 M180 55 L205 90" fill="none" stroke="#0e7490" strokeWidth="3" />
-            <circle cx="95" cy="55" r="18" fill="#cffafe" stroke="#0e7490" strokeWidth="3" />
-          </svg>
-          <figcaption className="font-black">① 뉴런</figcaption><p className="mt-1 text-sm leading-6">정보를 받아 처리하고 다음 뉴런으로 전달합니다.</p>
-        </figure>
-        <ArrowRight className="hidden text-cyan-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-cyan-700 md:hidden" aria-hidden="true" />
-        <figure className="min-w-0 rounded-xl border border-indigo-200 bg-white p-3">
-          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="두 입력을 받아 계산한 뒤 하나의 출력을 만드는 퍼셉트론">
-            <path d="M38 25 L98 55 M38 85 L98 55 M134 55 L193 55" fill="none" stroke="#6366f1" strokeWidth="3" />
-            <circle cx="28" cy="25" r="11" fill="#cffafe" stroke="#0e7490" /><circle cx="28" cy="85" r="11" fill="#cffafe" stroke="#0e7490" />
-            <circle cx="116" cy="55" r="25" fill="#e0e7ff" stroke="#4338ca" strokeWidth="2" /><text x="116" y="61" textAnchor="middle" fontSize="16">계산</text>
-            <circle cx="199" cy="55" r="11" fill="#d1fae5" stroke="#047857" />
-          </svg>
-          <figcaption className="font-black">② 퍼셉트론</figcaption><p className="mt-1 text-sm leading-6">입력·가중치·편향으로 가중합을 구한 뒤 활성화 함수로 출력을 만듭니다.</p>
-        </figure>
-        <ArrowRight className="hidden text-cyan-700 md:block" aria-hidden="true" /><ArrowDown className="mx-auto text-cyan-700 md:hidden" aria-hidden="true" />
-        <figure className="min-w-0 rounded-xl border border-indigo-200 bg-white p-3">
-          <svg viewBox="0 0 220 110" className="mx-auto w-full max-w-56" role="img" aria-label="두 입력 노드와 중간 뉴런 두 개, 출력 뉴런 하나가 연결된 인공신경망">
-            {[25,85].flatMap((y) => [25,85].map((to) => <line key={y + '-' + to} x1="30" y1={y} x2="110" y2={to} stroke="#94a3b8" strokeWidth="2" />))}
-            {[25,85].map((y) => <line key={y} x1="110" y1={y} x2="190" y2="55" stroke="#94a3b8" strokeWidth="2" />)}
-            {[25,85].map((y) => <circle key={y} cx="30" cy={y} r="12" fill="#cffafe" stroke="#0e7490" />)}
-            {[25,85].map((y) => <circle key={y} cx="110" cy={y} r="15" fill="#e0e7ff" stroke="#4338ca" />)}
-            <circle cx="190" cy="55" r="15" fill="#d1fae5" stroke="#047857" />
-          </svg>
-          <figcaption className="font-black">③ 인공신경망</figcaption><p className="mt-1 text-sm leading-6">여러 뉴런을 연결해 앞 뉴런의 출력을 다음 뉴런의 입력으로 전달합니다.</p>
-        </figure>
-      </div>
-      <p className="mt-4 leading-7"><strong>가중치</strong>는 각 입력이 계산에 반영되는 방식을 조절하며 음수도 가능합니다. <strong>편향</strong>은 입력에 곱하지 않고, 곱한 값들의 합에 더합니다. 가중합과 활성화 함수 적용 후 출력은 구분합니다.</p>
+      <p className="mt-3 leading-7">생물학적 뉴런은 정보를 받아 다음 뉴런으로 전달합니다. 이를 계산으로 단순화한 인공 뉴런이 퍼셉트론이며, 여러 인공 뉴런을 연결하면 인공신경망(ANN)이 됩니다.</p>
+      <p className="mt-4 leading-7"><strong>가중치</strong>는 입력의 영향 크기와 방향을 조절합니다. <strong>편향</strong>은 곱셈 결과의 합에 더해 판단 기준을 옮깁니다. 이처럼 학습으로 조정하는 숫자를 <strong>파라미터</strong>라고 합니다.</p>
       <figure className="mt-4 rounded-xl border border-indigo-200 bg-white p-4">
-        <figcaption className="font-black">② 퍼셉트론 안을 확대하면</figcaption>
+        <figcaption className="font-black">퍼셉트론의 입력에서 출력까지</figcaption>
         <svg viewBox="0 0 300 295" className="mx-auto mt-3 w-full max-w-sm" role="img" aria-label="입력 x1과 x2가 각 연결의 가중치 w1, w2와 곱해져 합산되고, 편향 b를 더한 가중합 z가 활성화 함수를 거쳐 출력이 됩니다.">
           <path d="M65 49 L65 80 L150 124 M235 49 L235 80 L150 124 M150 166 V194 M150 237 V265" fill="none" stroke="#6366f1" strokeWidth="2" />
           {[65,235].map((x,index) => <g key={x}><circle cx={x} cy="28" r="25" fill="#cffafe" stroke="#0e7490" strokeWidth="2" /><text x={x} y="33" textAnchor="middle" fontSize="15">입력 x{index + 1}</text><rect x={x - 54} y="67" width="108" height="28" rx="6" fill="#eef2ff" stroke="#4338ca" /><text x={x} y="86" textAnchor="middle" fontSize="14">× 가중치 w{index + 1}</text></g>)}
@@ -49,7 +19,13 @@ export function NeuronIntroduction() {
           <rect x="68" y="195" width="164" height="42" rx="10" fill="#cffafe" stroke="#0e7490" /><text x="150" y="222" textAnchor="middle" fontSize="16">활성화 함수</text>
           <rect x="90" y="264" width="120" height="28" rx="10" fill="#d1fae5" stroke="#047857" /><text x="150" y="284" textAnchor="middle" fontSize="16">출력</text>
         </svg>
-        <p className="mt-3 text-sm leading-6">선 위에서는 입력에 가중치를 곱하고, 합산하는 곳에서 편향을 더합니다. 활성화 함수 앞은 가중합, 뒤는 출력입니다. 이 위치를 아래 순서·역할 활동과 연결하세요.</p>
+        <dl className="mt-4 grid gap-3 text-sm leading-6 sm:grid-cols-2">
+          <div><dt className="font-black">입력 x · 가중치 w</dt><dd>받은 정보인 입력에 가중치를 곱합니다.</dd></div>
+          <div><dt className="font-black">편향 b · 가중합 z</dt><dd>곱한 값들을 합산하고 편향을 더한 결과가 z입니다.</dd></div>
+          <div><dt className="font-black">활성화 함수</dt><dd>가중합을 받아 출력으로 바꾸는 규칙입니다.</dd></div>
+          <div><dt className="font-black">출력</dt><dd>활성화 함수를 적용한 최종 결과입니다.</dd></div>
+        </dl>
+        <p className="mt-3 text-sm leading-6">아래 카드 번호는 학생이 배열한 계산 순서입니다. 직접 값을 조절하는 활동은 계산 원리 관찰이며 자동 학습은 아닙니다.</p>
       </figure>
     </section>
   )
@@ -57,10 +33,10 @@ export function NeuronIntroduction() {
 
 const stages = [
   { title: '① 입력값', detail: '모델이 받은 두 입력을 확인합니다. 아직 가중치를 곱하지 않았습니다.' },
-  { title: '② 가중치와 곱셈', detail: '같은 번호의 입력과 가중치를 연결해 곱합니다. 가중치는 연결마다 붙어 있습니다.' },
+  { title: '② 가중치와 곱셈', detail: '같은 번호의 입력과 가중치를 곱합니다. 입력이 음수이면 가중치를 키워도 곱한 값은 작아질 수 있습니다. 입력의 부호도 함께 보세요.' },
   { title: '③ 곱의 합', detail: '두 곱셈 결과를 모두 더합니다. 편향을 더하기 전의 값입니다.' },
   { title: '④ 편향과 가중합', detail: '곱의 합에 편향을 더하면 가중합 z가 됩니다. 편향을 각 입력에 곱하지 않습니다.' },
-  { title: '⑤ 활성화 함수와 출력', detail: '계단 함수는 z가 음수이면 0, 0 이상이면 1을 출력합니다. 가중합과 최종 출력은 다른 값입니다.' },
+  { title: '⑤ 활성화 함수와 출력', detail: '계단 함수는 z가 음수이면 0, 0 이상이면 1을 출력합니다. 이 0과 1은 기준에 따른 판단 결과이지 확률 0%와 100%가 아닙니다.' },
 ] as const
 
 export function PerceptronWalkthrough({ result }: { result: PerceptronCalculation }) {
@@ -72,7 +48,7 @@ export function PerceptronWalkthrough({ result }: { result: PerceptronCalculatio
   return (
     <section className="mt-5 rounded-2xl border border-indigo-200 bg-white p-4" aria-label="퍼셉트론 완성 풀이 그림">
       <h4 className="font-black">그림과 계산을 한 단계씩 연결하기</h4>
-      <p className="mt-2 text-sm leading-6">원은 입력값, 연결선의 w는 가중치입니다. 합에 편향 b를 더한 가중합을 계단 함수에 넣습니다. 아래 조작은 설명만 바꾸며 답안과 완료 상태는 바꾸지 않습니다.</p>
+      <p className="mt-2 text-sm leading-6">원은 입력값, 선의 w는 가중치, b는 편향입니다. 곱셈 → 합산 → 편향 더하기 → 계단 함수 순서로 현재 값을 따라가 보세요.</p>
       <div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2">
         <svg viewBox="0 0 300 430" className="mx-auto w-full max-w-80" role="img" aria-labelledby={titleId}>
           <title id={titleId}>{'입력 ' + result.inputs.join(', ') + '에 가중치 ' + result.weights.join(', ') + '를 곱해 합 ' + result.productSum + ', 편향 ' + result.bias + '를 더한 가중합 ' + result.z + ', 계단 함수 출력 ' + result.output}</title>

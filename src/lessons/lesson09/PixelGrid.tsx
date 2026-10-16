@@ -27,7 +27,7 @@ const toneClasses = {
 export default function PixelGrid({ values, label, region, tone = 'input', compact = false, annotations, focusCell }: PixelGridProps) {
   const columns = values[0]?.length ?? 1
   return (
-    <div>
+    <div className="min-w-0">
       <p className="mb-2 text-sm font-black text-slate-700">{label}</p>
       {region ? <p className="mb-2 text-xs font-bold text-violet-700">선택 영역: {region.startRow + 1}행 {region.startColumn + 1}열에서 시작</p> : null}
       <div
@@ -47,10 +47,10 @@ export default function PixelGrid({ values, label, region, tone = 'input', compa
           return (
             <span
               key={`${rowIndex}-${columnIndex}`}
-              className={`relative flex aspect-square min-w-0 items-center justify-center rounded-lg border font-mono font-black transition-colors duration-150 motion-reduce:transition-none ${compact ? 'text-sm' : 'text-base sm:text-lg'} ${focused ? 'border-orange-800 bg-orange-100 ring-2 ring-orange-600' : selected ? 'border-violet-800 bg-white ring-2 ring-violet-500' : 'border-white/80 bg-white/65'}`}
+              className={`flex aspect-square min-h-11 min-w-0 flex-col items-center justify-center rounded-lg border font-mono font-black transition-colors duration-150 motion-reduce:transition-none ${compact ? 'text-sm' : 'text-base sm:text-lg'} ${focused ? 'border-orange-800 bg-orange-100 ring-2 ring-orange-600' : selected ? 'border-violet-800 bg-white ring-2 ring-violet-500' : 'border-white/80 bg-white/65'}`}
               aria-label={`${rowIndex + 1}행 ${columnIndex + 1}열 값 ${value}${selected ? ', 선택됨' : ''}${annotation ? `, 대응 번호 ${annotation}` : ''}${focused ? ', 현재 설명 위치' : ''}`}
             >
-              {annotation || selected ? <span className="absolute left-1 top-0 text-[9px] text-violet-800" aria-hidden="true">{annotation ? `#${annotation}` : '✓'}</span> : null}
+              {annotation || selected ? <span className="block text-[11px] leading-3 text-violet-800" aria-hidden="true">{annotation ? `#${annotation}` : '✓'}</span> : null}
               {value}
             </span>
           )

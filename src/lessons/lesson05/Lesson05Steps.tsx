@@ -18,8 +18,7 @@ import {
   useState,
   type Dispatch,
   type ReactNode,
-  type SetStateAction,
-} from 'react'
+  type SetStateAction, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -598,26 +597,26 @@ export function Lesson05Step3(props: CommonStepProps) {
           <div>
             <h3 className="text-xl font-black text-indigo-950">손실함수</h3>
             <p className="mt-2 leading-7 text-slate-800">
-              예측값과 실젯값의 차이를 이용하여 모델이 얼마나 틀렸는지를
-              숫자로 나타내는 함수를 손실함수라고 합니다. 함수는 계산 방법이며, 그 계산으로 얻은 값이 오차(loss)입니다.
+              손실함수는 예측과 실젯값을 비교하는 계산 방법이며, 손실 또는 오차(loss)는 그 계산 결과입니다.
+              아래 2와 40은 예측에서 실젯값을 뺀 차이의 절댓값입니다. MSE·BCEE·CCEE로 계산한 값은 아닙니다.
             </p>
           </div>
         </div>
       </div>
 
       <div className="mt-7 grid gap-5 lg:grid-cols-2">
-        <PredictionLossFlow prediction="98" target="100" lossName="손실함수 적용">
+        <PredictionLossFlow prediction="98" target="100" lossName="차이의 절댓값 계산">
           <LossMeter
-            display="오차 2 · 비교적 작은 오차(loss)"
+            display="차이의 크기 2"
             level={0.12}
-            description="이 활동 안에서 예측 98은 실제 100에 가까운 편입니다."
+            description="98 − 100 = −2에서 부호를 제외한 크기는 2입니다."
           />
         </PredictionLossFlow>
-        <PredictionLossFlow prediction="60" target="100" lossName="손실함수 적용">
+        <PredictionLossFlow prediction="60" target="100" lossName="차이의 절댓값 계산">
           <LossMeter
-            display="오차 40 · 비교적 큰 오차(loss)"
+            display="차이의 크기 40"
             level={0.82}
-            description="이 활동 안에서 예측 60은 실제 100과 많이 다른 편입니다."
+            description="60 − 100 = −40에서 부호를 제외한 크기는 40입니다."
           />
         </PredictionLossFlow>
       </div>
@@ -664,8 +663,8 @@ export function Lesson05Step3(props: CommonStepProps) {
       <div className="mt-6 flex items-start gap-3 rounded-xl bg-slate-100 p-4 text-slate-700">
         <Lightbulb className="mt-0.5 shrink-0 text-amber-600" size={20} aria-hidden="true" />
         <p className="leading-7">
-          오차(loss)가 작을수록 현재 예측이 실젯값에 가까운 방향입니다. 오차(loss)는
-          정확도나 백분율이 아닙니다. 손실함수는 예측값과 가중치를 직접 고치지 않으며, 서로 다른 손실함수의 숫자 크기만으로 모델 성능을 비교할 수 없습니다.
+          손실은 틀릴 확률이나 정확도가 아닙니다. 같은 데이터와 같은 손실함수로 계산한 값끼리 비교하세요.
+          손실함수는 평가할 뿐, 예측값·정답·가중치를 직접 수정하지 않습니다.
         </p>
       </div>
 
@@ -791,7 +790,7 @@ export function Lesson05Step4(props: CommonStepProps) {
               <p className="mt-3 leading-7">실젯값 {item.target}, 예측값 {item.prediction}</p>
               <p className="mt-3 font-bold">차이: {item.prediction} − {item.target} = {expectedErrors[index]}</p>
               <p className="mt-2 font-bold">제곱: {expectedErrors[index]} × {expectedErrors[index]} = {expectedSquares[index]}</p>
-              <p className="mt-3 text-sm leading-6">이 행은 풀이를 보여 주는 예입니다. 옆의 두 행과 아래 평균은 직접 입력해야 합니다.</p>
+              <p className="mt-3 text-sm leading-6">+{expectedErrors[index]}는 실제보다 {expectedErrors[index]}점 높게 예측했다는 뜻입니다. 제곱한 {expectedSquares[index]}는 {expectedSquares[index]}점 틀렸다는 뜻이 아닙니다. 옆의 두 행을 계산해 함께 평균을 구하세요.</p>
             </article>
           ) : (
             <fieldset
@@ -1034,9 +1033,7 @@ export function Lesson05Step5(props: CommonStepProps) {
           이진 교차 엔트로피 오차(BCEE)
         </h3>
         <p className="mt-2 leading-7 text-slate-700">
-          스팸/정상처럼 두 종류 중 하나를 분류할 때 예측 확률과 실젯값을
-          비교하는 손실함수입니다. 확률을 바꾸어도 실젯값은 그 예제의 정답입니다. 아래 정답 선택은 다른 예제를 살펴보는 조작이지 모델이 정답을 고치는 과정이 아닙니다. 로그 계산 대신 확률과 오차(loss)의 관계를
-          관찰하세요.
+          스팸/정상처럼 두 종류를 구분할 때 사용하는 손실함수입니다. 정답 1·0은 종류 표시이고, 예측 확률 p는 스팸이라고 판단한 정도입니다. BCEE로 둘을 비교해 손실값을 계산합니다.
         </p>
       </div>
 
@@ -1084,7 +1081,7 @@ export function Lesson05Step5(props: CommonStepProps) {
               2. 모델 출력으로 가정한 확률 조절
             </h3>
             <p className="mt-2 leading-7 text-slate-600">
-              시그모이드 함수의 출력 형태를 예로 들어 ‘스팸일 확률’을 가정합니다. 확률은 설명용 입력이고, BCEE 값은 그 확률과 선택한 실젯값으로 실제 계산한 결과입니다.
+              확률은 모델 출력으로 가정한 값이고, 손실값은 BCEE로 실제 계산한 결과입니다. 정답 선택은 다른 예제로 바꾸는 조작이지 모델이 정답을 고치는 과정은 아닙니다.
             </p>
           </div>
           <output
@@ -1238,18 +1235,9 @@ export function Lesson05Step6(props: CommonStepProps) {
           범주형 교차 엔트로피 오차(CCEE)
         </h3>
         <p className="mt-2 leading-7 text-slate-700">
-          여러 클래스 중 하나를 분류할 때 실젯값 위치에 해당하는 예측 확률을
-          이용해 오차(loss)를 계산합니다.
+          클래스는 구분하려는 종류입니다. CCEE는 원-핫 정답에서 1인 위치의 예측 확률로 손실값을 계산하는 방법입니다. 예측 A·B·C를 모두 선택하고 정답 확률과 손실을 비교하세요.
         </p>
       </div>
-
-      <ClassComparisonWalkthrough
-        labels={irisLabels}
-        target={irisTarget}
-        probabilities={preset.probabilities}
-        presetLabel={preset.label}
-        loss={loss}
-      />
 
       <section className="mt-8" aria-labelledby="ccee-preset-title">
         <h3 id="ccee-preset-title" className="text-xl font-black text-slate-950">
@@ -1291,56 +1279,13 @@ export function Lesson05Step6(props: CommonStepProps) {
         </p>
       </section>
 
-      <div className="mt-8">
-        <FlowChain
-          label="점수에서 CCEE 오차(loss)까지의 흐름"
-          items={[
-            '점수',
-            'Softmax',
-            '클래스별 예측 확률',
-            '실젯값 위치 확인',
-            'CCEE',
-            '오차(loss)',
-          ]}
-        />
-      </div>
-
-      <div className="mt-8">
-        <PredictionLossFlow
-          prediction={
-            <>
-              [{preset.probabilities.map((value) => value.toFixed(2)).join(', ')}]
-              <span className="mt-1 block text-sm font-semibold text-slate-600">
-                소프트맥스 출력 형태의 예시 확률
-              </span>
-            </>
-          }
-          target={
-            <>
-              [0, 0, 1]
-              <span className="mt-1 block text-sm font-semibold text-slate-600">
-                원-핫 정답
-              </span>
-            </>
-          }
-          lossName="CCEE로 평가"
-        >
-          <LossMeter
-            display={`오차(loss) ${formatLoss(loss)}`}
-            level={1 - Math.exp(-Math.min(loss, 8))}
-            description={`정답 Virginica 위치의 예측 확률 ${preset.probabilities[2].toFixed(2)}를 사용해 -ln(${preset.probabilities[2].toFixed(2)})로 계산했습니다.`}
-          />
-        </PredictionLossFlow>
-      </div>
-
-      <div className="mt-5 flex items-start gap-3 rounded-xl bg-slate-100 p-4 text-slate-700">
-        <Lightbulb className="mt-0.5 shrink-0 text-amber-600" size={20} aria-hidden="true" />
-        <p className="leading-7">
-          정답 클래스인 Virginica의 확률이 높아질수록 CCEE 오차(loss)는 작아지는
-          경향이 있습니다. 예측 A의 오차(loss)는 -ln(0.84) = {formatLoss(categoricalCrossEntropy(irisTarget, cceePresets[0].probabilities), 3)}…,
-          화면 표시 약 {formatLoss(categoricalCrossEntropy(irisTarget, cceePresets[0].probabilities))}입니다. 교과서 인쇄 94쪽의 예를 앱이 계산하므로 로그 손계산은 하지 않습니다.
-        </p>
-      </div>
+      <ClassComparisonWalkthrough
+        labels={irisLabels}
+        target={irisTarget}
+        probabilities={preset.probabilities}
+        presetLabel={preset.label}
+        loss={loss}
+      />
 
       <fieldset className="mt-8">
         <legend className="text-xl font-black leading-snug text-slate-950">
@@ -1405,11 +1350,41 @@ interface Step7Props extends CommonStepProps {
 
 type LossName = 'MSE' | 'BCEE' | 'CCEE'
 
+
+type ReviewItem = { label: string; purpose?: string; done: boolean | null; remaining?: string }
+function ReviewNavigation({ label, items, current, onChange }: { label: string; items: ReviewItem[]; current: number; onChange: (index: number) => void }) {
+  const heading = useRef<HTMLParagraphElement>(null)
+  const move = (index: number) => {
+    onChange(index)
+    requestAnimationFrame(() => {
+      heading.current?.focus({ preventScroll: true })
+      heading.current?.scrollIntoView({ block: 'start' })
+    })
+  }
+  return <div className="my-5 min-w-0">
+    <nav aria-label={label} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+      <div className={`grid gap-2 ${label === '확인 문제 이동' ? 'grid-cols-2 sm:grid-cols-4' : 'sm:grid-cols-2'}`}>
+        {items.map((item, index) => <button key={item.label} type="button" aria-current={current === index ? 'step' : undefined} onClick={() => move(index)} className={`min-h-11 min-w-0 rounded-lg border-2 p-3 text-left text-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${current === index ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white'}`}>
+          <span className="block break-keep font-bold">{item.label} · {item.done === null ? '참고 · 제출 없음' : item.done ? '✓ 정답 제출' : '○ 남음'}</span>
+          {item.done === false && <span className="mt-1 block leading-5">{item.remaining}</span>}
+        </button>)}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={current === 0} onClick={() => move(current - 1)}>이전 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+        <Button variant="secondary" disabled={current === items.length - 1} onClick={() => move(current + 1)}>다음 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+      </div>
+    </nav>
+    <p ref={heading} tabIndex={-1} className="mt-5 scroll-mt-64 leading-7 text-slate-700 focus-visible:outline-2 focus-visible:outline-indigo-600 md:scroll-mt-44">{items[current].purpose ?? items[current].label}</p>
+  </div>
+}
+
 export function Lesson05Step7({
   priorStepsComplete,
   onCompletionReadyChange,
   ...props
 }: Step7Props) {
+  const [section, setSection] = useState(0)
+  const [quizIndex, setQuizIndex] = useState(0)
   const [matches, setMatches] = useState<Record<string, LossName | undefined>>({})
   const [matchesSubmitted, setMatchesSubmitted] = useState(false)
   const [quizAnswers, setQuizAnswers] = useState<Array<string | null>>([
@@ -1472,6 +1447,12 @@ export function Lesson05Step7({
       step={7}
       intro="문제 유형에 맞는 손실함수를 연결하고 활성화 함수와 손실함수의 서로 다른 역할을 정리합니다."
     >
+      <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
+        { label: '1. 문제 유형과 손실함수 연결', purpose: '문제의 출력 형태에 맞는 손실함수를 골라 제출하세요.', done: matchesSubmitted && matchesCorrect, remaining: '세 문제 유형 연결 후 제출' },
+        { label: '2. 활성화 함수와 손실함수 구분', purpose: '예측을 만드는 함수와 예측을 평가하는 함수를 비교하세요.', done: null, remaining: '' },
+        { label: '3. 결과 해석과 확인 문제', purpose: '손실값의 비교 기준을 살펴보고 네 문제를 제출하세요.', done: allQuizSubmitted && allQuizCorrect, remaining: '네 문제 정답 제출' },
+      ]} />
+      <div hidden={section !== 0} aria-label="소구간 1 내용">
       <section aria-labelledby="loss-match-title">
         <h3 id="loss-match-title" className="text-xl font-black text-slate-950">
           1. 문제 유형과 손실함수 연결
@@ -1528,6 +1509,8 @@ export function Lesson05Step7({
         )}
       </section>
 
+      </div>
+      <div hidden={section !== 1} aria-label="소구간 2 내용">
       <section className="mt-10" aria-labelledby="function-role-title">
         <h3 id="function-role-title" className="text-xl font-black text-slate-950">
           2. 활성화 함수와 손실함수 구분
@@ -1577,6 +1560,8 @@ export function Lesson05Step7({
         </p>
       </section>
 
+      </div>
+      <div hidden={section !== 2} aria-label="소구간 3 내용">
       <section className="mt-10" aria-labelledby="training-record-title">
         <h3 id="training-record-title" className="text-xl font-black">3. 계산 결과를 읽는 기준</h3>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -1593,9 +1578,10 @@ export function Lesson05Step7({
         <p className="mt-2 leading-7 text-slate-600">
           오답은 해설을 확인하고 답을 바꾸어 다시 제출할 수 있습니다.
         </p>
+        <ReviewNavigation label="확인 문제 이동" current={quizIndex} onChange={setQuizIndex} items={lesson05Quiz.map((question, index) => ({ label: `문제 ${index + 1}`, done: quizSubmitted[index] && quizAnswers[index] === question.answer, remaining: quizSubmitted[index] ? '오답 수정 후 재제출' : '선택 후 제출' }))} />
         <div className="mt-5 space-y-6">
           {lesson05Quiz.map((quiz, index) => (
-            <fieldset
+            <fieldset hidden={quizIndex !== index}
               key={quiz.question}
               className="rounded-2xl border border-slate-200 p-5 sm:p-6"
             >
@@ -1641,6 +1627,7 @@ export function Lesson05Step7({
         </div>
       </section>
 
+      </div>
       {completionReady && !props.isComplete && (
         <div
           className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950"

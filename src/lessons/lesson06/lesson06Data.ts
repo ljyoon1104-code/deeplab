@@ -1,7 +1,7 @@
 export const learningPhases = [
   { label: '순전파', detail: '입력 → 가중합 → 활성화 함수 → 예측값' },
   { label: '오차 계산', detail: '예측값과 실젯값 → 손실함수로 비교 → 오차(loss)' },
-  { label: '역전파', detail: '오차 정보로 수정 방향 계산 → 경사 하강법으로 가중치와 편향 조정' },
+  { label: '역전파', detail: '기울기를 계산합니다. 그 뒤 경사 하강법으로 가중치와 편향을 조정합니다.' },
 ] as const
 
 export const lesson06StepTitles = [

@@ -10,7 +10,7 @@ import {
   Lightbulb,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -216,8 +216,8 @@ function ModelIntroduction() {
     <h3 className="text-xl font-black">사진이 예측 결과가 되기까지</h3>
     <dl className="mt-4 grid gap-3 sm:grid-cols-2">
       <div><dt className="font-black">모델</dt><dd className="mt-1 leading-7">입력을 받아 예측을 계산하는 구조입니다.</dd></div>
-      <div><dt className="font-black">학습</dt><dd className="mt-1 leading-7">데이터로 모델의 판단에 필요한 기준을 조정하는 과정입니다.</dd></div>
-      <div><dt className="font-black">예측</dt><dd className="mt-1 leading-7">모델이 입력에 대해 내놓은 결과입니다.</dd></div>
+      <div><dt className="font-black">학습</dt><dd className="mt-1 leading-7">예측이 정답에 가까워지도록 데이터로 모델의 내부 값을 조정하는 과정입니다.</dd></div>
+      <div><dt className="font-black">예측</dt><dd className="mt-1 leading-7">모델이 입력을 보고 계산한 결과입니다. 보통 사용할 때는 학습된 내부 값을 그대로 써서 계산합니다.</dd></div>
       <div><dt className="font-black">레이블</dt><dd className="mt-1 leading-7">학습·평가에서 예측과 비교하는 실제 정답 정보입니다.</dd></div>
     </dl>
     <figure className="mt-5">
@@ -438,15 +438,15 @@ export function Lesson01Step4(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={4} intro="같은 이미지 분류 문제를 기계학습과 딥러닝의 흐름으로 비교하고, 사람이 맡는 준비와 신경망의 학습을 구분합니다.">
-      <p className="mb-5 leading-7 text-slate-700">교과서 96쪽의 핵심 차이는 특징을 다루는 방식입니다. 일반적인 기계학습은 사람이 특징을 설계해 특징값을 제공하고, 딥러닝은 신경망의 여러 층이 데이터에서 특징을 학습합니다.</p>
+    <StepFrame {...props} step={4} intro="두 흐름을 배열하고, 특징을 준비하는 방식의 차이와 공통점을 판단하세요.">
+      <p className="mb-5 leading-7 text-slate-700">딥러닝은 기계학습의 한 종류입니다. 여기서는 사람이 특징을 설계하는 방식과 신경망이 여러 층에서 특징을 학습하는 방식을 비교합니다.</p>
       <div className="grid gap-5 xl:grid-cols-2">
         <FlowOrder label="기계학습 흐름" order={mlOrder} tokens={machineLearningTokens} onChange={(next) => { setMlOrder(next); setResult('idle') }} />
         <FlowOrder label="딥러닝 흐름" order={dlOrder} tokens={deepLearningTokens} onChange={(next) => { setDlOrder(next); setResult('idle') }} />
       </div>
       <div className="mt-6 rounded-2xl bg-indigo-50 p-5 text-slate-800">
         <Lightbulb className="float-left mr-3 mt-1 text-indigo-700" size={22} aria-hidden="true" />
-        <p className="leading-7">두 방법 모두 데이터로 학습하고 새로운 데이터로 결과를 평가해야 합니다. 딥러닝도 사람이 데이터와 레이블을 준비하고, 모델 구조와 학습 조건을 정합니다. 신경망이 데이터에서 표현을 학습한다고 해서 사람이 준비할 일이 사라지는 것은 아닙니다.</p>
+        <p className="leading-7">학습된 특징이 사람이 이름 붙인 눈·귀와 꼭 일치하지는 않습니다. 두 방법 모두 사람이 데이터를 준비하고 새 데이터로 결과를 평가해야 합니다. 딥러닝도 레이블·모델 구조·학습 조건을 사람이 정합니다.</p>
       </div>
       <section className="mt-8" aria-labelledby="comparison-judgment-title">
         <h3 id="comparison-judgment-title" className="text-xl font-black text-slate-950">공통점과 차이를 판단하세요</h3>
@@ -481,7 +481,7 @@ export function Lesson01Step5(props: CommonStepProps) {
 
   return (
     <StepFrame {...props} step={5} intro="문장 속 근거를 읽고 기계학습, 딥러닝, 두 방법의 공통점으로 정확히 분류합니다.">
-      <p className="rounded-2xl bg-slate-100 p-4 leading-7 text-slate-700">모바일에서도 카드를 먼저 선택한 뒤 아래의 분류 영역 버튼을 누르면 됩니다. 모든 문장을 옮긴 뒤 제출하세요.</p>
+      <p className="rounded-2xl bg-slate-100 p-4 leading-7 text-slate-700">문장에서 ‘사람이 특징을 정함’, ‘여러 층에서 학습함’, ‘두 방법 모두 필요함’이라는 근거를 찾으세요. 카드를 선택해 분류한 뒤 모든 문장을 제출하세요.</p>
       <ClassificationBoard items={comparisonCards.map(({ id, text }) => ({ id, label: text }))} categories={comparisonCategories.map((category) => ({ ...category }))} assignments={assignments} selectedId={selectedId} onSelect={setSelectedId} onAssign={(category) => { if (!selectedId) return; setAssignments((current) => ({ ...current, [selectedId]: category as ComparisonCategory })); setResult('idle') }} />
       <Button className="mt-6" onClick={submit}>문장 분류 제출</Button>
       <ActivityFeedback result={result} incomplete="여섯 문장을 모두 세 영역 중 하나에 분류한 뒤 제출하세요." incorrect="특징을 사람이 직접 정하는지, 여러 층이 표현을 학습하는지, 두 방법 모두에 해당하는지를 문장마다 다시 살펴보세요." correct="좋습니다. 데이터 품질과 새 데이터 평가는 기계학습과 딥러닝 모두에 중요합니다." />
@@ -551,7 +551,37 @@ const projectFields: { id: ProjectField; title: string; prompt: string }[] = [
   { id: 'evaluation', title: '5. 결과 평가 방법', prompt: '어떻게 실제 사용 가능성을 확인할까요?' },
 ]
 
+
+type ReviewItem = { label: string; purpose?: string; done: boolean | null; remaining?: string }
+function ReviewNavigation({ label, items, current, onChange }: { label: string; items: ReviewItem[]; current: number; onChange: (index: number) => void }) {
+  const heading = useRef<HTMLParagraphElement>(null)
+  const move = (index: number) => {
+    onChange(index)
+    requestAnimationFrame(() => {
+      heading.current?.focus({ preventScroll: true })
+      heading.current?.scrollIntoView({ block: 'start' })
+    })
+  }
+  return <div className="my-5 min-w-0">
+    <nav aria-label={label} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+      <div className={`grid gap-2 ${label === '확인 문제 이동' ? 'grid-cols-2 sm:grid-cols-4' : 'sm:grid-cols-2'}`}>
+        {items.map((item, index) => <button key={item.label} type="button" aria-current={current === index ? 'step' : undefined} onClick={() => move(index)} className={`min-h-11 min-w-0 rounded-lg border-2 p-3 text-left text-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${current === index ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white'}`}>
+          <span className="block break-keep font-bold">{item.label} · {item.done === null ? '참고 · 제출 없음' : item.done ? '✓ 정답 제출' : '○ 남음'}</span>
+          {item.done === false && <span className="mt-1 block leading-5">{item.remaining}</span>}
+        </button>)}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={current === 0} onClick={() => move(current - 1)}>이전 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+        <Button variant="secondary" disabled={current === items.length - 1} onClick={() => move(current + 1)}>다음 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+      </div>
+    </nav>
+    <p ref={heading} tabIndex={-1} className="mt-5 scroll-mt-64 leading-7 text-slate-700 focus-visible:outline-2 focus-visible:outline-indigo-600 md:scroll-mt-44">{items[current].purpose ?? items[current].label}</p>
+  </div>
+}
+
 export function Lesson01Step7({ priorStepsComplete, onCompletionReadyChange, ...props }: Lesson01Step7Props) {
+  const [section, setSection] = useState(0)
+  const [quizIndex, setQuizIndex] = useState(0)
   const [projectAnswers, setProjectAnswers] = useState<Partial<Record<ProjectField, string>>>({})
   const [limitations, setLimitations] = useState<string[]>([])
   const [projectResult, setProjectResult] = useState<ActivityResult>('idle')
@@ -596,6 +626,11 @@ export function Lesson01Step7({ priorStepsComplete, onCompletionReadyChange, ...
 
   return (
     <StepFrame {...props} step={7} intro="새로운 이미지 분류 문제를 설계하며 데이터·레이블·특징·학습 방식·평가·한계를 하나의 흐름으로 연결합니다.">
+      <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
+        { label: '1. 미니 AI 프로젝트 설계', purpose: '데이터·레이블·평가와 한계를 선택하고 프로젝트를 제출하세요.', done: projectCorrect, remaining: '다섯 선택과 한계 판단 후 설계 제출' },
+        { label: '2. 마지막 확인 문제', purpose: '배운 개념을 문제마다 판단해 제출하세요.', done: allQuizCorrect, remaining: '모든 문제 정답 제출' },
+      ]} />
+      <div hidden={section !== 0} aria-label="소구간 1 내용">
       <section className="rounded-2xl border border-cyan-200 bg-cyan-50/50 p-5" aria-labelledby="project-title">
         <h3 id="project-title" className="text-xl font-black text-slate-950">미니 AI 프로젝트 · 학교 분리수거 분류</h3>
         <p className="mt-2 leading-7 text-slate-700">다양한 물체 이미지가 충분히 있고, 여러 층이 시각 특징을 학습하게 하려 합니다. 분리수거함에 들어온 물체의 이미지를 보고 <strong>종이·플라스틱·캔</strong>으로 분류하는 시스템을 설계합니다.</p>
@@ -619,17 +654,20 @@ export function Lesson01Step7({ priorStepsComplete, onCompletionReadyChange, ...
       <Button className="mt-6" onClick={submitProject}>프로젝트 설계 제출</Button>
       <ActivityFeedback result={projectResult} incomplete="다섯 연결과 한계 선택을 모두 마친 뒤 제출하세요." incorrect="다양한 실제 이미지를 데이터로 모으고, 정답을 새는 파일 이름은 피하며, 학습에 쓰지 않은 새 이미지로 평가해야 합니다. 현실의 한계도 다시 확인하세요." correct="프로젝트 설계가 완성되었습니다. 데이터의 범위와 새 데이터 평가, 실제 환경의 한계를 함께 고려했습니다." />
 
+      </div>
+      <div hidden={section !== 1} aria-label="소구간 2 내용">
       <section className="mt-10 border-t border-slate-200 pt-8" aria-labelledby="lesson01-quiz-title">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div><h3 id="lesson01-quiz-title" className="text-xl font-black text-slate-950">마지막 확인 문제</h3><p className="mt-2 leading-7 text-slate-600">오답은 선택을 바꾼 뒤 다시 제출할 수 있습니다.</p></div>
           <span className="rounded-full bg-indigo-100 px-3 py-1.5 text-sm font-black text-indigo-800">{lesson01Quiz.filter((question) => quizSubmitted.includes(question.id) && question.options.find((option) => option.id === quizAnswers[question.id])?.correct).length} / {lesson01Quiz.length} 정답</span>
         </div>
+        <ReviewNavigation label="확인 문제 이동" current={quizIndex} onChange={setQuizIndex} items={lesson01Quiz.map((question, index) => ({ label: `문제 ${index + 1}`, done: quizSubmitted.includes(question.id) && !!question.options.find(option => option.id === quizAnswers[question.id])?.correct, remaining: quizSubmitted.includes(question.id) ? '오답 수정 후 재제출' : '선택 후 제출' }))} />
         <div className="mt-5 space-y-5">
           {lesson01Quiz.map((question, index) => {
             const submitted = quizSubmitted.includes(question.id)
             const selected = question.options.find((option) => option.id === quizAnswers[question.id])
             return (
-              <fieldset key={question.id} className="rounded-2xl border border-slate-200 p-5">
+              <fieldset hidden={quizIndex !== index} key={question.id} className="rounded-2xl border border-slate-200 p-5">
                 <legend className="px-1 font-black leading-7 text-slate-950">문제 {index + 1}. {question.question}</legend>
                 <div className="mt-4 grid gap-3">{question.options.map((option) => <RadioOption key={option.id} selected={quizAnswers[question.id] === option.id} onClick={() => selectQuiz(question.id, option.id)}>{option.label}</RadioOption>)}</div>
                 <Button className="mt-4" onClick={() => submitQuiz(question.id)} disabled={!quizAnswers[question.id]}>답안 확인</Button>
@@ -640,6 +678,7 @@ export function Lesson01Step7({ priorStepsComplete, onCompletionReadyChange, ...
         </div>
       </section>
 
+      </div>
       {projectCorrect && allQuizCorrect && !props.isComplete && <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status"><CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" /><p className="leading-7">프로젝트 설계와 확인 문제를 모두 통과했습니다. {priorStepsComplete ? '화면 아래의 완료 버튼으로 Lesson 01을 완료하세요.' : '앞 STEP의 핵심 활동을 모두 완료하면 완료 버튼이 활성화됩니다.'}</p></div>}
 
       {props.isComplete && <div className="mt-8 border-t border-emerald-200 pt-7"><div className="flex items-start gap-3 text-emerald-900" role="status"><CheckCircle2 className="mt-0.5 shrink-0" size={24} aria-hidden="true" /><div><h3 className="text-xl font-black">Lesson 01 완료</h3><p className="mt-2 leading-7">홈의 전체 진행도에 1개 차시 완료로 반영되었습니다.</p></div></div><div className="mt-7 rounded-2xl bg-indigo-50 p-5"><p className="font-black text-indigo-900">Lesson 02로 이어지는 질문</p><p className="mt-2 text-lg font-bold leading-7 text-slate-900">신경망 안에서는 어떻게 계산할까요?</p><div className="mt-5 flex flex-col gap-3 sm:flex-row"><Link to="/" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-800 hover:border-indigo-300 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Home에서 진행도 보기</Link><Link to="/lesson/02" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-indigo-700 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Lesson 02 미리 보기<ArrowRight size={18} aria-hidden="true" /></Link></div></div></div>}

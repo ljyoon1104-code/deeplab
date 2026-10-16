@@ -13,7 +13,7 @@ import {
   Sparkles,
   XCircle,
 } from 'lucide-react'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
@@ -345,7 +345,8 @@ export function Lesson03Step1(props: CommonStepProps) {
 
       <section className="mt-9" aria-labelledby="activation-flow-title">
         <h3 id="activation-flow-title" className="text-xl font-black text-slate-950">가중합 이후의 Signal Flow</h3>
-        <p className="mt-3 rounded-xl bg-indigo-50 p-4 leading-7">가중합은 활성화 함수 적용 전의 계산값입니다. <strong>활성화 함수</strong>는 가중합을 다음 뉴런에 전달하거나 최종 결과로 사용할 출력으로 바꿉니다. 함수에 따라 출력의 범위와 형태가 달라지므로, 모든 함수가 0과 1만 출력하는 것은 아닙니다.</p>
+        <p className="mt-3 rounded-xl bg-indigo-50 p-4 leading-7"><strong>활성화 함수</strong>는 가중합을 다음 층에 전달하거나 최종 결과로 쓸 출력으로 바꿉니다. 값에 따라 다르게 처리하는 비선형 함수를 넣으면 신경망이 복잡한 관계를 표현하는 데 도움이 됩니다.</p>
+        <details className="mt-3"><summary className="min-h-11 cursor-pointer py-2 font-bold">곱하고 더하는 계산만 쌓으면 왜 부족할까요?</summary><p className="mt-2 leading-7">2배한 뒤 3배하면 결국 6배하는 계산 하나가 됩니다. 곱하고 더하기만 하는 층은 여러 개 쌓아도 하나의 계산으로 합칠 수 있습니다. 렐루(ReLU)처럼 입력에 따라 다르게 반응하는 비선형 활성화 함수가 이 한계를 줄여 줍니다.</p></details>
         <div className="mt-5 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
           <FlowNode eyebrow="계산" title="입력값 × 가중치" detail="각 입력에 가중치를 곱합니다." />
           <FlowArrow />
@@ -421,7 +422,7 @@ export function Lesson03Step2(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={2}
-      intro="계단 함수는 가중합을 0과 비교해 출력 0 또는 1로 바꿉니다. z가 0이면 출력은 1입니다."
+      intro="계단 함수는 가중합을 0과 비교해 판단 결과 0 또는 1을 냅니다. 확률을 뜻하지 않으며, z가 0이면 출력은 1입니다."
     >
       <div className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(19rem,1.1fr)] lg:items-start">
         <section aria-labelledby="step-rule-title">
@@ -513,7 +514,7 @@ export function Lesson03Step3(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={3}
-      intro="렐루(ReLU) 함수는 음수를 0으로, 0 이상의 값은 그대로 출력합니다. 그래프의 꺾인 모양과 연결해 보고 세 입력에 적용해 보세요."
+      intro="렐루(ReLU)는 음수를 0으로, 0 이상의 값은 그대로 보내는 비선형 활성화 함수입니다. 은닉층에서 이 출력은 다음 층으로 전달할 중간값입니다. 그래프와 세 입력을 비교해 보세요."
     >
       <LayerLocation focus="hidden" />
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.75fr)_minmax(19rem,1.15fr)] lg:items-start">
@@ -726,7 +727,7 @@ export function Lesson03Step5(props: CommonStepProps) {
         <div className="mt-4"><ZoneProgress zones={zones} /></div>
       </section>
 
-      <section className="mt-8" aria-labelledby="activation-table-title"><h3 id="activation-table-title" className="text-xl font-black">함수 비교표</h3><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[42rem] border-collapse text-left text-sm"><thead><tr className="bg-slate-100"><th className="p-3">함수</th><th className="p-3">출력 범위</th><th className="p-3">음수 입력</th><th className="p-3">z=0</th><th className="p-3">변화</th><th className="p-3">주요 쓰임</th></tr></thead><tbody>{[['계단 함수','0 또는 1','0','1','경계에서 불연속','즉시 0/1 판단'],['ReLU','0 이상','0','0','연속','은닉층 특징'],['Sigmoid','0~1','0과 0.5 사이','0.5','연속','이진 분류 확률']].map((row) => <tr key={row[0]} className="border-t border-slate-200">{row.map((cell) => <td key={cell} className="p-3 font-semibold">{cell}</td>)}</tr>)}</tbody></table></div><div className="mt-5 grid gap-4 md:grid-cols-2">{['출력이 0 또는 1뿐인 함수','음수는 0, 양수는 그대로인 함수','z=0에서 0.5인 함수','이진 분류 확률에 알맞은 함수','은닉층 특징 표현에 알맞은 함수'].map((label,index) => <label key={label} className="rounded-xl border border-slate-200 p-4"><span className="block font-bold leading-6">{label}</span><select value={comparisonAnswers[index]} onChange={(event) => { setComparisonAnswers((items) => items.map((answer,item) => item===index ? event.target.value : answer)); setComparisonSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">함수 선택</option><option>계단 함수</option><option>ReLU</option><option>Sigmoid</option></select></label>)}</div><Button className="mt-5" disabled={comparisonAnswers.some((answer) => !answer)} onClick={() => setComparisonSubmitted(true)}>비교표 연결 제출</Button>{comparisonSubmitted && <AnswerFeedback correct={comparisonCorrect} explanation={comparisonCorrect ? '출력 범위, 경계값, 연속성, 사용 위치를 모두 구분했습니다.' : '틀린 연결이 있습니다. 표에서 출력 범위와 주요 쓰임 열을 다시 비교하세요.'} />}</section>
+      <section className="mt-8" aria-labelledby="activation-table-title"><h3 id="activation-table-title" className="text-xl font-black">함수 비교표</h3><div className="mt-4 overflow-x-auto"><table className="w-full min-w-[42rem] border-collapse text-left text-sm"><thead><tr className="bg-slate-100"><th className="p-3">함수</th><th className="p-3">출력 범위</th><th className="p-3">음수 입력</th><th className="p-3">z=0</th><th className="p-3">변화</th><th className="p-3">주요 쓰임</th></tr></thead><tbody>{[['계단 함수','0 또는 1','0','1','경계에서 불연속','즉시 0/1 판단'],['ReLU','0 이상','0','0','연속','은닉층 특징'],['Sigmoid','0~1','0과 0.5 사이','0.5','연속','이진 분류 확률']].map((row) => <tr key={row[0]} className="border-t border-slate-200">{row.map((cell, columnIndex) => <td key={columnIndex} className="p-3 font-semibold">{cell}</td>)}</tr>)}</tbody></table></div><div className="mt-5 grid gap-4 md:grid-cols-2">{['출력이 0 또는 1뿐인 함수','음수는 0, 양수는 그대로인 함수','z=0에서 0.5인 함수','이진 분류 확률에 알맞은 함수','은닉층 특징 표현에 알맞은 함수'].map((label,index) => <label key={label} className="rounded-xl border border-slate-200 p-4"><span className="block font-bold leading-6">{label}</span><select value={comparisonAnswers[index]} onChange={(event) => { setComparisonAnswers((items) => items.map((answer,item) => item===index ? event.target.value : answer)); setComparisonSubmitted(false) }} className="mt-3 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">함수 선택</option><option>계단 함수</option><option>ReLU</option><option>Sigmoid</option></select></label>)}</div><Button className="mt-5" disabled={comparisonAnswers.some((answer) => !answer)} onClick={() => setComparisonSubmitted(true)}>비교표 연결 제출</Button>{comparisonSubmitted && <AnswerFeedback correct={comparisonCorrect} explanation={comparisonCorrect ? '출력 범위, 경계값, 연속성, 사용 위치를 모두 구분했습니다.' : '틀린 연결이 있습니다. 표에서 출력 범위와 주요 쓰임 열을 다시 비교하세요.'} />}</section>
 
       <fieldset className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5"><legend className="font-black text-indigo-950">같은 z라도 함수에 따라 출력이 달라지는 까닭은?</legend><div className="mt-4 grid gap-3 sm:grid-cols-2"><Button variant={interpretation === 'different' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'different'} onClick={() => { setInterpretation('different'); setInterpretationSubmitted(false) }}>각 함수의 변환 규칙과 출력 범위가 다르다</Button><Button variant={interpretation === 'same' ? 'primary' : 'secondary'} aria-pressed={interpretation === 'same'} onClick={() => { setInterpretation('same'); setInterpretationSubmitted(false) }}>함수 이름만 다르고 규칙은 같다</Button></div><Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>차이 해석 제출</Button>{interpretationSubmitted && <AnswerFeedback correct={interpretation === 'different'} explanation={interpretation === 'different' ? '계단 함수는 판단, ReLU는 특징 전달, Sigmoid는 0~1 정도 표현에 맞는 서로 다른 규칙을 가집니다.' : '같은 z=0에서도 출력이 1, 0, 0.5로 다른 점을 다시 확인하세요.'} />}</fieldset>
 
@@ -804,7 +805,7 @@ export function Lesson03Step6(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={6}
-      intro="소프트맥스(softmax) 함수는 여러 클래스의 점수를 한 묶음으로 받아 클래스별 확률로 바꿉니다. 합은 1이며, 가장 높은 확률의 클래스를 예측으로 선택할 수 있습니다."
+      intro="클래스는 구별할 종류이고, 로짓은 확률로 바꾸기 전의 점수입니다. 소프트맥스(softmax) 함수는 클래스별 점수를 함께 받아 합이 1인 확률로 바꿉니다."
     >
       <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.7fr)_minmax(0,1.3fr)]">
         <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="softmax-score-title">
@@ -912,7 +913,7 @@ export function Lesson03Step6(props: CommonStepProps) {
 
       <div className="mt-7 flex items-start gap-3 rounded-2xl bg-cyan-50 p-5">
         <Sparkles className="mt-0.5 shrink-0 text-cyan-700" size={22} aria-hidden="true" />
-        <p className="font-semibold leading-7 text-slate-800">Softmax는 한 점수에 따로 적용하는 함수가 아니라 여러 출력값을 함께 받아 각 클래스의 상대적인 확률을 만듭니다.</p>
+        <p className="font-semibold leading-7 text-slate-800">예측 확률은 한 입력에 대한 모델의 출력입니다. 정확도는 여러 데이터에서 실제로 맞힌 비율이므로 두 값은 다릅니다.</p>
       </div>
 
       {props.isComplete && (
@@ -934,11 +935,41 @@ const applicationCases = [
   { id: 'softmax', name: '소프트맥스(softmax) 함수', location: '다중 분류 출력층', output: '합이 1인 클래스별 확률', reason: '여러 클래스를 한 묶음으로 비교' },
 ] as const
 
+
+type ReviewItem = { label: string; purpose?: string; done: boolean | null; remaining?: string }
+function ReviewNavigation({ label, items, current, onChange }: { label: string; items: ReviewItem[]; current: number; onChange: (index: number) => void }) {
+  const heading = useRef<HTMLParagraphElement>(null)
+  const move = (index: number) => {
+    onChange(index)
+    requestAnimationFrame(() => {
+      heading.current?.focus({ preventScroll: true })
+      heading.current?.scrollIntoView({ block: 'start' })
+    })
+  }
+  return <div className="my-5 min-w-0">
+    <nav aria-label={label} className="rounded-xl border border-slate-300 bg-slate-50 p-3">
+      <div className={`grid gap-2 ${label === '확인 문제 이동' ? 'grid-cols-2 sm:grid-cols-4' : 'sm:grid-cols-2'}`}>
+        {items.map((item, index) => <button key={item.label} type="button" aria-current={current === index ? 'step' : undefined} onClick={() => move(index)} className={`min-h-11 min-w-0 rounded-lg border-2 p-3 text-left text-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${current === index ? 'border-indigo-600 bg-indigo-50' : 'border-slate-200 bg-white'}`}>
+          <span className="block break-keep font-bold">{item.label} · {item.done === null ? '참고 · 제출 없음' : item.done ? '✓ 정답 제출' : '○ 남음'}</span>
+          {item.done === false && <span className="mt-1 block leading-5">{item.remaining}</span>}
+        </button>)}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button variant="secondary" disabled={current === 0} onClick={() => move(current - 1)}>이전 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+        <Button variant="secondary" disabled={current === items.length - 1} onClick={() => move(current + 1)}>다음 {label === '확인 문제 이동' ? '문제' : '구간'}</Button>
+      </div>
+    </nav>
+    <p ref={heading} tabIndex={-1} className="mt-5 scroll-mt-64 leading-7 text-slate-700 focus-visible:outline-2 focus-visible:outline-indigo-600 md:scroll-mt-44">{items[current].purpose ?? items[current].label}</p>
+  </div>
+}
+
 export function Lesson03Step7({
   priorStepsComplete,
   onCompletionReadyChange,
   ...props
 }: Step7Props) {
+  const [section, setSection] = useState(0)
+  const [quizIndex, setQuizIndex] = useState(0)
   const [mappings, setMappings] = useState<Record<string, UsageTarget | undefined>>({})
   const [mappingSubmitted, setMappingSubmitted] = useState(false)
   const [outputs, setOutputs] = useState<Record<string, string>>({})
@@ -981,6 +1012,12 @@ export function Lesson03Step7({
       step={7}
       intro="활성화 함수를 알맞은 사용 위치에 연결하고 네 확인 문제로 각 함수의 특징을 정리합니다."
     >
+      <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
+        { label: '1. 함수와 사용 위치 연결', purpose: '각 함수가 어디에 사용되는지 연결하세요.', done: mappingSubmitted && mappingCorrect, remaining: '세 함수의 위치 연결 후 제출' },
+        { label: '2. 출력 형태와 선택 이유 해석', purpose: '네 함수가 어떤 출력을 만들며 왜 쓰이는지 선택하세요.', done: applicationSubmitted && applicationsCorrect, remaining: '네 함수의 출력·이유 선택 후 제출' },
+        { label: '3. 확인 문제', purpose: '배운 함수의 특징을 구분해 문제마다 제출하세요.', done: allQuizSubmitted && allQuizCorrect, remaining: '네 문제 정답 제출' },
+      ]} />
+      <div hidden={section !== 0} aria-label="소구간 1 내용">
       <section aria-labelledby="usage-mapping-title">
         <div className="flex items-center gap-3">
           <Link2 className="text-indigo-600" size={25} aria-hidden="true" />
@@ -1035,17 +1072,22 @@ export function Lesson03Step7({
         </div>
       </section>
 
-      <section className="mt-10" aria-labelledby="application-design-title"><h3 id="application-design-title" className="text-xl font-black">출력 형태와 사용 이유 해석</h3><p className="mt-2 leading-7 text-slate-600">위에서 연결한 사용 위치를 참고하여, 각 함수가 만드는 출력과 그 이유를 해석하세요.</p><div className="mt-5 grid gap-5 xl:grid-cols-2">{applicationCases.map((item) => <article key={item.id} className="rounded-2xl border border-slate-200 p-5"><h4 className="text-lg font-black text-indigo-800">{item.name}</h4><p className="mt-2 text-sm text-slate-600">사용 위치: {item.location}</p>{[
+      </div>
+      <div hidden={section !== 1} aria-label="소구간 2 내용">
+      <section className="mt-10" aria-labelledby="application-design-title"><h3 id="application-design-title" className="text-xl font-black">출력 형태와 사용 이유 해석</h3><div className="mt-5 grid gap-5 xl:grid-cols-2">{applicationCases.map((item) => <article key={item.id} className="rounded-2xl border border-slate-200 p-5"><h4 className="text-lg font-black text-indigo-800">{item.name}</h4><p className="mt-2 text-sm text-slate-600">사용 위치: {item.location}</p>{[
         { label: '출력 형태', value: outputs[item.id] ?? '', set: setOutputs, options: applicationCases.map((candidate) => candidate.output) },
         { label: '선택 이유', value: reasons[item.id] ?? '', set: setReasons, options: applicationCases.map((candidate) => candidate.reason) },
       ].map((field) => <label key={field.label} className="mt-4 block"><span className="text-sm font-bold text-slate-700">{field.label}</span><select value={field.value} onChange={(event) => { field.set((current) => ({ ...current, [item.id]: event.target.value })); setApplicationSubmitted(false) }} className="mt-2 min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3"><option value="">선택</option>{[...new Set(field.options)].map((option) => <option key={option} value={option}>{option}</option>)}</select></label>)}</article>)}</div><Button className="mt-5" disabled={!allApplicationsAnswered} onClick={() => setApplicationSubmitted(true)}>출력 해석 제출</Button>{applicationSubmitted && <AnswerFeedback correct={applicationsCorrect} explanation={applicationsCorrect ? '네 함수가 그 위치에서 사용되는 이유를 출력 특성과 연결했습니다.' : '틀린 항목이 있습니다. 계단=즉시 0/1, ReLU=은닉 특징, Sigmoid=이진 확률, Softmax=클래스별 확률의 차이를 다시 보세요.'} />}</section>
 
+      </div>
+      <div hidden={section !== 2} aria-label="소구간 3 내용">
       <section className="mt-10" aria-labelledby="lesson03-quiz-title">
         <h3 id="lesson03-quiz-title" className="text-xl font-black text-slate-950">확인 문제 4개</h3>
         <p className="mt-2 leading-7 text-slate-600">오답이어도 이유를 확인한 뒤 답을 바꾸어 다시 제출할 수 있습니다.</p>
+        <ReviewNavigation label="확인 문제 이동" current={quizIndex} onChange={setQuizIndex} items={lesson03Quiz.map((question, index) => ({ label: `문제 ${index + 1}`, done: quizSubmitted[index] && quizAnswers[index] === question.answer, remaining: quizSubmitted[index] ? '오답 수정 후 재제출' : '선택 후 제출' }))} />
         <div className="mt-5 space-y-6">
           {lesson03Quiz.map((quiz, index) => (
-            <fieldset key={quiz.question} className="rounded-2xl border border-slate-200 p-5 sm:p-6">
+            <fieldset hidden={quizIndex !== index} key={quiz.question} className="rounded-2xl border border-slate-200 p-5 sm:p-6">
               <legend className="px-1 text-lg font-black leading-7 text-slate-950">문제 {index + 1}. {quiz.question}</legend>
               <div className="mt-4 grid gap-3">
                 {quiz.options.map(([key, label]) => (
@@ -1078,6 +1120,7 @@ export function Lesson03Step7({
         </div>
       </section>
 
+      </div>
       {completionReady && !props.isComplete && (
         <div className="mt-7 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 text-amber-950" role="status">
           <CircleHelp className="mt-0.5 shrink-0" size={21} aria-hidden="true" />

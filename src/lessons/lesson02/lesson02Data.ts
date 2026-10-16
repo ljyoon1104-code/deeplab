@@ -27,13 +27,13 @@ export const perceptronElements = [
     id: 'weight',
     label: '가중치',
     symbol: 'w1, w2',
-    description: '각 입력을 얼마나 중요하게 반영할지 나타내는 값입니다.',
+    description: '입력에 곱하여 영향의 크기와 방향을 조절하는 값입니다.',
   },
   {
     id: 'bias',
     label: '편향',
     symbol: 'b',
-    description: '전체 판단 기준을 조정하는 값입니다.',
+    description: '곱셈 결과의 합에 더해, 가중치를 그대로 두면서 판단 기준을 옮기는 값입니다.',
   },
   {
     id: 'weighted-sum',

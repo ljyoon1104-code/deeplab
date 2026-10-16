@@ -64,14 +64,14 @@ export const cnnFlowLabel = (item: CnnFlowItem) =>
   item === '완전연결층' ? '완전 연결층' : item === 'flatten' ? '차원 변환(flatten)' : item
 
 export const CNN_FLOW_ROLES: Record<CnnFlowItem, string> = {
-  '입력 이미지': '픽셀의 가로·세로 구조를 유지한 입력',
-  '합성곱': '작은 필터로 지역 패턴을 탐색',
-  ReLU: '음수 반응을 0으로 바꾸고 비선형성을 더함',
-  '풀링': '공간 크기를 줄이며 강한 반응을 남김',
-  flatten: '2차원 특징 맵을 한 줄 배열로 변환',
-  '완전연결층': '추출된 특징을 종합',
-  Softmax: '클래스별 확률을 생성',
-  '클래스 예측': '가장 높은 확률을 바탕으로 예측 결과를 선택',
+  '입력 이미지': '픽셀값과 가로·세로 위치를 입력합니다.',
+  '합성곱': '이웃한 값과 필터를 곱해 더합니다.',
+  ReLU: '음수는 0으로, 나머지는 그대로 전달합니다.',
+  '풀링': '작은 구역을 대표값으로 요약합니다.',
+  flatten: '값과 순서를 유지해 한 줄로 펼칩니다.',
+  '완전연결층': '입력에 가중치를 곱해 더하고 편향을 더합니다.',
+  Softmax: '클래스별 점수를 확률 형태로 바꿉니다.',
+  '클래스 예측': '가장 높은 확률을 바탕으로 종류를 선택합니다.',
 }
 
 export type VisionTask = 'classification' | 'localization' | 'detection' | 'segmentation'

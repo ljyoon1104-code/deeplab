@@ -5,11 +5,11 @@ import type { forwardTinyNetwork, TinyNetworkConfig } from './networkMath'
 
 const scenes = [
   { title: '① H1에 들어오는 입력', detail: '입력층의 x1·x2가 H1에 전달됩니다. 연결 ①·②의 가중치를 각각 곱합니다.' },
-  { title: '② H1의 가중합', detail: 'H1으로 들어온 두 곱을 모두 더하고 H1의 편향을 더합니다.' },
-  { title: '③ H1의 렐루 출력', detail: 'H1의 가중합에 렐루를 적용합니다. 음수는 0, 0 이상은 그대로 전달합니다.' },
+  { title: '② H1의 가중합', detail: '연결 ①·②에서 구한 두 곱을 더하고 H1의 편향을 더합니다. 아래 z는 아직 활성화 함수를 거치지 않은 중간 계산값입니다.' },
+  { title: '③ H1의 렐루 출력', detail: '가중합이 음수이면 0, 0 이상이면 그대로 보내는 렐루를 적용합니다. 이 중간 출력은 정답 번호나 확률이 아닙니다.' },
   { title: '④ 다음 층의 입력', detail: 'H1의 출력 a1이 연결 ⑤를 따라 출력층에 전달됩니다. 앞 뉴런의 출력이 다음 뉴런의 입력이 됩니다.' },
-  { title: '⑤ H2에도 같은 원리 적용', detail: 'H2는 같은 입력에 연결 ③·④의 가중치와 자신의 편향을 사용합니다. 필요한 값은 아래 활동에서 직접 계산하세요.' },
-  { title: '⑥ 출력층에서 종합', detail: '출력층은 a1·a2를 새 입력으로 받아 연결 ⑤·⑥의 가중치와 출력층 편향을 사용합니다. 가중합을 구한 뒤 출력층 활성화 함수를 적용하세요.' },
+  { title: '⑤ H2에도 같은 원리 적용', detail: 'H2도 같은 입력을 받지만 연결 ③·④의 가중치와 자신의 편향으로 다르게 조합합니다. 서로 다른 중간 반응을 얻을 수 있도록 한 구조입니다.' },
+  { title: '⑥ 출력층에서 종합', detail: 'a1·a2에 연결 ⑤·⑥의 가중치를 곱해 더하고 출력층 편향을 더합니다. 중간 반응들을 다시 조합한 가중합에 활성화 함수를 적용하세요.' },
 ] as const
 
 // Only explanation navigation lives here. Answers and completion remain in the exercise.
@@ -39,7 +39,7 @@ export function TinyNetworkWalkthrough({ config, result, guided, revealAnswers }
   return (
     <section className="mt-5 min-w-0 rounded-2xl border border-indigo-200 bg-white p-4 sm:p-5" aria-label={guided ? '안내 신경망 계산 그림' : '독립 신경망 계산 그림'}>
       <h4 className="text-lg font-black">같은 번호의 선과 계산을 연결하세요</h4>
-      <p className="mt-2 leading-7">입력층의 원은 데이터를 전달합니다. H1·H2와 출력층의 원은 가중합과 활성화 함수로 처리합니다. 선의 번호는 아래 가중치와 대응하며, 편향은 각 뉴런의 합에 더합니다.</p>
+      <p className="mt-2 leading-7">같은 입력에서 출발해도 연결별 가중치와 뉴런별 편향은 다를 수 있습니다. 선의 번호와 곱셈을 맞춰 보고, 각 뉴런에서 편향을 더하는 위치를 찾으세요.</p>
       <p className="mt-2 text-sm leading-6 text-indigo-800">{guided ? 'H1은 완성 풀이입니다. H2와 출력층의 답은 전체 계산을 정답으로 제출하기 전까지 ?로 표시합니다.' : '독립 풀이입니다. 중간값은 전체 계산을 정답으로 제출하기 전까지 ?로 표시합니다. 시그모이드 최종 출력만 기존 활동처럼 제공합니다.'}</p>
       <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <svg viewBox="0 0 280 552" className="mx-auto block h-auto w-full max-w-80 self-start" role="img" aria-labelledby={titleId}>
