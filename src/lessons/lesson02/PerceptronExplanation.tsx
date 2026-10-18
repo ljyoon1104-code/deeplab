@@ -47,8 +47,8 @@ export function PerceptronWalkthrough({ result }: { result: PerceptronCalculatio
   const highlight = 'transition-colors duration-150 motion-reduce:transition-none'
   return (
     <section className="mt-5 rounded-2xl border border-indigo-200 bg-white p-4" aria-label="퍼셉트론 완성 풀이 그림">
-      <h4 className="font-black">그림과 계산을 한 단계씩 연결하기</h4>
-      <p className="mt-2 text-sm leading-6">원은 입력값, 선의 w는 가중치, b는 편향입니다. 곱셈 → 합산 → 편향 더하기 → 계단 함수 순서로 현재 값을 따라가 보세요.</p>
+      <h4 className="text-lg font-black">두 입력이 어떻게 출력 {result.output}이 되나요?</h4>
+      <p className="mt-2 leading-7">원은 입력값, 선의 w는 가중치, b는 편향입니다. 아래 계산 이름을 누르면 그림의 같은 위치가 강조됩니다. 모든 중간값은 처음부터 비교할 수 있습니다.</p>
       <div className="mt-4 grid min-w-0 gap-4 md:grid-cols-2">
         <svg viewBox="0 0 300 430" className="mx-auto w-full max-w-80" role="img" aria-labelledby={titleId}>
           <title id={titleId}>{'입력 ' + result.inputs.join(', ') + '에 가중치 ' + result.weights.join(', ') + '를 곱해 합 ' + result.productSum + ', 편향 ' + result.bias + '를 더한 가중합 ' + result.z + ', 계단 함수 출력 ' + result.output}</title>
@@ -75,7 +75,7 @@ export function PerceptronWalkthrough({ result }: { result: PerceptronCalculatio
         <div className="min-w-0">
           <ol className="space-y-3">
             {stages.map((stage, index) => <li key={stage.title} aria-current={scene === index ? 'step' : undefined} className={'rounded-xl border-2 p-3 ' + highlight + (scene === index ? ' border-indigo-600 bg-indigo-50' : ' border-slate-200')}>
-              <p className="font-black">{stage.title}{scene === index ? ' · 현재' : ''}</p>
+              <button type="button" onClick={() => setScene(index)} aria-pressed={scene === index} className="min-h-11 w-full rounded-lg text-left font-black focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{stage.title}{scene === index ? ' · 현재 위치' : ' 살펴보기'}</button>
               <p className="mt-1 break-words font-mono leading-7">
                 {index === 0 && result.inputs.map((value, i) => 'x' + (i + 1) + ' = ' + value).join(', ')}
                 {index === 1 && result.products.map((value, i) => '(' + result.inputs[i] + ' × ' + result.weights[i] + ') = ' + value).join(', ')}
@@ -83,15 +83,16 @@ export function PerceptronWalkthrough({ result }: { result: PerceptronCalculatio
                 {index === 3 && <>{result.productSum} + ({result.bias}) = {result.z}</>}
                 {index === 4 && <>z = {result.z} → 출력 {result.output}</>}
               </p>
+              <p className="mt-1 leading-7 text-slate-700">{stage.detail}</p>
             </li>)}
           </ol>
+          <div className="mt-4 flex flex-wrap gap-2" aria-label="계산 위치 탐색">
+            <Button variant="secondary" disabled={scene === 0} onClick={() => setScene((value) => value - 1)} aria-label="퍼셉트론 풀이 이전">이전 계산</Button>
+            <Button disabled={scene === stages.length - 1} onClick={() => setScene((value) => value + 1)} aria-label="퍼셉트론 풀이 다음">{scene < 4 ? ['가중치 곱하기 보기', '두 곱 더하기 보기', '편향 더하기 보기', '계단 함수 적용 보기'][scene] : '출력까지 확인함'}</Button>
+            <Button variant="secondary" onClick={() => setScene(0)} aria-label="퍼셉트론 풀이 다시 보기"><RotateCcw size={16} aria-hidden="true" />입력부터 보기</Button>
+          </div>
+          <p className="mt-2 text-sm leading-6 text-slate-600" role="status">현재 강조: {stages[scene].title}. 설명 위치만 바뀌며 답안은 바뀌지 않습니다.</p>
         </div>
-      </div>
-      <p className="mt-4 min-h-20 rounded-xl bg-indigo-50 p-4 leading-7" role="status" aria-live="polite"><strong>{stages[scene].title} · {scene + 1}/5</strong><br />{stages[scene].detail}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button variant="secondary" disabled={scene === 0} onClick={() => setScene((value) => value - 1)} aria-label="퍼셉트론 풀이 이전">이전</Button>
-        <Button disabled={scene === stages.length - 1} onClick={() => setScene((value) => value + 1)} aria-label="퍼셉트론 풀이 다음">다음</Button>
-        <Button variant="secondary" onClick={() => setScene(0)} aria-label="퍼셉트론 풀이 다시 보기"><RotateCcw size={16} aria-hidden="true" />다시 보기</Button>
       </div>
     </section>
   )

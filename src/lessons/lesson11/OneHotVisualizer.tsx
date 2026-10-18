@@ -1,10 +1,11 @@
 import { WORDS } from './lesson11Data'
 import { createOneHot } from './textRepresentation'
 
-export default function OneHotVisualizer({ selectedWord, vocabulary = WORDS, revealed = true }: { selectedWord: string; vocabulary?: readonly string[]; revealed?: boolean }) {
+export default function OneHotVisualizer({ selectedWord, vocabulary = WORDS, revealed = true, compact = false }: { selectedWord: string; vocabulary?: readonly string[]; revealed?: boolean; compact?: boolean }) {
   const vector = createOneHot(vocabulary, selectedWord)
   const activeIndex = vector.indexOf(1)
   if (!revealed) return <div className="rounded-xl border border-dashed border-violet-300 bg-violet-50 p-4 text-sm leading-6" role="note">독립 계산 · “{selectedWord}”의 완성 벡터와 1의 위치는 위치 문제를 맞힌 뒤 표시됩니다. 위 단어 목록의 순서를 이용하세요.</div>
+  if (compact) return <div aria-live="polite"><p className="font-mono font-bold">[{vector.join(', ')}] · 길이 {vector.length}</p><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">{vector.map((value, index) => <div key={vocabulary[index]} className={`rounded-lg border p-2 text-center ${value ? 'border-indigo-700 bg-indigo-100 font-bold' : 'bg-white'}`}><span>{vocabulary[index]}</span><strong className="block text-xl">{value}</strong><span className="text-sm">번호 {index}</span></div>)}</div><p className="mt-3 text-sm leading-6">선택한 단어의 칸만 1이고 나머지는 0입니다.</p></div>
   return (
     <div className="rounded-2xl border border-violet-200 bg-violet-50 p-5" aria-live="polite">
       <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="font-black">“{selectedWord}”의 원-핫 벡터</h3><span className="rounded-full bg-white px-3 py-1 text-sm font-bold">벡터 길이: {vector.length}</span></div>

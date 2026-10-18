@@ -63,6 +63,7 @@ export function DensePhotoExample({ data, index, compact = false }: { data: PetI
   return <section className="min-w-0 rounded-xl border border-violet-300 bg-white p-3" aria-label={compact ? '완전 연결층 축소 구조' : '실제 배열과 완전 연결층 축소 계산'}>
     <h5 className="font-black">{compact ? '⑦ 완전 연결층으로 연결' : '풀링 칸 → 배열 위치 → 완전 연결층'}</h5>
     <p className="mt-2 text-sm leading-6">{data.pooled[0].length}×{data.pooled.length} → 행 우선 {data.flattened.length}개. {compact ? '그중 세 입력과 뉴런 A·B만 그린 축소 예입니다.' : `선택한 칸은 배열[${index}] = ${data.flattened[index]}입니다. 선택 칸과 두 추가 입력만 확대하며 나머지 ${data.flattened.length - inputs.length}개는 생략했습니다.`}</p>
+    <div className={`mt-3 grid items-start gap-4 ${compact ? '' : 'lg:grid-cols-2'}`}><div className="min-w-0">
     <svg viewBox="0 0 300 285" className={`mx-auto block w-full ${compact ? 'max-w-xs' : 'max-w-md'}`} role="img" aria-label={`실제 배열 입력 ${inputs.map(input => input.value).join(', ')}에서 뉴런 A와 B로 각각 연결되는 여섯 선. ${focusedInput + 1}번 입력의 두 연결 강조`}>
       <g fontSize="20" fill="#0f172a" textAnchor="middle"><text x="51" y="22">실제 입력</text><text x="245" y="22">뉴런</text></g>
       {inputs.flatMap((_, i) => [0, 1].map(j => <line key={`${i}-${j}`} x1="91" y1={65 + i * 90} x2="220" y2={105 + j * 100} stroke={i === focusedInput ? '#7e22ce' : '#cbd5e1'} strokeWidth={i === focusedInput ? 3 : 1.5} />))}
@@ -72,13 +73,15 @@ export function DensePhotoExample({ data, index, compact = false }: { data: PetI
     <p className="text-sm leading-6"><strong>완전 연결층</strong>은 앞에서 얻은 반응을 가중치와 편향으로 종합합니다. A·B는 뉴런 이름이며, 동물 종류나 학습된 클래스 점수가 아닙니다.</p>
     {!compact && <>
       <div className="my-3 grid gap-2 sm:grid-cols-3" role="group" aria-label="축소 모형 입력 연결 강조">{inputs.map((input, i) => <button key={i} type="button" onClick={() => setFocusedInput(i)} aria-pressed={focusedInput === i} className={`min-h-11 min-w-0 rounded-lg border-2 p-2 text-sm focus-visible:outline-3 focus-visible:outline-indigo-600 ${focusedInput === i ? 'border-violet-600 bg-violet-50' : 'border-slate-300'}`}><strong className="block">입력 {i + 1}{focusedInput === i ? ' ✓' : ''}</strong><span>배열[{input.index}] = {input.value}</span><span className="block text-xs">풀링[{Math.floor(input.index / data.pooled[0].length)}][{input.index % data.pooled[0].length}]</span></button>)}</div>
+    </>}
+    </div>{!compact && <div className="min-w-0">
       <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm leading-6">입력 세 값은 실제 사진의 풀링 결과이고, 가중치·편향은 설명용으로 가정했습니다. 같은 입력을 A·B가 어떻게 다르게 조합하는지 비교하세요.</p>
-      <details className="mb-3 rounded-lg bg-slate-50 p-3 text-sm leading-6"><summary className="min-h-11 cursor-pointer py-2 font-bold">가중치와 편향의 뜻·시작값 알아보기</summary><p className="mt-2"><strong>가중치(Weight)</strong>는 입력의 영향 크기와 방향을 조절하는 학습 가능한 숫자입니다. 입력마다 가중치를 곱해 더한 값이 <strong>가중합(Weighted sum)</strong>이며, 뉴런에서는 여기에 <strong>편향(Bias)</strong>을 추가로 더합니다. 실제 모델의 가중치는 보통 임의의 작은 값으로, 편향은 0으로 시작하는 경우가 많고 이후 학습으로 조정합니다. 아래 숫자는 계산을 살펴보기 위해 따로 정한 설명용 값입니다.</p></details>
-      <div className="grid gap-3 lg:grid-cols-2">{calculations.map(neuron => <div key={neuron.name} className="min-w-0 rounded-lg border border-violet-200 p-3 text-sm leading-6">
+      <p className="mb-3 text-sm leading-6"><strong>가중치</strong>는 입력마다 곱하는 숫자이며 영향의 크기와 방향을 조절합니다. 곱한 결과를 모두 더하고 <strong>편향</strong>을 더한 값이 아래 가중합 z입니다. 실제 가중치는 작은 임의의 값, 편향은 0으로 시작하는 경우가 많고 학습으로 조정합니다.</p>
+      <div className="grid gap-3">{calculations.map(neuron => <div key={neuron.name} className="min-w-0 rounded-lg border border-violet-200 p-3 text-sm leading-6">
         <h6 className="font-black">뉴런 {neuron.name} · 가중합</h6><p>가정한 가중치 [{neuron.weights.join(', ')}], 편향 {neuron.bias}</p>
         <p className="mt-2 break-words font-bold">z{neuron.name} = {neuron.sum}</p><p>입력×가중치를 더하고 편향을 더한 가중합입니다.</p>
-        <details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 font-bold">곱셈과 합 자세히 보기</summary><ul className="my-2 space-y-1">{inputs.map((input, i) => <li key={i} className={`rounded px-2 py-1 ${focusedInput === i ? 'bg-violet-100 font-bold' : 'bg-slate-50'}`}>입력 {i + 1}: {input.value} × ({neuron.weights[i]}) = {neuron.products[i]}</li>)}</ul><p className="break-words">{neuron.products.map(v => `(${v})`).join(' + ')} + ({neuron.bias}) = {neuron.sum}</p></details>
+        <ul className="my-2 space-y-1">{inputs.map((input, i) => <li key={i} className={`rounded px-2 py-1 ${focusedInput === i ? 'bg-violet-100 font-bold' : 'bg-slate-50'}`}>입력 {i + 1}: {input.value} × ({neuron.weights[i]}) = {neuron.products[i]}</li>)}</ul><p className="break-words">{neuron.products.map(v => `(${v})`).join(' + ')} + ({neuron.bias}) = {neuron.sum}</p>
       </div>)}</div>
-    </>}
+    </div>}</div>
   </section>
 }

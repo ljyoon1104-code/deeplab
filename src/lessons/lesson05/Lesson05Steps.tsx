@@ -300,7 +300,7 @@ export function Lesson05Step1(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={1}
-      intro="Lesson 04에서 만든 신경망이 입력을 받아 예측값을 만드는 정보 흐름을 완성합니다."
+      intro="신경망이 낸 예측이 실제 답과 얼마나 다른지 알아보겠습니다. 먼저 입력에서 예측까지의 순전파를 카드로 완성하세요."
     >
       <section aria-labelledby="lesson05-goals-title">
         <h3 id="lesson05-goals-title" className="text-xl font-black text-slate-950">
@@ -447,7 +447,7 @@ export function Lesson05Step2(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={2}
-      intro="입력으로 만든 예측값은 실젯값과 같지 않을 수 있습니다. 예측 70점과 실젯값 80점처럼 둘을 나란히 비교해야 얼마나 틀렸는지 알 수 있습니다. 두 예측의 차이를 계산해 보세요."
+      intro="70점이라고 예측했는데 실제로 80점이라면 얼마나 다른가요? 두 사례의 차이를 구한 다음, 부호가 다른 차이를 그냥 더하면 생기는 문제를 확인하세요."
     >
       <div className="grid gap-5 md:grid-cols-2">
         {[
@@ -589,7 +589,7 @@ export function Lesson05Step3(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={3}
-      intro="예측값과 실젯값을 비교해 현재 예측이 얼마나 틀렸는지를 오차(loss)로 나타냅니다."
+      intro="예측을 고치려면 먼저 틀린 정도를 숫자로 알아야 합니다. 같은 실젯값을 기준으로 두 예측을 비교하고, 더 작은 오차를 고르세요."
     >
       <div className="rounded-2xl bg-indigo-50 p-5 sm:p-6">
         <div className="flex items-start gap-3">
@@ -765,7 +765,7 @@ export function Lesson05Step4(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={4}
-      intro="연속적인 숫자 예측의 차이를 제곱하고 평균을 내어 평균제곱오차(MSE)를 계산합니다."
+      intro="여러 학생의 점수 예측을 숫자 하나로 비교해 보겠습니다. 안내 행을 보고 차이 → 제곱 → 평균을 계산한 뒤, 두 모델의 결과를 해석하세요."
     >
       <div className="rounded-2xl bg-indigo-50 p-5">
         <p className="font-black text-indigo-950">
@@ -1026,7 +1026,7 @@ export function Lesson05Step5(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={5}
-      intro="모델 출력으로 가정한 확률과 실젯값을 이진 교차 엔트로피 오차(BCEE)로 비교합니다. 실제 신경망을 실행해 얻은 출력은 아닙니다."
+      intro="스팸인지 정상인지 구분할 때는 정답 종류에 준 확률을 살펴봅니다. 정답과 확률을 바꾸어 손실을 비교하고, 확률과 손실의 관계를 제출하세요."
     >
       <div className="rounded-2xl bg-indigo-50 p-5">
         <h3 className="text-xl font-black text-indigo-950">
@@ -1074,14 +1074,15 @@ export function Lesson05Step5(props: CommonStepProps) {
 
       <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="bcee-scenarios-title"><h3 id="bcee-scenarios-title" className="text-xl font-black text-indigo-950">비교를 돕는 예시</h3><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Button variant={goodTargetOne ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.9)}>{goodTargetOne ? <Check size={18} aria-hidden="true" /> : null}정답 1 · 좋은 예측</Button><Button variant={goodTargetZero ? 'primary' : 'secondary'} onClick={() => applyScenario(0,0.1)}>{goodTargetZero ? <Check size={18} aria-hidden="true" /> : null}정답 0 · 좋은 예측</Button><Button variant={observedConfidentWrong ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.05)}>{observedConfidentWrong ? <Check size={18} aria-hidden="true" /> : null}자신 있게 틀림</Button><Button variant={observedAmbiguous ? 'primary' : 'secondary'} onClick={() => applyScenario(1,0.5)}>{observedAmbiguous ? <Check size={18} aria-hidden="true" /> : null}애매한 0.5</Button></div><div className="mt-4 grid gap-3 sm:grid-cols-2"><p className="rounded-xl bg-white p-4 font-semibold">정답에 가까운 예측: 오차(loss)가 작아지는 경향</p><p className="rounded-xl bg-white p-4 font-semibold">자신 있게 틀린 예측: 오차(loss)가 크게 증가</p></div></section>
 
-      <section className="mt-8" aria-labelledby="bcee-slider-title">
+      <div className="mt-7 grid min-w-0 gap-5 lg:grid-cols-2">
+      <section className="min-w-0 rounded-2xl border border-slate-200 p-5" aria-labelledby="bcee-slider-title">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h3 id="bcee-slider-title" className="text-xl font-black text-slate-950">
               2. 모델 출력으로 가정한 확률 조절
             </h3>
             <p className="mt-2 leading-7 text-slate-600">
-              확률은 모델 출력으로 가정한 값이고, 손실값은 BCEE로 실제 계산한 결과입니다. 정답 선택은 다른 예제로 바꾸는 조작이지 모델이 정답을 고치는 과정은 아닙니다.
+              슬라이더로 스팸일 확률 p를 바꾸세요. 확률은 가정한 모델 출력이며, 옆의 손실값은 현재 정답과 확률로 계산합니다. 정답 선택은 비교할 예제를 바꾸는 조작입니다.
             </p>
           </div>
           <output
@@ -1113,25 +1114,20 @@ export function Lesson05Step5(props: CommonStepProps) {
         </div>
       </section>
 
-      <div className="mt-8">
-        <PredictionLossFlow
-          prediction={
-            <>
-              스팸 확률 {probability.toFixed(2)}
-              <span className="mt-1 block text-sm font-semibold text-slate-600">
-                모델 출력으로 가정한 확률
-              </span>
-            </>
-          }
-          target={target === 1 ? '스팸 · 1' : '정상 · 0'}
-          lossName="BCEE로 평가"
-        >
+      <section className="min-w-0 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-label="현재 확률과 BCEE 손실 계산" aria-live="polite">
+          <h3 className="text-lg font-black text-indigo-950">3. 현재 정답의 확률 → 손실</h3>
+          <p className="mt-3 leading-7">정답: <strong>{target === 1 ? '스팸 · 1' : '정상 · 0'}</strong></p>
+          <p className="mt-2 break-words font-mono font-bold leading-7">
+            {target === 1 ? `스팸 확률 p = ${probability.toFixed(2)}` : `정상 확률 1 − p = 1 − ${probability.toFixed(2)} = ${correctClassProbability.toFixed(2)}`}
+          </p>
+          <p className="my-3 break-words font-mono font-bold leading-7">손실 = −ln(정답 종류의 확률) ≈ {formatLoss(loss)}</p>
           <LossMeter
             display={`오차(loss) ${formatLoss(loss)}`}
             level={1 - Math.exp(-Math.min(loss, 8))}
-            description={`현재 정답 클래스(${target === 1 ? '스팸' : '정상'})의 확률은 ${correctClassProbability.toFixed(2)}입니다. 이 BCEE 활동 안에서 확률 변화에 따른 오차(loss)를 비교하세요.`}
+            description="이 값은 예측을 평가한 손실이며 확률이나 정확도가 아닙니다. 같은 정답에 더 높은 확률을 주면 손실은 작아집니다."
           />
-        </PredictionLossFlow>
+          <p className="mt-3 text-sm leading-6 text-slate-700">ln은 로그 계산 기호입니다. 앱이 계산하며, 0·1 끝값은 안전한 범위로 제한합니다. 이 활동에서 모델을 실제 학습하지는 않습니다.</p>
+      </section>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -1163,18 +1159,6 @@ export function Lesson05Step5(props: CommonStepProps) {
           )}
           <span className="font-bold">정답과 먼 예측 관찰</span>
         </div>
-      </div>
-
-      <div className="mt-6 rounded-xl border border-slate-200 p-4 text-sm leading-6 text-slate-700">
-        <p>
-          정답이 1이면 <strong>오차(loss) = -ln(p)</strong>, 정답이 0이면{' '}
-          <strong>오차(loss) = -ln(1-p)</strong>로 계산합니다. 내부 계산은 0과 1
-          끝값에서도 깨지지 않도록 안전한 범위로 제한합니다.
-        </p>
-        <p className="mt-2 font-bold text-indigo-900">
-          정답 클래스의 확률이 높아지면 오차(loss)는 작아지고, 낮아지면 오차(loss)는
-          커지는 경향이 있습니다.
-        </p>
       </div>
 
       <fieldset className="mt-7 rounded-xl border border-indigo-200 p-5">
@@ -1228,7 +1212,7 @@ export function Lesson05Step6(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={6}
-      intro="붓꽃 세 종류의 예측 확률을 비교하며 정답 클래스 확률과 CCEE 오차(loss)의 관계를 관찰합니다."
+      intro="종류가 셋일 때도 정답 위치의 확률을 기준으로 예측을 평가합니다. 예측 A·B·C를 바꾸며 같은 열의 확률과 손실을 비교하고, 계산에 쓴 확률을 설명하세요."
     >
       <div className="rounded-2xl bg-indigo-50 p-5">
         <h3 className="text-xl font-black text-indigo-950">
@@ -1445,7 +1429,7 @@ export function Lesson05Step7({
     <StepFrame
       {...props}
       step={7}
-      intro="문제 유형에 맞는 손실함수를 연결하고 활성화 함수와 손실함수의 서로 다른 역할을 정리합니다."
+      intro="새 문제에 맞는 손실함수를 골라 보세요. 세 구간에서 함수 선택, 출력과 평가의 역할, 계산 결과의 의미를 구별합니다."
     >
       <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
         { label: '1. 문제 유형과 손실함수 연결', purpose: '문제의 출력 형태에 맞는 손실함수를 골라 제출하세요.', done: matchesSubmitted && matchesCorrect, remaining: '세 문제 유형 연결 후 제출' },

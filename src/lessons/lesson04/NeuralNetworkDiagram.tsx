@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowRight } from 'lucide-react'
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 
 export interface DiagramLayer {
   id: string
@@ -68,11 +68,11 @@ function ConnectionBridge() {
   )
 }
 
-function LayerCard({ layer, compact }: { layer: DiagramLayer; compact: boolean }) {
+function LayerCard({ layer, compact, selected, action }: { layer: DiagramLayer; compact: boolean; selected: boolean; action?: ReactNode }) {
   const tone = tones[layer.tone]
 
   return (
-    <div className={`min-w-0 rounded-2xl border p-4 text-center ${tone.card}`}>
+    <div className={`min-w-0 rounded-2xl border p-4 text-center ${tone.card} ${selected ? 'ring-2 ring-indigo-600 ring-offset-2' : ''}`}>
       <p className={`text-sm font-black ${tone.label}`}>{layer.label}</p>
       <div
         className={`mx-auto mt-4 grid w-fit gap-2 ${
@@ -89,6 +89,7 @@ function LayerCard({ layer, compact }: { layer: DiagramLayer; compact: boolean }
         ))}
       </div>
       <p className="mt-4 text-sm font-semibold leading-6 text-slate-700">{layer.role}</p>
+      {action}
     </div>
   )
 }
@@ -97,10 +98,14 @@ export function NeuralNetworkDiagram({
   layers,
   label,
   compact = false,
+  selectedLayerId,
+  renderLayerAction,
 }: {
   layers: readonly DiagramLayer[]
   label: string
   compact?: boolean
+  selectedLayerId?: string
+  renderLayerAction?: (layer: DiagramLayer) => ReactNode
 }) {
   return (
     <figure className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -111,7 +116,7 @@ export function NeuralNetworkDiagram({
       >
         {layers.map((layer, index) => (
           <div key={layer.id} className="contents">
-            <LayerCard layer={layer} compact={compact} />
+            <LayerCard layer={layer} compact={compact} selected={selectedLayerId === layer.id} action={renderLayerAction?.(layer)} />
             {index < layers.length - 1 && <ConnectionBridge />}
           </div>
         ))}

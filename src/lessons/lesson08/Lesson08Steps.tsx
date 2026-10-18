@@ -168,7 +168,7 @@ export function Lesson08Step1(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={1} intro="훈련 데이터 수, 학습 횟수(Epoch), 신경망 구조를 정합니다. 모델 구조는 연결된 층과 뉴런 수를 뜻합니다.">
+    <StepFrame {...props} step={1} intro="같은 숫자 문제도 데이터와 모델의 조건에 따라 결과가 달라집니다. 훈련 데이터 수·학습 횟수·모델 구조를 각각 선택한 뒤 실행 조건을 확인하세요.">
       <LabBadges />
       <p className="mt-4 leading-7 text-slate-700">Lesson 07의 전처리 원리를 이어서 딥러닝 모델 구성 → 학습 → 성능 평가를 수행합니다. 이 차시에서 데이터를 별도로 불러와 실제 신경망을 학습합니다. 교과서와 데이터 수·실행 환경·학습 조건이 다를 수 있어 정확도가 같을 필요는 없습니다.</p>
 
@@ -280,7 +280,7 @@ export function Lesson08Step2(props: CommonStepProps) {
       : STATUS_LABELS[lab.status]
 
   return (
-    <StepFrame {...props} step={2} intro="선택한 실제 MNIST 훈련 데이터 일부로 새 신경망을 만들고 학습합니다. 데이터·모델 준비가 끝나면 실제 배치별 학습 진행이 표시됩니다.">
+    <StepFrame {...props} step={2} intro="준비한 픽셀과 정답으로 예측을 비교하며 가중치를 조정합니다. 실제 학습을 실행하고, 준비 상태 → 배치 진행 → 마지막 결과를 차례로 확인하세요.">
       <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <h3 className="flex items-center gap-2 text-lg font-black"><Database size={20} /> 실제 학습 흐름</h3>
@@ -293,6 +293,13 @@ export function Lesson08Step2(props: CommonStepProps) {
         </div>
 
         <div className="rounded-2xl border border-violet-200 bg-white p-5" aria-busy={running}>
+          <div className="mb-5 flex flex-wrap gap-3">
+            <Button onClick={() => void lab.startTraining()} disabled={lab.isBusy}>
+              {running ? <LoaderCircle className="animate-spin" size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
+              {running ? '실제 모델 학습 중…' : lab.trainingResult ? '새 모델로 다시 학습' : '실제 모델 학습 시작'}
+            </Button>
+            {running ? <Button variant="danger" onClick={lab.cancelTraining}><Square size={17} aria-hidden="true" /> 학습 취소</Button> : null}
+          </div>
           <p className="text-xs font-black tracking-[0.15em] text-violet-700">TRAINING STATUS</p>
           <div className="mt-2 flex items-center gap-2" role="status" aria-live="polite" aria-atomic="true">
             {running ? <LoaderCircle className="shrink-0 animate-spin text-violet-600" size={21} aria-hidden="true" /> : null}
@@ -356,14 +363,6 @@ export function Lesson08Step2(props: CommonStepProps) {
       {lab.error && ['data', 'engine', 'model', 'training'].includes(lab.error.kind) ? (
         <Notice danger><p className="font-black">{lab.error.message}</p><p className="mt-1 break-words">{lab.error.detail}</p></Notice>
       ) : null}
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button onClick={() => void lab.startTraining()} disabled={lab.isBusy}>
-          {running ? <LoaderCircle className="animate-spin" size={18} aria-hidden="true" /> : <Play size={18} aria-hidden="true" />}
-          {running ? '실제 모델 학습 중…' : lab.trainingResult ? '새 모델로 다시 학습' : '실제 모델 학습 시작'}
-        </Button>
-        {running ? <Button variant="danger" onClick={lab.cancelTraining}><Square size={17} aria-hidden="true" /> 학습 취소</Button> : null}
-      </div>
-
       {lab.status === 'cancelled' ? (
         <Notice>
           <p className="font-black">학습이 취소되었습니다.</p>
@@ -418,15 +417,28 @@ export function Lesson08Step3(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={3} intro="실제 학습에서 기록한 훈련 오차(loss)와 훈련 정확도(accuracy)를 비교합니다. 이 그래프는 테스트 데이터의 결과가 아닙니다.">
+    <StepFrame {...props} step={3} intro="손실은 예측을 평가한 값이고, 정확도는 맞힌 비율입니다. 두 그래프를 각각 선택해 읽고, 바로 아래에서 첫 학습과 마지막 학습의 변화를 판단하세요. 모두 훈련 데이터의 결과입니다.">
       {!modelReady ? <ModelRequired /> : null}
       <div className="grid gap-5 lg:grid-cols-2">
-        <TrainingMetricChart title="학습 횟수별 훈련 오차(loss)" metric="loss" history={trainingResult.history} onInspect={() => setViewedLoss(true)} />
-        <TrainingMetricChart title="학습 횟수별 훈련 정확도(accuracy)" metric="accuracy" history={trainingResult.history} onInspect={() => setViewedAccuracy(true)} />
+        {(['loss', 'accuracy'] as const).map((metric) => {
+          const value = metric === 'loss' ? lossReading : accuracyReading
+          const setValue = metric === 'loss' ? setLossReading : setAccuracyReading
+          return <section key={metric} className="min-w-0 rounded-2xl border border-slate-200 p-3 sm:p-4">
+            <TrainingMetricChart title={metric === 'loss' ? '학습 횟수별 훈련 오차(loss)' : '학습 횟수별 훈련 정확도(accuracy)'} metric={metric} history={trainingResult.history} onInspect={metric === 'loss' ? () => setViewedLoss(true) : () => setViewedAccuracy(true)} />
+            <p className="mt-3 leading-7 text-slate-700">{metric === 'loss' ? '같은 손실함수로 예측과 정답을 비교한 값입니다. 손실 0.2를 정확도 20%로 읽지 않습니다.' : '해당 훈련 데이터에서 맞힌 수를 전체 수로 나눈 비율입니다. 한 이미지의 클래스별 확률과는 다릅니다.'}</p>
+            <fieldset className="mt-4">
+              <legend className="font-bold">{metric === 'loss' ? '오차(loss)' : '정확도(accuracy)'}는 어떻게 달라졌나요?</legend>
+              <p className="mt-2 font-mono leading-7">첫 학습 {metric === 'loss' ? first.loss.toFixed(4) : <Percent value={first.accuracy} />} → 마지막 학습 {metric === 'loss' ? last.loss.toFixed(4) : <Percent value={last.accuracy} />}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {([['down', '감소'], ['up', '증가'], ['similar', '거의 같음']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={value === key} onClick={() => { setValue(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 font-bold ${value === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
+              </div>
+            </fieldset>
+          </section>
+        })}
       </div>
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
         <table className="min-w-full text-left text-sm">
-          <caption className="px-4 py-3 text-left font-black">실제 history 값</caption>
+          <caption className="px-4 py-3 text-left font-black">그래프에 사용한 실제 학습 기록</caption>
           <thead className="bg-slate-100"><tr><th className="px-4 py-3">Epoch</th><th className="px-4 py-3">오차(loss)</th><th className="px-4 py-3">정확도(accuracy)</th></tr></thead>
           <tbody>{trainingResult.history.map((item) => <tr key={item.epoch} className="border-t border-slate-200"><td className="px-4 py-3 font-black">{item.epoch}</td><td className="px-4 py-3 font-mono">{item.loss.toFixed(6)}</td><td className="px-4 py-3 font-mono"><Percent value={item.accuracy} /></td></tr>)}</tbody>
         </table>
@@ -438,19 +450,7 @@ export function Lesson08Step3(props: CommonStepProps) {
 
       <div className="mt-6 rounded-2xl border border-slate-200 p-5">
         <h3 className="font-black">이번 실행 결과 해석</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">오차(loss)는 예측과 정답을 비교해 손실함수로 계산한 값입니다. 정확도(accuracy)는 해당 데이터에서 맞힌 비율로, 오차와 다른 지표입니다. 각 지표의 첫 학습과 마지막 학습을 비교하세요.</p>
-        {(['loss', 'accuracy'] as const).map((metric) => {
-          const value = metric === 'loss' ? lossReading : accuracyReading
-          const setValue = metric === 'loss' ? setLossReading : setAccuracyReading
-          return (
-            <fieldset key={metric} className="mt-4">
-              <legend className="font-bold">{metric === 'loss' ? '오차(loss)' : '정확도(accuracy)'}는 어떻게 달라졌나요?</legend>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {([['down', '감소'], ['up', '증가'], ['similar', '거의 같음']] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={value === key} onClick={() => { setValue(key); setSubmitted(false) }} className={`min-h-11 rounded-xl border px-4 font-bold ${value === key ? 'border-violet-600 bg-violet-600 text-white' : 'border-slate-300 bg-white'}`}>{label}</button>)}
-              </div>
-            </fieldset>
-          )
-        })}
+        <p className="mt-2 leading-7 text-slate-600">그래프 아래에서 고른 두 판단을 제출하세요. 마지막 값뿐 아니라 중간의 변화도 함께 살펴보세요.</p>
         <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={!lossReading || !accuracyReading}>해석 제출</Button>
         {submitted ? <Notice><p>실제 값 기준: 훈련 오차는 <strong>{classify(first.loss, last.loss) === 'down' ? '감소' : classify(first.loss, last.loss) === 'up' ? '증가' : '거의 같음'}</strong>, 훈련 정확도는 <strong>{classify(first.accuracy, last.accuracy) === 'up' ? '증가' : classify(first.accuracy, last.accuracy) === 'down' ? '감소' : '거의 같음'}</strong>했습니다.</p><p className="mt-1">매 학습에서 같은 방향으로 움직인다고 보장할 수 없고, 다른 실행에서도 같은 값이 나온다고 보장할 수 없습니다.</p></Notice> : null}
         <Button className="mt-5" onClick={finish} disabled={!complete}>STEP 3 활동 완료</Button>
@@ -469,7 +469,7 @@ export function Lesson08Step4(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={4} intro="학습에 사용하지 않은 실제 테스트 데이터(Test) 500개를 현재 모델로 예측해 성능을 평가합니다.">
+    <StepFrame {...props} step={4} intro="학습한 사진에만 잘 맞는지, 처음 보는 사진에도 잘 맞는지 구분해야 합니다. 테스트 데이터 500개를 평가하고 훈련·테스트 정확도의 대상을 비교하세요.">
       <p className="mb-5 leading-7 text-slate-700">클래스별 확률은 한 이미지가 각 숫자일 가능성에 대한 모델의 예측입니다. 테스트 정확도는 여러 이미지의 예측을 실제 정답과 비교해 구한 정답 비율입니다. 평가 후 결과 카드에서 500개 중 맞힌 수와 정확도를 함께 읽고, STEP 5의 확률 막대에서는 선택한 한 이미지의 판단을 살펴봅니다.</p>
       {!modelReady ? <ModelRequired /> : (
         <>
@@ -540,7 +540,7 @@ export function Lesson08Step5(props: CommonStepProps) {
   }
 
   return (
-    <StepFrame {...props} step={5} intro="실제 레이블(정답)과 예측 숫자가 다른 테스트 표본을 살펴봅니다. 클래스별 출력 확률은 모델의 판단이며, 가장 높은 확률도 정답을 보장하지는 않습니다.">
+    <StepFrame {...props} step={5} intro="정확도 하나만으로는 어떤 숫자를 헷갈렸는지 알 수 없습니다. 실제 오분류 표본을 골라 정답·예측·두 클래스의 확률을 비교하고, 획에서 관찰한 이유를 선택하세요.">
       <p className="mb-5 leading-7 text-slate-700">카드를 선택하면 그 이미지 한 장의 클래스별 확률 막대가 나타납니다. 이 확률은 STEP 4에서 여러 이미지의 정답 여부를 모아 구한 테스트 정확도와 다릅니다. 실제 레이블과 예측 숫자, 각 숫자의 확률을 함께 비교하세요.</p>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -640,7 +640,7 @@ export function Lesson08Step6(props: CommonStepProps) {
     : null
 
   return (
-    <StepFrame {...props} step={6} intro="검은 캔버스에 흰색으로 손 글씨 숫자를 그리고, 방금 학습한 실제 모델로 예측합니다.">
+    <StepFrame {...props} step={6} intro="직접 쓴 숫자에도 현재 모델이 어떻게 반응하는지 확인해 보세요. 빈 입력 안내를 확인한 뒤 숫자를 그리고 예측을 실행해 0~9의 확률을 읽어 보세요.">
       <p className="mb-5 leading-7 text-slate-700">그림을 28×28 입력 형태로 맞춘 뒤 현재 학습된 모델이 예측합니다. 숫자의 크기·위치·획 모양에 따라 결과가 달라질 수 있습니다.</p>
       {!modelReady ? (
         <Notice><p className="font-black">먼저 STEP 1과 STEP 2에서 실제 모델을 학습해 주세요.</p><p className="mt-1">저장된 실험 기록만으로는 현재 모델을 복원할 수 없습니다.</p></Notice>
@@ -760,7 +760,7 @@ export function Lesson08Step7({
   ] as const
 
   return (
-    <StepFrame {...props} step={7} intro="저장된 실제 실험 두 개의 훈련 데이터 수·모델 구조·학습 횟수와 결과를 비교합니다. 모델이 크거나 학습 횟수가 많다고 항상 더 좋은 결과가 나오는 것은 아닙니다.">
+    <StepFrame {...props} step={7} intro="조건과 결과를 나란히 놓아야 차이를 설명할 수 있습니다. 실제 실험 기록 두 개를 고르고, 바뀐 조건과 훈련 정확도 차이를 제출하세요. 큰 모델이나 많은 학습이 항상 더 좋은 결과를 보장하지는 않습니다.">
       <div className="rounded-2xl border border-cyan-200 bg-cyan-50 p-5">
         <h3 className="font-black text-cyan-950">권장 비교</h3>
         <p className="mt-2 text-sm leading-6 text-cyan-900">비교 예: 실험 A는 훈련 데이터 500개 · 기본 모델 · 3회 학습, 실험 B는 훈련 데이터 2,000개 · 기본 모델 · 3회 학습</p>

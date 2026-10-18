@@ -54,9 +54,9 @@ export default function KernelVisualizer({
             : `곱셈 결과를 모두 더해 특징 맵 ${outputRow + 1}행 ${outputColumn + 1}열에 놓습니다.${showCalculation ? ` 합은 ${result}입니다.` : ' 아직 정답을 공개하지 않습니다. 아래 독립 입력란에서 곱과 합을 완성하세요.'}`}
         </p>
         <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="합성곱 설명 조작">
-          <Button variant="secondary" disabled={stage === 0} onClick={() => setStage((value) => value - 1)} aria-label="합성곱 이전 설명">이전</Button>
-          <Button disabled={stage === finalStage} onClick={() => setStage((value) => value + 1)} aria-label="합성곱 다음 설명">다음</Button>
-          <Button variant="secondary" onClick={() => setStage(0)} aria-label="합성곱 설명 다시 보기">다시 보기</Button>
+          <Button variant="secondary" disabled={stage === 0} onClick={() => setStage((value) => value - 1)} aria-label="합성곱 이전 설명">이전 대응</Button>
+          <Button disabled={stage === finalStage} onClick={() => setStage((value) => value + 1)} aria-label="합성곱 다음 설명">{stage < terms.length ? `곱 #${stage + 1} 보기` : '합산 위치 보기'}</Button>
+          <Button variant="secondary" onClick={() => setStage(0)} aria-label="합성곱 설명 다시 보기">영역부터 보기</Button>
         </div>
         <p className="mt-2 text-xs leading-5 text-slate-500">이전·다음으로 같은 #번호의 입력과 필터를 따라가 보세요. 굵은 테두리가 지금 곱할 두 칸을 나타냅니다. 계산을 직접 하는 문제에서는 아래 입력란에 답을 적어 주세요.</p>
       </div>

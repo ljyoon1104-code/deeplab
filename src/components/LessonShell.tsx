@@ -19,10 +19,6 @@ const partialReviewNotes: Partial<Record<LessonId, Partial<Record<number, string
     6: '세 사례의 방법·한계 판단은 새로고침하면 초기화됩니다. 저장된 비교 카드 답안은 복원됩니다.',
     7: '서비스 적용의 임시 답안은 새로고침하면 초기화됩니다. 역할 연결과 확인 문제의 저장 답안은 복원됩니다.',
   },
-  '11': {
-    3: '역연결의 현재 선택·제출 표시는 새로고침하면 초기화됩니다. 저장된 인덱스 연결과 역연결 정답 기록은 유지됩니다.',
-    4: '값 1의 인덱스 입력·제출 상태는 새로고침하면 초기화됩니다. 길이·오류 벡터 판단의 저장 답안은 복원됩니다.',
-  },
 }
 
 function temporaryReviewNote(lessonId: LessonId, step: number) {

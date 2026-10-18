@@ -135,9 +135,9 @@ export function Lesson09Step1(props: CommonStepProps) {
   const correct = useCoreAnswer(101)
   const selected = activity.pixelChoices.some(value => /^photo:\d+:\d+$/.test(value))
   return <StepFrame {...props} step={1} intro="목적: 이미지의 한 칸과 밝기 숫자를 연결합니다. 할 일: 사진의 칸을 선택한 뒤 픽셀값과 정답의 차이를 판단하세요.">
-    <p className="mb-3 text-sm leading-6">컴퓨터 비전은 이미지에서 정보를 찾는 분야이고, 픽셀은 이미지를 이루는 작은 칸입니다. 아래에서는 사진을 축소한 흑백 이미지의 밝기를 0~255로 읽습니다.</p>
+    <p className="mb-3 text-sm leading-6"><strong>컴퓨터 비전</strong>은 이미지에서 정보를 찾는 분야입니다. 컴퓨터가 사진을 계산하려면 작은 칸인 <strong>픽셀</strong>을 숫자로 나타내야 합니다. 아래 사진의 한 칸을 선택해 밝기값과 위치를 함께 확인하세요.</p>
     <PetImageLab mode="pixels" active={props.active} onPixelSelect={(row, column) => update(current => ({ ...current, pixelChoices: [...current.pixelChoices.filter(value => !value.startsWith('photo:')), `photo:${row}:${column}`] }))} />
-    <p className="text-sm leading-6">이 사진의 교육용 레이블은 ‘동물 있음’입니다. 레이블은 사람이 붙인 정답이고, 모델 예측은 입력을 처리한 결과입니다. 지금은 학습된 모델을 실행하지 않습니다.</p>
+    <p className="text-sm leading-6"><strong>입력</strong>은 사진의 픽셀값, <strong>레이블</strong>은 사람이 붙인 정답 ‘동물 있음’입니다. 여러 뉴런을 연결한 <strong>인공신경망</strong>이 입력을 계산해 내놓는 결과가 모델 예측입니다. 레이블과 예측은 학습·평가에서 비교하며, 지금은 학습된 모델을 실행하지 않습니다.</p>
     <CoreQuestion id={101} />
     <ActivityGuide complete={props.isComplete} items={[[ '사진의 픽셀 한 칸 선택', selected], ['핵심 질문 정답', correct]]} />
     <Button disabled={!selected || !correct} onClick={props.onComplete}>STEP 1 활동 완료</Button>
@@ -163,9 +163,10 @@ export function Lesson09Step2(props: CommonStepProps) {
     <StepFrame {...props} step={2} intro="목적: 네 작업이 답하는 방식의 차이를 비교합니다. 할 일: 네 상황에 알맞은 작업을 하나씩 연결하세요.">
       <ActivityGuide complete={props.isComplete} items={[[`네 상황에 작업 연결 (${requiredVisionScenarios.filter(item => activity.visionAssignments[item.id]).length}/4)`, allAssigned], ['네 상황을 모두 맞게 제출', submitted && allCorrect]]} />
       <VisionTaskExamples />
-      <h3 className="mt-6 font-black">직접 적용 · 상황 선택 → 바로 아래에서 작업 연결</h3>
-      <div className="mt-3 grid items-start gap-3 lg:grid-cols-2">
-        {requiredVisionScenarios.map((scenario, index) => <div key={scenario.id} className={`min-w-0 rounded-xl border p-3 ${selectedScenario === scenario.id ? 'border-cyan-600 bg-cyan-50' : 'border-slate-200 bg-white'}`}>
+      <h3 className="mt-6 font-black">직접 적용 · 현재 상황에 필요한 출력은 무엇인가요?</h3>
+      <nav className="mt-3 flex flex-wrap gap-2" aria-label="컴퓨터 비전 적용 상황 이동">{requiredVisionScenarios.map((scenario, index) => <Button key={scenario.id} variant={selectedScenario === scenario.id ? 'primary' : 'secondary'} aria-pressed={selectedScenario === scenario.id} onClick={() => setSelectedScenario(scenario.id)}>상황 {index + 1}{activity.visionAssignments[scenario.id] ? ' · 연결함' : ''}</Button>)}</nav>
+      <div className="mt-3">
+        {requiredVisionScenarios.map((scenario, index) => <div key={scenario.id} hidden={selectedScenario !== scenario.id} className={`min-w-0 rounded-xl border p-3 ${selectedScenario === scenario.id ? 'border-cyan-600 bg-cyan-50' : 'border-slate-200 bg-white'}`}>
           <button type="button" aria-pressed={selectedScenario === scenario.id} onClick={() => setSelectedScenario(scenario.id)} className="min-h-14 w-full rounded-lg p-1 text-left"><span className="font-black">{selectedScenario === scenario.id ? '✓ 선택한 ' : ''}상황 {index + 1}</span><span className="mt-1 block text-sm leading-6">{scenario.text}</span></button>
           <p className="mt-2 text-sm font-bold text-violet-800" aria-live="polite">현재 연결: {activity.visionAssignments[scenario.id] ? VISION_TASKS[activity.visionAssignments[scenario.id] as VisionTask]?.name : '아직 선택하지 않음'}</p>
           {selectedScenario === scenario.id && <div className="mt-3 grid grid-cols-2 gap-2" role="group" aria-label={`상황 ${index + 1}에 작업 연결`}>{visionTaskKeys.map(task => <button key={task} type="button" aria-pressed={activity.visionAssignments[scenario.id] === task} onClick={() => { assignVision(selectedScenario, task); setSubmitted(false); update(current => ({ ...current, quizSubmitted: current.quizSubmitted.filter(id => id !== 102) })) }} className={`min-h-14 rounded-lg border p-2 text-sm font-bold ${activity.visionAssignments[scenario.id] === task ? 'border-violet-700 bg-violet-100 text-violet-950' : 'border-violet-300 bg-white text-violet-900'}`}>{activity.visionAssignments[scenario.id] === task ? '✓ ' : ''}{VISION_TASKS[task].name}에 연결</button>)}</div>}
@@ -191,12 +192,12 @@ export function Lesson09Step3(props: CommonStepProps) {
   const correct = useCoreAnswer(103)
   const selected = activity.networkAssignments['spatial:pixel'] !== undefined
   return <StepFrame {...props} step={3} intro="목적: 같은 값을 펼친 배열과 공간적 이웃 관계를 비교합니다. 할 일: 픽셀을 선택해 대응을 찾고, 이웃 영역을 옮긴 뒤 질문에 답하세요.">
-    <p className="mb-4 text-sm leading-6">여기부터는 작은 4×4 숫자 예제입니다. 차원 변환은 값과 순서를 유지해 펼치고, 합성곱 신경망(CNN)은 가까운 칸에 필터를 적용해 여러 위치를 살펴봅니다.</p>
+    <p className="mb-4 text-sm leading-6">여기부터는 사진과 다른 작은 4×4 숫자 예제입니다. 차원 변환은 값과 순서를 유지해 펼치고, 합성곱 신경망(CNN)은 가까운 칸에 필터를 적용해 여러 위치를 살펴봅니다.</p>
+    <CnnOverview />
     <SpatialComparison image={exampleImage} onPixelSelect={index => update(current => ({ ...current, networkAssignments: { ...current.networkAssignments, 'spatial:pixel': String(index) } }))} />
     <CoreQuestion id={103} />
     <ActivityGuide complete={props.isComplete} items={[[ '픽셀과 배열의 대응 위치 선택', selected], ['핵심 질문 정답', correct]]} />
     <Button disabled={!selected || !correct} onClick={props.onComplete}>STEP 3 활동 완료</Button>
-    <details className="mt-5"><summary className="min-h-11 cursor-pointer py-2 font-bold">보충 · CNN의 전체 구조 미리 보기</summary><CnnOverview /></details>
   </StepFrame>
 }
 
@@ -238,11 +239,13 @@ export function Lesson09Step4(props: CommonStepProps) {
       <div className="mt-7 rounded-2xl border border-orange-200 bg-orange-50 p-5">
         <h3 className="font-black text-orange-950">직접 계산하기</h3>
         <p className="mt-2 text-sm leading-6">이번에는 필터를 오른쪽으로 한 칸 옮겼습니다. 대응하는 네 곱셈 결과와 합을 입력해 특징 맵 1행 2열을 만드세요.</p>
-        <div className="mt-4 grid items-start gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
+        <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-1">
           <PixelGrid values={input} label="입력 · 테두리 안의 네 칸" region={{ startRow: 0, startColumn: 1, height: kernel.length, width: kernel[0].length }} annotations={input.map((row, r) => row.map((_, c) => r < kernel.length && c >= 1 ? String(r * kernel[0].length + c) : ''))} />
           <PixelGrid values={kernel} label="필터 · 같은 #번호끼리 곱하기" tone="kernel" annotations={kernel.map((row, r) => row.map((_, c) => String(r * kernel[0].length + c + 1)))} />
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="min-w-0">
+        <div className="grid grid-cols-2 gap-3">
           {kernel.flatMap((row, rowIndex) => row.map((kernelValue, columnIndex) => {
             const inputValue = input[rowIndex][columnIndex + 1]
             const index = rowIndex * kernel[0].length + columnIndex
@@ -251,8 +254,10 @@ export function Lesson09Step4(props: CommonStepProps) {
         </div>
         <label className="mt-4 block max-w-sm font-bold">네 결과의 합<input type="number" inputMode="numeric" value={sumAnswer} onChange={(event) => { setSumAnswer(event.target.value); setSubmitted(false) }} className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-mono" /></label>
         <Button className="mt-5" onClick={() => setSubmitted(true)} disabled={answers.some((item) => item === '') || sumAnswer === ''}>계산 제출</Button>
-      </div>
       {submitted ? correct ? <Feedback correct>{terms.join(' + ')} = <strong>{expectedSum}</strong>: 이 필터를 적용한 반응값입니다. 특징 맵 1행 2열에 들어가며 정답 확률이 아닙니다.</Feedback> : <Feedback correct={false}><strong>다시 계산하세요.</strong> 같은 위치끼리 곱한 네 결과를 먼저 확인한 뒤 그 값을 모두 더합니다.{answers.map(Number).map((value, index) => answers[index] && value !== terms[index] ? <span key={index} className="block">• {Math.floor(index / 2) + 1}행 {index % 2 + 1}열 곱셈을 다시 확인하세요.</span> : null)}{!correctSum ? <span className="block">• 네 곱셈 결과의 최종 합을 다시 확인하세요.</span> : null}</Feedback> : null}
+        </div>
+        </div>
+      </div>
       <Button className="mt-5" disabled={!submitted || !correct} onClick={props.onComplete}>STEP 4 활동 완료</Button>
       <details className="mt-5"><summary className="min-h-11 cursor-pointer py-2 font-bold">보충 · 다른 입력인 실제 사진에 적용하기</summary><PetImageLab mode="convolution" active={props.active} /></details>
       {props.isComplete ? <Completion>네 곱셈과 합을 실제 격자·필터로 계산해 특징 맵 두 번째 칸을 만들었습니다.</Completion> : null}
@@ -276,7 +281,7 @@ export function Lesson09Step5(props: CommonStepProps) {
   const [sizeAnswer, setSizeAnswer] = useState('')
   const correct = answers.every((answer, index) => answer.trim() !== '' && Number(answer) === featureMap[1][index])
   return <StepFrame {...props} step={5} intro="목적: 같은 필터를 옮기거나 필터를 바꿨을 때의 반응을 비교합니다. 할 일: 서로 다른 두 위치 이상을 선택하고 두 필터의 차이를 해석하세요.">
-    <p className="text-sm leading-6">이제 교과서의 4×4 입력·3×3 필터로 바꿉니다. 비슷한 패턴이 다른 위치에도 있을 수 있어 같은 필터를 이동합니다.</p>
+    <p className="text-sm leading-6">이제 교과서의 4×4 입력·3×3 필터로 바꿉니다. 비슷한 패턴이 다른 위치에도 있을 수 있어 같은 필터를 이동합니다. 이동 간격인 <strong>스트라이드</strong>는 1칸이며, <strong>패딩</strong>이라 부르는 테두리 추가는 하지 않습니다.</p>
     <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="필터 위치 선택">{positions.map(position => <Button key={position.index} variant={selected.index === position.index ? 'primary' : 'secondary'} aria-pressed={selected.index === position.index} onClick={() => update(current => ({ ...current, selectedFilterPosition: position.index, checkedFilterPositions: [...new Set([...current.checkedFilterPositions, position.index])] }))}>위치 {position.index + 1}{activity.checkedFilterPositions.includes(position.index) ? ' ✓' : ''}</Button>)}</div>
     <div className="mt-4 grid items-start gap-4 lg:grid-cols-3">
       <PixelGrid values={input} label="같은 입력 · 선택 영역" region={{ startRow: selected.row, startColumn: selected.column, height: kernel.length, width: kernel[0].length }} />
@@ -286,6 +291,7 @@ export function Lesson09Step5(props: CommonStepProps) {
         <p className="text-sm leading-6" aria-live="polite"><strong>{item.map[selected.row][selected.column]}</strong>: 선택 영역에 이 필터를 적용한 반응값입니다.</p>
       </div>)}
     </div>
+    <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm leading-6">한 방향에서 필터를 놓을 수 있는 위치는 {input.length} − {kernel.length} + 1 = <strong>{featureMap.length}곳</strong>입니다. 가로와 세로 위치마다 반응값을 모아 {featureMap.length}×{featureMap[0].length} 특징 맵을 만듭니다.</p>
     <p className="mt-3 text-sm leading-6">큰 반응값은 눈·귀를 찾았다는 뜻이나 정답 확률이 아닙니다. 지금은 고정 필터를 비교하며, 실제 CNN에서는 학습으로 필터값을 조정합니다.</p>
     <CoreQuestion id={105} />
     <ActivityGuide complete={props.isComplete} items={[[`서로 다른 위치 비교 (${observed.length}/2 이상)`, compared], ['두 필터의 차이 해석', interpreted]]} />
@@ -298,7 +304,7 @@ export function Lesson09Step5(props: CommonStepProps) {
       <Button className="mt-3" disabled={answers.some(value => !value.trim()) || !sizeAnswer} onClick={() => setSubmitted(true)}>선택 연습 제출</Button>
       {submitted && <Feedback correct={correct && sizeAnswer === String(featureMap.length)}>{correct && sizeAnswer === String(featureMap.length) ? '계산과 출력 크기가 맞습니다.' : '같은 위치끼리 곱해 더한 값과 가능한 필터 위치 수를 확인하세요.'}</Feedback>}
     </details>
-    <details className="mt-4"><summary className="min-h-11 cursor-pointer py-2 font-bold">보충 · 사진의 특징 맵과 ReLU</summary><PetImageLab mode="feature" active={props.active} /></details>
+    <section className="mt-6 border-t border-slate-200 pt-5" aria-label="같은 반응값을 다음 층에 전달하기"><h3 className="font-black">같은 원리를 사진에 적용하고 다음 층으로 전달하기</h3><p className="mt-2 text-sm leading-6">아래는 작은 격자와 다른 사진 입력입니다. <strong>렐루(ReLU) 함수</strong>는 음수를 0으로 바꾸고 0과 양수는 그대로 전달합니다. 값이 모두 양수이면 전후가 같아도 올바른 결과입니다.</p><PetImageLab mode="feature" active={props.active} /></section>
   </StepFrame>
 }
 
@@ -314,11 +320,10 @@ export function Lesson09Step6(props: CommonStepProps) {
   return <StepFrame {...props} step={6} intro="목적: 대표값을 남겨 다음 단계에서 처리할 숫자를 줄입니다. 할 일: 첫 영역의 안내를 보고 두 번째 영역의 최댓값을 고른 뒤 줄어드는 정보를 판단하세요.">
     <p className="text-sm leading-6">새로운 4×4 풀링 예제입니다. <strong>최대 풀링</strong>은 2×2 영역에서 가장 큰 값 하나를 남깁니다.</p>
     <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-6">안내 · 첫 영역 [{guidedValues.join(', ')}] → <strong>{pooled[0][0]}</strong>: 이 영역에서 남긴 최댓값입니다.</p>
-    <PoolingVisualizer input={input} poolSize={2} selectedRegion={1} checkedRegions={correct ? [0, 1, 2, 3] : [0]} />
-    <fieldset className="mt-4 rounded-xl border border-amber-200 p-4"><legend className="px-2 font-bold">직접 선택 · 오른쪽 위 2×2 영역의 최댓값</legend>
+    <PoolingVisualizer input={input} poolSize={2} selectedRegion={1} checkedRegions={correct ? [0, 1, 2, 3] : [0]} control={<fieldset className="mt-4 rounded-xl border border-amber-200 p-4"><legend className="px-2 font-bold">직접 선택 · 오른쪽 위 2×2 영역의 최댓값</legend>
       <div className="flex flex-wrap gap-2">{values.map((value, index) => <Button key={index} variant={choice === value ? 'primary' : 'secondary'} aria-pressed={choice === value} onClick={() => update(current => ({ ...current, poolSelections: { ...current.poolSelections, 1: value }, checkedPoolRegions: value === pooled[0][1] ? [...new Set([...current.checkedPoolRegions, 1])] : current.checkedPoolRegions }))}>{value}</Button>)}</div>
       {choice !== undefined && <Feedback correct={correct}>{correct ? `${choice}: 이 2×2 영역에서 남긴 최댓값입니다. 나머지 결과도 펼쳐 보면 16개 값이 4개가 됩니다.` : '네 숫자 중 가장 큰 값을 다시 선택하세요.'}</Feedback>}
-    </fieldset>
+    </fieldset>} />
     <CoreQuestion id={106} />
     <ActivityGuide complete={props.isComplete} items={[[ '독립 영역의 최댓값 선택', correct], ['줄어드는 값과 정보 판단', meaning]]} />
     <Button disabled={!correct || !meaning} onClick={props.onComplete}>STEP 6 활동 완료</Button>
@@ -453,11 +458,10 @@ export function Lesson09Step7({ priorStepsComplete, onCompletionReadyChange, ...
       <ActivityGuide complete={props.isComplete} items={[[ 'STEP 1~6 완료 (차시 완료에 필요)', priorStepsComplete], ['CNN 전체 흐름 배열을 맞게 제출', activity.flowCorrect], ['뉴런 A·B의 계산 차이 판단', denseCorrect]]} />
       <PetImageLab mode="dense" active={props.active} />
       <CoreQuestion id={107} />
-      <details className="mt-5 rounded-xl border border-cyan-200 p-4"><summary className="min-h-11 cursor-pointer py-2 font-bold">보충 · 기본 구조와 처리 역할 다시 보기</summary>
-        <CnnOverview />
+      <section className="mt-5 rounded-xl border border-cyan-200 p-4" aria-label="흐름 카드의 값과 역할 참고"><h3 className="font-black">값을 펼치는 일과 계산하는 일을 구별하세요</h3>
         <p className="text-sm leading-6">ReLU는 음수를 0으로 바꾸고, 차원 변환은 값과 순서를 유지해 펼칩니다. 완전 연결층은 여러 반응을 종합하며, 분류용 출력층의 점수에 소프트맥스를 적용하면 클래스별 확률이 됩니다. 확률은 정확도나 정답 보장이 아닙니다.</p>
         <p className="mt-2 text-sm leading-6">합성곱은 한 칸씩 이동(스트라이드 1)하며 테두리 추가(패딩) 없이 계산했고, 풀링은 2×2 영역을 두 칸씩 옮겼습니다. 실제 CNN에서는 층을 반복하거나 구성을 바꿀 수 있습니다.</p>
-      </details>
+      </section>
       <h3 className="mb-3 mt-7 border-t border-slate-200 pt-6 text-lg font-black">직접 적용 · 나의 CNN 흐름 배열</h3>
       {!activity.flowCorrect ? <>
       <p className="mb-3 text-sm leading-6">카드의 역할을 읽고 위·아래 버튼으로 옮긴 뒤 순서를 확인하세요.</p>

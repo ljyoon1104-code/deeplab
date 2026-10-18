@@ -38,14 +38,14 @@ export function ClassComparisonWalkthrough({
         정답·예측 확률·손실을 한곳에서 비교하기
       </h3>
       <p className="mt-2 text-sm leading-6 text-slate-700">
-        같은 열은 같은 붓꽃 종류입니다. 설명을 넘기며 정답의 1 → 같은 열의 확률 → 손실을 따라가 보세요.
+        같은 열은 같은 붓꽃 종류입니다. 정답의 1이 있는 열에서 예측 확률을 찾아 아래 손실과 연결하세요. 번호를 선택하면 해당 위치를 강조합니다.
       </p>
       <ol className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="비교 설명 순서">
         {stages.map((title, index) => (
-          <li key={title} aria-current={stage === index ? 'step' : undefined}
-            className={`min-w-0 rounded-lg border-2 p-2 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none ${stage === index ? 'border-indigo-500 bg-indigo-50 text-indigo-950' : 'border-slate-200 text-slate-600'}`}>
+          <li key={title} className="min-w-0"><button type="button" onClick={() => setStage(index)} aria-pressed={stage === index}
+            className={`min-h-14 w-full min-w-0 rounded-lg border-2 p-2 text-sm font-bold transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${stage === index ? 'border-indigo-500 bg-indigo-50 text-indigo-950' : 'border-slate-200 text-slate-600'}`}>
             {index + 1}. {title}{stage === index && <span className="block text-xs">현재 설명</span>}
-          </li>
+          </button></li>
         ))}
       </ol>
 
@@ -94,7 +94,7 @@ export function ClassComparisonWalkthrough({
 
       <p className={`mt-4 rounded-xl border-2 p-3 font-bold transition-colors duration-150 motion-reduce:transition-none ${stage === 3 ? highlight : 'border-slate-200 bg-slate-50'}`}>
         {targetLabel}의 확률 {targetProbability.toFixed(2)} → 손실값 −ln({targetProbability.toFixed(2)}) ≈ {formatLoss(loss)}
-        <span className="mt-2 block text-sm font-normal leading-6">정답 위치의 확률이 높을수록 손실은 작아집니다. 손실값은 예측을 평가한 결과이며 확률이나 정확도가 아닙니다. 로그 계산은 앱이 합니다.</span>
+        <span className="mt-2 block text-sm font-normal leading-6">ln은 로그 계산 기호이며 앱이 계산합니다. 정답 위치의 확률이 높을수록 손실은 작아집니다. 손실은 예측을 평가한 결과이며 확률이나 정확도가 아닙니다.</span>
       </p>
       <p className="mt-4 leading-7 text-slate-800" aria-live="polite" aria-atomic="true">
         <strong>{stage + 1}/4 · {stages[stage]}: </strong>{descriptions[stage]}

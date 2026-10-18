@@ -168,27 +168,28 @@ function ClassificationBoard({
 }) {
   const selectedItem = items.find((item) => item.id === selectedId)
   return (
-    <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.85fr)]">
-      <div>
-        <p className="text-sm font-bold text-slate-700">카드를 하나 선택한 뒤 분류 영역을 누르세요.</p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {items.map((item) => {
+    <div className="mt-5 rounded-2xl border border-slate-200 p-4 sm:p-5">
+      <p className="font-bold text-slate-700">문장 번호를 고른 뒤, 바로 아래에서 분류하세요. 다른 문장으로 이동해도 선택한 분류는 남습니다.</p>
+      <div className="mt-3 flex flex-wrap gap-2" aria-label="분류할 문장 이동">
+          {items.map((item, index) => {
             const chosen = selectedId === item.id
             const assigned = assignments[item.id]
             const category = categories.find((itemCategory) => itemCategory.id === assigned)
             return (
-              <button key={item.id} type="button" aria-pressed={chosen} onClick={() => onSelect(item.id)} className={`min-h-14 rounded-xl border px-4 py-3 text-left font-semibold leading-6 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${chosen ? selectedButtonClass : unselectedButtonClass}`}>
+              <button key={item.id} type="button" aria-pressed={chosen} aria-label={`문장 ${index + 1}: ${item.label}${category ? `, 현재 분류 ${category.label}` : ', 분류 전'}`} onClick={() => onSelect(item.id)} className={`min-h-12 rounded-xl border px-4 py-3 text-left font-semibold leading-6 transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${chosen ? selectedButtonClass : unselectedButtonClass}`}>
                 <span className="flex items-start gap-2">
-                  {chosen ? <CheckCircle2 className="mt-0.5 shrink-0 text-indigo-700" size={19} aria-hidden="true" /> : <Circle className="mt-0.5 shrink-0 text-slate-400" size={18} aria-hidden="true" />}
-                  <span>{item.label}</span>
+                  <span>문장 {index + 1}</span>
+                  <span className="text-sm">{assigned ? '분류함' : '분류 전'}</span>
                 </span>
-                {category && <span className="mt-1 block text-xs font-bold text-indigo-700">→ {category.label}</span>}
               </button>
             )
           })}
-        </div>
       </div>
-      <div className="space-y-3" aria-live="polite">
+      <div className="mt-4 rounded-xl bg-indigo-50 p-4" aria-live="polite">
+        <p className="text-lg font-black leading-8 text-indigo-950">{selectedItem?.label ?? '위에서 판단할 문장을 선택하세요.'}</p>
+        {selectedItem && <p className="mt-2 leading-7">현재 분류: <strong>{categories.find((category) => category.id === assignments[selectedItem.id])?.label ?? '아직 선택하지 않았습니다.'}</strong></p>}
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {categories.map((category) => (
           <Button key={category.id} variant={selectedItem && assignments[selectedItem.id] === category.id ? 'primary' : 'secondary'} className="h-auto min-h-16 w-full justify-start whitespace-normal text-left leading-6" disabled={!selectedItem} onClick={() => onAssign(category.id)}>
             <span>

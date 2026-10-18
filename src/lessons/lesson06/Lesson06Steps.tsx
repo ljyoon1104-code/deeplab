@@ -265,7 +265,7 @@ export function Lesson06Step1(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={1}
-      intro="Lesson 05에서 오차(loss)를 계산한 다음, 학습을 계속하려면 무엇을 해야 하는지 생각합니다."
+      intro="틀린 정도를 알아도 모델의 숫자는 아직 그대로입니다. Lesson 05의 손실 계산 다음에 무엇을 바꿔야 하는지 판단해 보세요."
     >
       <section className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-label="교과서 기본 학습 과정">
         <h3 className="font-black text-indigo-950">순전파 → 오차 계산 → 역전파</h3>
@@ -403,7 +403,7 @@ export function Lesson06Step2(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={2}
-      intro="주어진 값, 순전파에서 계산되는 값, 학습하면서 조정되는 값을 구분합니다."
+      intro="예측을 바꾸려면 어떤 숫자를 조정해야 할까요? 같은 예시의 값을 ‘주어진 자료·계산 결과·조정할 값’으로 나누고 그 이유를 제출하세요."
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
@@ -561,7 +561,7 @@ export function Lesson06Step3(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={3}
-      intro="앞으로 진행되는 예측 과정과 뒤에서 앞으로 오차 정보를 전달하는 역전파를 구분합니다."
+      intro="예측을 만든 길과 수정 방향을 찾는 길은 다릅니다. 그림에서 입력과 오차 정보가 어디로 전달되는지 보고 두 방향을 구별하세요."
     >
       <div className="rounded-2xl bg-indigo-50 p-5">
         <h3 className="text-xl font-black text-indigo-950">역전파</h3>
@@ -695,7 +695,7 @@ export function Lesson06Step4(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={4}
-      intro="경사 하강법을 오차(loss)가 작아지는 방향으로 값을 조금씩 조정하는 방법으로 이해합니다."
+      intro="기울기는 지금 위치에서 값을 바꾸면 손실이 어느 쪽으로 변하는지 알려 줍니다. 손실 곡선을 보고 이동 방향과 값 수정의 의미를 판단하세요."
     >
       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-6">
         <LossLandscapeDiagram showDirection={submitted && choice === 'left'} />
@@ -811,40 +811,11 @@ export function Lesson06Step5(props: CommonStepProps) {
     { label: 'BCEE 오차(loss)', value: formatTrainingValue(initialForward.loss) },
   ]
 
-  const afterValues = trainingResult
-    ? [
-        {
-          label: 'w1',
-          value: formatTrainingValue(trainingResult.nextParameters.w1),
-        },
-        {
-          label: 'w2',
-          value: formatTrainingValue(trainingResult.nextParameters.w2),
-        },
-        {
-          label: '편향 b',
-          value: formatTrainingValue(trainingResult.nextParameters.b),
-        },
-        {
-          label: '가중합 z',
-          value: formatTrainingValue(trainingResult.after.z),
-        },
-        {
-          label: '예측값',
-          value: formatTrainingValue(trainingResult.after.prediction),
-        },
-        {
-          label: 'BCEE 오차(loss)',
-          value: formatTrainingValue(trainingResult.after.loss),
-        },
-      ]
-    : []
-
   return (
     <StepFrame
       {...props}
       step={5}
-      intro="작은 이진 분류 뉴런에서 BCEE에 따른 수정 방향에 근거한 1회 업데이트를 실행합니다."
+      intro="같은 입력으로 다시 예측했을 때 왜 결과가 달라질까요? 순전파 → 변화 예상 제출 → 1회 학습을 실행하고, 전후 숫자로 이유를 설명하세요."
     >
       <SimulationBadge />
       <div className="mt-5 rounded-2xl bg-slate-100 p-5">
@@ -900,6 +871,7 @@ export function Lesson06Step5(props: CommonStepProps) {
         {forwardRun && (
           <div className="mt-5">
             <MetricGrid title="학습 전 계산 결과" values={beforeValues} />
+            <p className="mt-3 break-words rounded-xl bg-slate-50 p-4 font-mono leading-7">z = {TRAINING_EXAMPLE.x1}×{INITIAL_PARAMETERS.w1} + {TRAINING_EXAMPLE.x2}×({INITIAL_PARAMETERS.w2}) + {INITIAL_PARAMETERS.b} = {formatTrainingValue(initialForward.z)}<br />시그모이드(z) ≈ {formatTrainingValue(initialForward.prediction)} → 정답 {TRAINING_EXAMPLE.y}와 BCEE로 비교 → 손실 {formatTrainingValue(initialForward.loss)}</p>
           </div>
         )}
       </section>
@@ -971,48 +943,12 @@ export function Lesson06Step5(props: CommonStepProps) {
 
         {trainingResult && (
           <>
-            <div className="mt-6">
-              <FlowChain
-                tone="rose"
-                label="오차(loss) 확인부터 다시 순전파까지의 한 번 학습 흐름"
-                items={[
-                  '오차(loss) 확인',
-                  '역전파',
-                  '가중치·편향 수정',
-                  '다시 순전파',
-                ]}
-              />
-            </div>
-            <p className="mt-4 rounded-xl bg-rose-50 p-4 font-bold text-rose-950">
-              예측값과 실젯값의 방향을 나타내는 차이: {formatTrainingValue(trainingResult.error)}. 이 부호 있는 차이와 손실함수로 계산한 오차(loss)는 서로 다른 값입니다.
-            </p>
-            <details className="mt-3 rounded-xl border border-slate-200 p-4">
-              <summary className="min-h-11 cursor-pointer py-2 font-bold">w₁의 기울기와 실제 수정량 비교하기</summary>
-              <p className="mt-2 leading-7">현재 예측 약 {formatTrainingValue(trainingResult.before.prediction)}와 정답 {TRAINING_EXAMPLE.y}의 차이에 입력 {TRAINING_EXAMPLE.x1}을 곱하면, 이 뉴런의 w₁ 기울기는 약 {formatTrainingValue(trainingResult.error * TRAINING_EXAMPLE.x1)}입니다.</p>
-              <p className="mt-2 break-words leading-7">새 w₁ = 기존 w₁ − 학습률 × 기울기입니다. 여기서는 {INITIAL_PARAMETERS.w1}에서 약 {formatTrainingValue(LEARNING_RATE * trainingResult.error * TRAINING_EXAMPLE.x1, 4)}을 빼므로 약 {formatTrainingValue(trainingResult.nextParameters.w1, 4)}이 됩니다. 음수를 빼서 값이 커집니다.</p>
-              <p className="mt-2 leading-7">이는 현재 시그모이드+BCEE 뉴런의 계산입니다. 모든 신경망에서 ‘예측−정답’이 모든 가중치의 기울기인 것은 아닙니다. 위 숫자는 표시할 때만 반올림했습니다.</p>
-            </details>
             <UpdateWalkthrough
               example={TRAINING_EXAMPLE}
-              beforeValues={beforeValues}
-              afterValues={afterValues}
+              beforeParameters={INITIAL_PARAMETERS}
+              result={trainingResult}
+              learningRate={LEARNING_RATE}
             />
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                '가중치가 바뀜',
-                '편향이 바뀜',
-                '예측값이 정답 1에 가까워짐',
-                '이 예제에서 오차(loss)가 감소함',
-              ].map((label) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 rounded-xl bg-emerald-50 p-4 font-bold text-emerald-900"
-                >
-                  <CheckCircle2 size={19} aria-hidden="true" />
-                  {label}
-                </div>
-              ))}
-            </div>
             <div className="mt-6 grid gap-3 sm:grid-cols-3" aria-live="polite">
               {[
                 ['예측값 증가', predictions.output === predictionSolutions?.output],
@@ -1030,11 +966,6 @@ export function Lesson06Step5(props: CommonStepProps) {
                 </div>
               ))}
             </div>
-            <p className="mt-4 rounded-xl bg-slate-100 p-4 leading-7 text-slate-700">
-              실제 계산에서 예측은 {formatTrainingValue(trainingResult.before.prediction)}에서 {formatTrainingValue(trainingResult.after.prediction)}로,
-              오차(loss)는 {formatTrainingValue(trainingResult.before.loss)}에서 {formatTrainingValue(trainingResult.after.loss)}로 변했습니다.
-              입력과 실젯값은 유지된 채 가중치와 편향이 조정되어, 다시 순전파한 예측이 정답 1에 가까워졌습니다. 이 단순 예제에서 오차가 줄었으며 모든 학습이 매번 같은 결과를 내는 것은 아닙니다.
-            </p>
           </>
         )}
       </section>
@@ -1043,7 +974,7 @@ export function Lesson06Step5(props: CommonStepProps) {
         <legend className="font-black">학습 전후 결과가 달라진 이유는?</legend>
         <div className="mt-4 grid gap-3">{([{id:'parameters',label:'가중치와 편향을 조정하고 다시 순전파해 새 예측값과 오차를 계산했기 때문이다.'},{id:'target',label:'손실함수가 실젯값이나 현재 예측을 직접 정답으로 고쳤기 때문이다.'}] as const).map((item) => <Button key={item.id} variant={interpretation === item.id ? 'primary' : 'secondary'} aria-pressed={interpretation === item.id} onClick={() => {setInterpretation(item.id);setInterpretationSubmitted(false)}}>{item.label}</Button>)}</div>
         <Button className="mt-4" disabled={!interpretation} onClick={() => setInterpretationSubmitted(true)}>학습 결과 해석 제출</Button>
-        {interpretationSubmitted && <AnswerFeedback correct={interpretation === 'parameters'} explanation={interpretation === 'parameters' ? '역전파로 기울기를 구하고 경사 하강법으로 가중치와 편향을 수정한 뒤, 같은 입력으로 다시 계산했습니다.' : '위의 입력과 실젯값은 그대로입니다. 전후 표에서 바뀐 가중치·편향과 다음 순전파의 예측값을 비교한 뒤 다시 제출하세요.'} />}
+        {interpretationSubmitted && <AnswerFeedback correct={interpretation === 'parameters'} explanation={interpretation === 'parameters' ? '역전파로 기울기를 구하고 경사 하강법으로 가중치와 편향을 수정한 뒤, 같은 입력으로 다시 계산했습니다.' : '위의 입력과 실젯값은 그대로입니다. 항목별 기록의 가중치·편향 수정과 ‘다시 예측’을 비교한 뒤 다시 제출하세요.'} />}
       </fieldset>}
 
       {props.isComplete && (
@@ -1122,7 +1053,7 @@ export function Lesson06Step6(props: CommonStepProps) {
     <StepFrame
       {...props}
       step={6}
-      intro="동일한 실제 계산을 최대 10회 반복하고 에포크에 따른 가중치, 편향, 예측값과 오차(loss) 변화를 관찰합니다."
+      intro="방금 조정한 값이 다음 예측의 시작값이 됩니다. 같은 작은 뉴런을 5회 이상 학습하고, 그래프의 전체 변화가 무엇을 뜻하는지 제출하세요. 최대 10회까지 비교할 수 있습니다."
     >
       <SimulationBadge />
       <div className="mt-5 flex flex-wrap gap-3">
@@ -1349,7 +1280,7 @@ export function Lesson06Step7({
     <StepFrame
       {...props}
       step={7}
-      intro="입력부터 반복 학습까지 1~6차시의 개념을 하나의 흐름으로 연결합니다."
+      intro="입력과 정답을 준비한 뒤 무엇을 계산하고 무엇을 바꾸는지 정리해 보세요. 10개 흐름 카드를 배열하고, 네 개념의 역할과 새 데이터에서의 한계를 확인합니다."
     >
       <ReviewNavigation label="소구간 이동" current={section} onChange={setSection} items={[
         { label: '1. 전체 학습 흐름 배열', purpose: '열 개 카드를 학습 순서대로 배치하고 확인하세요.', done: orderSubmitted && orderCorrect, remaining: '열 카드 배치 후 전체 흐름 확인' },

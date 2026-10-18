@@ -29,7 +29,7 @@ export default function GeneratorDiscriminatorFlow() {
     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
       <h3 className="font-black text-slate-950">GAN · 학습과 사용 구분 (교과서 106쪽)</h3>
       <p className="mt-3 min-h-20 text-sm leading-6" aria-live="polite" aria-atomic="true"><strong>설명 {stage + 1}/{explanations.length} · </strong>{explanations[stage]}</p>
-      <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="GAN 설명 조작"><Button variant="secondary" disabled={stage === 0} onClick={() => setStage(value => value - 1)}>이전</Button><Button disabled={stage === explanations.length - 1} onClick={() => setStage(value => value + 1)}>다음</Button><Button variant="secondary" onClick={() => setStage(0)}>다시 보기</Button></div>
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="GAN 설명 조작">{['전체 비교', '생성 입력 보기', '감별할 자료 보기', '가중치 수정 보기', '학습 후 사용 보기'].map((label, index) => <Button key={label} variant={stage === index ? 'primary' : 'secondary'} aria-pressed={stage === index} onClick={() => setStage(index)}>{label}</Button>)}</div>
       <p className="mt-2 text-xs leading-5 text-slate-600">테두리와 번호가 현재 설명 위치를 나타냅니다. 설명 이동은 답안·Round·완료 기록과 무관합니다.</p>
       <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">
         <section className="min-w-0 rounded-xl border border-violet-200 bg-white p-4" aria-label="GAN 학습 중 흐름">
@@ -41,7 +41,7 @@ export default function GeneratorDiscriminatorFlow() {
             <ArrowDown className="mx-auto" aria-hidden="true" />
             <p className="rounded-xl border border-violet-200 bg-violet-50 p-3 text-center text-sm font-black">생성 데이터 · 실제와 비슷한 새 결과</p>
           </div>
-          <p className="mt-2 text-xs leading-5 text-slate-600">생성자의 목표: 생성 결과를 감별자가 실제 데이터처럼 판단하도록 학습합니다.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-700">생성자의 목표: 생성 결과를 감별자가 실제 데이터처럼 판단하도록 학습합니다. 노이즈는 시작 정보인 무작위 숫자 묶음이며, 모든 생성형 AI가 노이즈만 입력받는 것은 아닙니다.</p>
           <div className={`mt-4 grid grid-cols-2 gap-2 rounded-xl p-1 text-center text-sm font-bold${highlight(2)}`}>
             <div className="min-w-0 rounded-xl border border-cyan-300 bg-cyan-50 p-3">위에서 만든 생성 데이터</div>
             <div className="min-w-0 rounded-xl border border-blue-300 bg-blue-50 p-3">비교 기준이 되는 실제 데이터</div>

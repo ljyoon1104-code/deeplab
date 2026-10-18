@@ -293,17 +293,14 @@ export function Lesson04Step2(props: CommonStepProps) {
       step={2}
       intro="입력층, 은닉층, 출력층을 차례로 눌러 각 층의 노드와 역할을 확인합니다."
     >
-      <NeuralNetworkDiagram layers={networkLayers} label="인공신경망의 세 층" />
-
-      <p className="mt-4 leading-7 text-slate-700">동그라미는 값을 받거나 계산하는 <strong>노드</strong>, 노드를 묶은 단은 <strong>층</strong>입니다. 연결선의 가중치가 전달되는 값의 영향을 조절하며, 은닉층의 중간 출력이 다음 층의 입력이 됩니다. 아래에서 세 층을 눌러 역할을 확인하세요.</p>
-
-      <section className="mt-7" aria-labelledby="layer-explore-title">
+      <p className="mb-4 leading-7 text-slate-700">동그라미는 값을 받거나 계산하는 <strong>노드</strong>, 노드를 묶은 단은 <strong>층</strong>입니다. 연결선의 가중치가 전달되는 값의 영향을 조절합니다. 은닉층의 중간 출력은 다음 층의 입력이 됩니다.</p>
+      <section aria-labelledby="layer-explore-title">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h3 id="layer-explore-title" className="text-xl font-black text-slate-950">층별 역할 탐색</h3>
           <span className="text-sm font-black tabular-nums text-indigo-700">{viewed.length} / 3 확인</span>
         </div>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
-          {networkLayers.map((layer) => {
+        <div className="mt-4"><NeuralNetworkDiagram layers={networkLayers} label="입력 데이터가 세 층을 지나는 흐름" selectedLayerId={activeLayer?.id} renderLayerAction={(diagramLayer) => {
+            const layer = networkLayers.find((item) => item.id === diagramLayer.id)!
             const isViewed = viewed.includes(layer.id)
             const isActive = activeLayer?.id === layer.id
             return (
@@ -312,7 +309,7 @@ export function Lesson04Step2(props: CommonStepProps) {
                 type="button"
                 onClick={() => inspect(layer)}
                 aria-pressed={isActive}
-                className={`min-h-28 rounded-2xl border p-5 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
+                className={`mt-3 min-h-12 w-full rounded-xl border p-3 text-left focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
                   isActive
                     ? 'border-indigo-500 bg-indigo-50'
                     : 'border-slate-200 bg-white hover:border-indigo-300'
@@ -320,8 +317,8 @@ export function Lesson04Step2(props: CommonStepProps) {
               >
                 <span className="flex items-start justify-between gap-3">
                   <span>
-                    <span className="block text-lg font-black text-slate-950">{layer.label}</span>
-                    <span className="mt-1 block text-sm font-semibold text-slate-600">{layer.shortRole}</span>
+                    <span className="block font-black text-slate-950">{layer.label} 역할 확인</span>
+                    <span className="mt-1 block text-sm font-semibold text-slate-600">{isViewed ? '확인함 · 다시 볼 수 있습니다' : layer.shortRole}</span>
                   </span>
                   {isViewed ? (
                     <CheckCircle2 className="shrink-0 text-emerald-600" size={20} aria-label="확인함" />
@@ -331,18 +328,8 @@ export function Lesson04Step2(props: CommonStepProps) {
                 </span>
               </button>
             )
-          })}
-        </div>
-        <div className="mt-5 min-h-28 rounded-2xl bg-slate-100 p-5" aria-live="polite">
-          {activeLayer ? (
-            <>
-              <p className="font-black text-indigo-800">{activeLayer.label}</p>
-              <p className="mt-2 leading-7 text-slate-700">{activeLayer.role}</p>
-            </>
-          ) : (
-            <p className="leading-7 text-slate-600">세 층을 눌러 설명을 확인하세요.</p>
-          )}
-        </div>
+          }} /></div>
+        <p className="mt-3 leading-7 text-slate-700" role="status">{activeLayer ? `현재 확인한 층: ${activeLayer.label} · ${activeLayer.shortRole}` : '각 층의 그림과 역할을 읽고 해당 층의 확인 버튼을 누르세요.'}</p>
       </section>
 
       <section className="mt-8 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="node-count-title"><h3 id="node-count-title" className="text-xl font-black text-indigo-950">문제에 맞는 입력·출력 뉴런 수</h3><div className="mt-5 grid gap-5 lg:grid-cols-3"><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">붓꽃 특징 4개</legend><p className="mt-1 text-sm text-slate-600">입력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[3,4,10].map((value) => <Button key={value} variant={irisInputs === value ? 'primary' : 'secondary'} aria-pressed={irisInputs === value} onClick={() => { setIrisInputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">숫자 0~9 분류</legend><p className="mt-1 text-sm text-slate-600">클래스별 출력 뉴런 수는?</p><div className="mt-3 grid grid-cols-3 gap-2">{[1,4,10].map((value) => <Button key={value} variant={digitOutputs === value ? 'primary' : 'secondary'} aria-pressed={digitOutputs === value} onClick={() => { setDigitOutputs(value); setSubmitted(false) }}>{value}개</Button>)}</div></fieldset><fieldset className="rounded-xl bg-white p-4"><legend className="font-black">스팸/정상 이진 분류</legend><p className="mt-1 text-sm text-slate-600">스팸일 확률을 만들 출력 뉴런을 선택하세요.</p><div className="mt-3 grid gap-2"><Button variant={spamOutputOne ? 'primary' : 'secondary'} aria-pressed={spamOutputOne} onClick={() => { setSpamOutputOne(true); setSubmitted(false) }}>{spamOutputOne ? <Check size={18} aria-hidden="true" /> : null}출력 뉴런 1개</Button></div><p className="mt-3 text-sm font-bold text-slate-700">출력 뉴런 1개 → 시그모이드(sigmoid) → 스팸일 확률 0~1</p></fieldset></div><Button className="mt-5" disabled={irisInputs === null || digitOutputs === null || !spamOutputOne} onClick={() => setSubmitted(true)}>뉴런 수 설계 제출</Button>{submitted && <AnswerFeedback correct={countsCorrect} explanation={countsCorrect ? '입력 뉴런은 특징 수, 다중 분류 출력 뉴런은 클래스 수와 맞추었습니다. 이진 분류는 출력 뉴런 1개와 시그모이드로 스팸일 확률을 만듭니다.' : '입력은 특징 개수, 다중 분류 출력은 클래스 개수를 기준으로 다시 선택하세요. 스팸/정상은 출력 뉴런 1개와 시그모이드를 연결하세요.'} />}</section>
@@ -384,13 +371,11 @@ function TinyNetworkExercise({ config, guided, onSolved }: { config: TinyNetwork
   const correct = required.every((index) => networkNumberMatches(answers[index], expected[index]))
   const hints = ['각 입력×가중치의 합에 첫 은닉 뉴런의 편향을 더하세요.', '렐루는 음수를 0으로, 0 이상은 그대로 보냅니다.', '같은 입력에 두 번째 뉴런의 가중치와 편향을 적용하세요.', '두 번째 가중합에 렐루를 적용하세요.', '원래 입력이 아니라 두 은닉 뉴런의 출력을 새 입력으로 사용하세요.', '출력층 가중합이 0 이상이면 1, 음수이면 0입니다.']
   return <>
-    <TinyNetworkWalkthrough config={config} result={result} guided={guided} revealAnswers={submitted && correct} />
-    <div className="mt-5 grid gap-4 sm:grid-cols-2">
-      {required.map((index) => {
+    <TinyNetworkWalkthrough config={config} result={result} guided={guided} revealAnswers={submitted && correct} renderAnswer={(index) => {
+        if (!required.includes(index)) return null
         const fieldCorrect = networkNumberMatches(answers[index], expected[index])
-        return <label key={labels[index]} className="block"><span className="mb-2 block text-sm font-bold">{labels[index]}</span><input type="text" inputMode="decimal" value={answers[index]} onChange={(event) => {setAnswers((items) => items.map((answer, item) => item === index ? event.target.value : answer));setSubmitted(false);onSolved(false)}} aria-invalid={submitted && !fieldCorrect || undefined} aria-describedby={submitted ? `network-${guided ? 'guided' : 'independent'}-${index}-hint` : undefined} className={`min-h-12 w-full rounded-xl border px-4 font-black focus-visible:outline-3 focus-visible:outline-indigo-600 ${submitted ? fieldCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white'}`} />{submitted && <span id={`network-${guided ? 'guided' : 'independent'}-${index}-hint`} className={`mt-1 block text-sm font-semibold ${fieldCorrect ? 'text-emerald-700' : 'text-rose-700'}`}>{fieldCorrect ? '✓ 맞음' : `✕ ${hints[index]}`}</span>}</label>
-      })}
-    </div>
+        return <label key={labels[index]} className="my-3 block rounded-xl bg-slate-50 p-3"><span className="mb-2 block text-sm font-bold">직접 계산 · {labels[index]}</span><input type="text" inputMode="decimal" value={answers[index]} onChange={(event) => {setAnswers((items) => items.map((answer, item) => item === index ? event.target.value : answer));setSubmitted(false);onSolved(false)}} aria-invalid={submitted && !fieldCorrect || undefined} aria-describedby={submitted ? `network-${guided ? 'guided' : 'independent'}-${index}-hint` : undefined} className={`min-h-12 w-full rounded-xl border px-4 font-black focus-visible:outline-3 focus-visible:outline-indigo-600 ${submitted ? fieldCorrect ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50' : 'border-slate-300 bg-white'}`} />{submitted && <span id={`network-${guided ? 'guided' : 'independent'}-${index}-hint`} className={`mt-1 block text-sm font-semibold ${fieldCorrect ? 'text-emerald-700' : 'text-rose-700'}`}>{fieldCorrect ? '✓ 맞음' : `✕ ${hints[index]}`}</span>}</label>
+      }} />
     {config.outputActivation === 'sigmoid' && <p className="mt-5 rounded-xl bg-indigo-50 p-4 leading-7">시그모이드 함수의 출력은 앱이 계산해 제공합니다: 약 <strong>{result.output.toFixed(2)}</strong>. 지수 계산은 하지 않습니다. 은닉층의 출력과 출력층 가중합을 구한 뒤, 이 확률이 무엇을 뜻하는지 아래에서 판단하세요.</p>}
     <Button className="mt-5" disabled={required.some((index) => parseNetworkNumber(answers[index]) === null)} onClick={() => {setSubmitted(true);onSolved(correct)}}>전체 순전파 제출</Button>
     {submitted && <AnswerFeedback correct={correct} explanation={correct ? `은닉층에서 처리한 두 값이 출력층 입력이 됩니다. 출력층 가중합 ${result.outputZ} → 최종 출력 ${result.output.toFixed(config.outputActivation === 'sigmoid' ? 2 : 0)}입니다.` : '✕ 표시된 필드의 힌트를 따라 수정한 뒤 다시 제출하세요. 입력층은 데이터를 받고, 은닉층·출력층은 각자의 가중치·편향과 활성화 함수를 사용합니다.'} />}

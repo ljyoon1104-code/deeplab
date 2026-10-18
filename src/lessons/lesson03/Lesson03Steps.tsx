@@ -346,7 +346,7 @@ export function Lesson03Step1(props: CommonStepProps) {
       <section className="mt-9" aria-labelledby="activation-flow-title">
         <h3 id="activation-flow-title" className="text-xl font-black text-slate-950">가중합 이후의 Signal Flow</h3>
         <p className="mt-3 rounded-xl bg-indigo-50 p-4 leading-7"><strong>활성화 함수</strong>는 가중합을 다음 층에 전달하거나 최종 결과로 쓸 출력으로 바꿉니다. 값에 따라 다르게 처리하는 비선형 함수를 넣으면 신경망이 복잡한 관계를 표현하는 데 도움이 됩니다.</p>
-        <details className="mt-3"><summary className="min-h-11 cursor-pointer py-2 font-bold">곱하고 더하는 계산만 쌓으면 왜 부족할까요?</summary><p className="mt-2 leading-7">2배한 뒤 3배하면 결국 6배하는 계산 하나가 됩니다. 곱하고 더하기만 하는 층은 여러 개 쌓아도 하나의 계산으로 합칠 수 있습니다. 렐루(ReLU)처럼 입력에 따라 다르게 반응하는 비선형 활성화 함수가 이 한계를 줄여 줍니다.</p></details>
+        <p className="mt-3 leading-7"><strong>왜 필요할까요?</strong> 2배한 뒤 3배하면 결국 6배하는 계산 하나가 됩니다. 곱하고 더하기만 하는 층은 여러 개 쌓아도 하나의 계산으로 합칠 수 있습니다. 렐루처럼 입력에 따라 다르게 반응하는 비선형 활성화 함수가 이 한계를 줄여 줍니다.</p>
         <div className="mt-5 grid items-center gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
           <FlowNode eyebrow="계산" title="입력값 × 가중치" detail="각 입력에 가중치를 곱합니다." />
           <FlowArrow />
@@ -611,11 +611,11 @@ export function Lesson03Step4(props: CommonStepProps) {
 
         <div>
           <ActivationGraph kind="sigmoid" z={z} />
-          <details className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-            <summary className="min-h-11 cursor-pointer font-black text-indigo-800 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">원리 보기</summary>
+          <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5" aria-label="시그모이드 계산 규칙">
+            <h4 className="font-black text-indigo-800">그래프의 숫자는 어떻게 계산하나요?</h4>
             <p className="mt-3 break-words font-bold tabular-nums text-slate-900">sigmoid(z) = 1 / (1 + exp(-z))</p>
-            <p className="mt-2 leading-6 text-slate-600">지수 계산을 직접 할 필요는 없습니다. 식으로 계산한 내부 값은 유지하고 화면에 표시할 때만 반올림합니다.</p>
-          </details>
+            <p className="mt-2 leading-7 text-slate-600">z는 가중합이고 exp(-z)는 e의 -z제곱을 뜻합니다. 지수 계산은 앱이 합니다. 내부 값은 유지하고 화면에 표시할 때만 반올림합니다.</p>
+          </section>
         </div>
       </div>
 
@@ -807,15 +807,15 @@ export function Lesson03Step6(props: CommonStepProps) {
       step={6}
       intro="클래스는 구별할 종류이고, 로짓은 확률로 바꾸기 전의 점수입니다. 소프트맥스(softmax) 함수는 클래스별 점수를 함께 받아 합이 1인 확률로 바꿉니다."
     >
-      <div className="grid gap-6 lg:grid-cols-[minmax(17rem,0.7fr)_minmax(0,1.3fr)]">
-        <section className="rounded-2xl border border-slate-200 p-5" aria-labelledby="softmax-score-title">
+      <section className="rounded-2xl border border-slate-200 p-4 sm:p-5" aria-labelledby="softmax-score-title">
           <div className="flex items-center justify-between gap-3">
-            <h3 id="softmax-score-title" className="text-xl font-black text-slate-950">세 클래스 점수</h3>
+            <h3 id="softmax-score-title" className="text-xl font-black text-slate-950">점수 하나를 바꾸면 세 확률은 어떻게 달라지나요?</h3>
             <SlidersHorizontal className="text-indigo-600" size={24} aria-hidden="true" />
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">각 점수는 0~5에서 바꿀 수 있습니다.</p>
-          <div className="mt-6 space-y-6">
+          <p className="mt-2 leading-7 text-slate-600">각 점수를 0~5에서 바꾸고, 연결된 확률과 다른 후보의 확률을 함께 보세요. 소프트맥스는 세 점수를 한 묶음으로 계산합니다.</p>
+          <div className="mt-5 space-y-4">
             {softmaxClasses.map((item, index) => (
+              <div key={item.id} className="grid min-w-0 gap-4 rounded-xl bg-slate-50 p-4 sm:grid-cols-2 sm:items-center">
               <RangeControl
                 key={item.id}
                 id={`softmax-${item.id}`}
@@ -826,40 +826,15 @@ export function Lesson03Step6(props: CommonStepProps) {
                 step={0.5}
                 onChange={(value) => changeScore(index, value)}
               />
-            ))}
-          </div>
-        </section>
-
-        <section className="rounded-2xl bg-slate-50 p-5 sm:p-6" aria-labelledby="softmax-result-title">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h3 id="softmax-result-title" className="text-xl font-black text-slate-950">소프트맥스(softmax) 함수의 확률</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-600">세 점수 전체를 함께 계산한 결과입니다.</p>
-            </div>
-            <span className="rounded-xl bg-emerald-100 px-3 py-2 text-sm font-black text-emerald-900">
-              합계 100%
-            </span>
-          </div>
-
-          <div className="mt-6 space-y-5" aria-live="polite">
-            {softmaxClasses.map((item, index) => (
-              <div key={item.id}>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-bold text-slate-800">{item.label}</span>
-                  <span className="font-black tabular-nums text-indigo-800">{displayPercentages[index].toFixed(1)}%</span>
-                </div>
-                <div className="mt-2 h-5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-cyan-500 transition-[width] duration-200 motion-reduce:transition-none"
-                    style={{ width: `${probabilities[index] * 100}%` }}
-                  />
-                </div>
-                <p className="mt-1 text-xs tabular-nums text-slate-500">내부 확률 {probabilities[index].toPrecision(8)}</p>
+              <div className="min-w-0" aria-live="polite">
+                <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-bold">{item.label}의 예측 확률</span><span className="text-xl font-black tabular-nums text-indigo-800">{displayPercentages[index].toFixed(1)}%</span></div>
+                <div className="mt-2 h-5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true"><div className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-cyan-500 transition-[width] duration-200 motion-reduce:transition-none" style={{ width: `${probabilities[index] * 100}%` }} /></div>
+                <p className="mt-2 text-sm tabular-nums text-slate-600">반올림 전 확률: {probabilities[index].toPrecision(8)}</p>
+              </div>
               </div>
             ))}
           </div>
-
-          <div className="mt-6 rounded-2xl border border-indigo-200 bg-indigo-50 p-5">
+          <div className="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
             <p className="text-sm font-black text-indigo-800">예측 결과로 선택할 수 있는 클래스</p>
             <p className="mt-2 text-2xl font-black text-slate-950">{predicted.join(', ')}</p>
             {predicted.length > 1 && (
@@ -867,9 +842,8 @@ export function Lesson03Step6(props: CommonStepProps) {
             )}
           </div>
 
-          <p className="mt-4 text-xs leading-5 text-slate-500">내부 확률 합계: {probabilitySum.toPrecision(12)} · 표시할 때만 반올림합니다.</p>
-        </section>
-      </div>
+          <p className="mt-3 text-sm leading-6 text-slate-600">표시 합계 100% · 반올림 전 확률 합계: {probabilitySum.toPrecision(12)}. 가장 높은 확률도 정답을 보장하지 않습니다.</p>
+      </section>
 
       <section className="mt-7 rounded-2xl border border-indigo-200 bg-indigo-50 p-5" aria-labelledby="softmax-observation-title">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -1,14 +1,16 @@
 import { maxPool2D, type Matrix } from './cnnMath'
 import PixelGrid from './PixelGrid'
+import type { ReactNode } from 'react'
 
 interface PoolingVisualizerProps {
   input: Matrix
   poolSize: number
   selectedRegion: number
   checkedRegions: readonly number[]
+  control?: ReactNode
 }
 
-export default function PoolingVisualizer({ input, poolSize, selectedRegion, checkedRegions }: PoolingVisualizerProps) {
+export default function PoolingVisualizer({ input, poolSize, selectedRegion, checkedRegions, control }: PoolingVisualizerProps) {
   const output = maxPool2D(input, poolSize)
   const outputColumns = output[0].length
   const selectedRow = Math.floor(selectedRegion / outputColumns)
@@ -28,7 +30,7 @@ export default function PoolingVisualizer({ input, poolSize, selectedRegion, che
     <div className="mt-5 grid gap-4">
       <p className="text-sm leading-6"><strong>영역 #{selectedRegion + 1} → 출력 {selectedRow + 1}행 {selectedColumn + 1}열.</strong> 같은 번호의 {poolSize * poolSize}개 값 중 하나를 대표값으로 남깁니다.{showRepresentative ? ' 굵은 테두리는 이 영역의 최댓값입니다.' : ' 아직 확인하지 않은 영역의 대표값은 직접 선택하세요.'}</p>
       <div className="grid items-center gap-5 md:grid-cols-[1fr_auto_0.75fr]">
-      <PixelGrid
+      <div className="min-w-0"><PixelGrid
         values={input}
         label="4×4 특징 맵"
         tone="feature"
@@ -36,6 +38,7 @@ export default function PoolingVisualizer({ input, poolSize, selectedRegion, che
         annotations={regionNumbers}
         focusCell={showRepresentative ? representative : undefined}
       />
+      {control}</div>
       <div className="text-center font-black text-amber-700" aria-label="최대 풀링하여 크기 줄이기">최대 풀링 →</div>
       <PixelGrid values={visibleOutput} label="2×2 풀링 결과 · 선택 뒤 대표값 표시" tone="pool" region={{ startRow: selectedRow, startColumn: selectedColumn, height: 1, width: 1 }} annotations={output.map((row, r) => row.map((_, c) => String(r * outputColumns + c + 1)))} />
       </div>

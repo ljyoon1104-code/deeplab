@@ -1,6 +1,7 @@
 import type { LessonContentProps } from '../lessonRegistry'
-import { Lesson12Provider } from './Lesson12Context'
-import { Lesson12Step1, Lesson12Step2, Lesson12Step3, Lesson12Step4, Lesson12Step5, Lesson12Step6, Lesson12Step7 } from './Lesson12Steps'
+import { StudyProvider } from '../lesson11/StudyActivity'
+import { lesson12Tasks } from './studyTasks'
+import { Lesson12Step1, Lesson12Step2, Lesson12Step3, Lesson12Step4, Lesson12Step5, Lesson12Step6, Lesson12Step7 } from './StudySteps'
 
 function Lesson12Content({ currentStep, progress, onStepComplete, onLessonCompletionReadyChange }: LessonContentProps) {
   const isComplete = (step: number) => progress.completedSteps.includes(step)
@@ -17,6 +18,6 @@ function Lesson12Content({ currentStep, progress, onStepComplete, onLessonComple
 }
 
 export default function Lesson12(props: LessonContentProps) {
-  return <Lesson12Provider><Lesson12Content {...props} /></Lesson12Provider>
+  return <StudyProvider lesson="12" tasks={lesson12Tasks}><Lesson12Content {...props} /></StudyProvider>
 }
 
