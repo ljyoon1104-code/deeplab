@@ -1,0 +1,78 @@
+{
+  "organizedOn": "2026-10-18",
+  "appCommit": "13cd30e425378f52baafbe57892b01db979f8a89",
+  "reports": [
+    {
+      "originalPath": "docs/learning-followup-20261017-L06.md",
+      "archivedPath": "learning-followup-20261017-L06.md",
+      "originalBytes": 3996,
+      "originalSha256": "fb610e0a900b467032443b6b70f5e9bb2e7cefe2887eb03c054719a8557046dd",
+      "archivedSha256": "fb610e0a900b467032443b6b70f5e9bb2e7cefe2887eb03c054719a8557046dd",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-followup-20261017-L11.md",
+      "archivedPath": "learning-followup-20261017-L11.md",
+      "originalBytes": 3285,
+      "originalSha256": "8622cf2ad3b97a6185145593220e55bf6c1cdb0fcf697d4150475872c3a8cdda",
+      "archivedSha256": "8622cf2ad3b97a6185145593220e55bf6c1cdb0fcf697d4150475872c3a8cdda",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-followup-20261017-L12.md",
+      "archivedPath": "learning-followup-20261017-L12.md",
+      "originalBytes": 2393,
+      "originalSha256": "e5f4fe6c5998e6749a125153bf8860c2fcc5b7553b4a0b5e4710e08230d20d5c",
+      "archivedSha256": "e5f4fe6c5998e6749a125153bf8860c2fcc5b7553b4a0b5e4710e08230d20d5c",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-followup-20261017.md",
+      "archivedPath": "learning-followup-20261017.md",
+      "originalBytes": 25365,
+      "originalSha256": "501dae1c4a9fb2d1cdba1d128f8c2e0fb19181e78b18cade9836ab8e0c4ee58e",
+      "archivedSha256": "f5c143a29ed12ffde545a891e0825a1df8f876a5eec57afbbb9f2b5c7ecb21e8",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-restructure-20261017-L01-04.md",
+      "archivedPath": "learning-restructure-20261017-L01-04.md",
+      "originalBytes": 10760,
+      "originalSha256": "07df89a448039227466866fa75d13f123b33090915a6bc73700ba41e1cd39d3a",
+      "archivedSha256": "07df89a448039227466866fa75d13f123b33090915a6bc73700ba41e1cd39d3a",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-restructure-20261017-L05-08.md",
+      "archivedPath": "learning-restructure-20261017-L05-08.md",
+      "originalBytes": 9664,
+      "originalSha256": "23e6011700b8ad13b9ccec47bf2926438fdd44e2cb5c96fd381afb1571befa02",
+      "archivedSha256": "23e6011700b8ad13b9ccec47bf2926438fdd44e2cb5c96fd381afb1571befa02",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-restructure-20261017-L09-10.md",
+      "archivedPath": "learning-restructure-20261017-L09-10.md",
+      "originalBytes": 6780,
+      "originalSha256": "c124643ae0fb3586b7ff2fb667319642a8f3d5d8706e9f701217d0b2c361b0d2",
+      "archivedSha256": "0509d723ef780d501fa36dfbb58483d5f2a972ff7d46b9aa48a7b50121a3b506",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-restructure-20261017-L11-12.md",
+      "archivedPath": "learning-restructure-20261017-L11-12.md",
+      "originalBytes": 6847,
+      "originalSha256": "24e050d7129f3eb50648dd6d6f80aabbe25099a31412ca733e945d81822713f4",
+      "archivedSha256": "24e050d7129f3eb50648dd6d6f80aabbe25099a31412ca733e945d81822713f4",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    },
+    {
+      "originalPath": "docs/learning-restructure-20261017.md",
+      "archivedPath": "learning-restructure-20261017.md",
+      "originalBytes": 13723,
+      "originalSha256": "ea5780d0608bfc607038ebc915d5a8ec434acbe1b21197c7669f050e8f22a540",
+      "archivedSha256": "cd3e926a0081fd8dcb4d2a4f21514cdcf0657755bfa1777dc80dedea2024f36f",
+      "changes": "Markdown evidence links and preservation-copy links only; historical assertions retained."
+    }
+  ]
+}

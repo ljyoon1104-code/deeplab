@@ -1,0 +1,873 @@
+[
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 1,
+    "title": "관찰 정보는 모두 특징일까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 2,
+    "title": "학습 흐름을 완성해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 3,
+    "title": "좋은 특징을 고르는 기준",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 4,
+    "title": "기계학습과 딥러닝 비교하기",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 5,
+    "title": "비교 문장을 근거로 분류하기",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 6,
+    "title": "문제에 맞는 방법 선택하기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 1,
+    "scroll": 1425,
+    "step": 7,
+    "title": "미니 AI 프로젝트 설계하기",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 1,
+    "title": "인공 뉴런의 판단 과정",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 2,
+    "title": "안내된 2입력 퍼셉트론 계산",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 3,
+    "title": "퍼셉트론을 스스로 계산하기",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 4,
+    "title": "값이 바뀌면 출력은 어떻게 달라지는가",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 5,
+    "title": "목표 출력에 맞는 값 설계",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 6,
+    "title": "그래프에서 출력 변화 살펴보기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 2,
+    "scroll": 1425,
+    "step": 7,
+    "title": "가중치·편향과 출력 관계 정리",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 1,
+    "title": "가중합 다음에는 무엇이 있을까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 2,
+    "title": "계단 함수는 0과 1로 판단한다",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 3,
+    "title": "렐루(ReLU) 함수는 양수를 그대로 보낸다",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 4,
+    "title": "시그모이드(sigmoid) 함수는 0과 1 사이로 바꾼다",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 5,
+    "title": "같은 z인데 왜 출력이 다를까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 6,
+    "title": "여러 종류 중 하나를 고르려면",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 3,
+    "scroll": 1425,
+    "step": 7,
+    "title": "어떤 활성화 함수를 어디에 사용할까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 1,
+    "title": "퍼셉트론을 여러 개 연결하면",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 2,
+    "title": "인공신경망에는 어떤 층이 있을까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 3,
+    "title": "작은 신경망을 따라 계산해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 4,
+    "title": "작은 신경망을 스스로 계산해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 5,
+    "title": "출력층은 어떤 결과를 만들까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 6,
+    "title": "은닉층이 여러 개라면",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 4,
+    "scroll": 1425,
+    "step": 7,
+    "title": "인공신경망을 완성해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 1,
+    "title": "신경망의 예측은 어떻게 만들어질까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 2,
+    "title": "예측값과 실젯값은 같을까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 3,
+    "title": "틀린 정도를 숫자로 나타내려면",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 4,
+    "title": "숫자를 예측한다면 — MSE",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 5,
+    "title": "두 종류 중 하나라면 — BCEE",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 6,
+    "title": "여러 종류 중 하나라면 — CCEE",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 5,
+    "scroll": 1425,
+    "step": 7,
+    "title": "어떤 손실함수를 사용해야 할까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 1,
+    "title": "오차(loss)를 계산한 다음에는",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 2,
+    "title": "신경망에서 무엇을 바꿀까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 3,
+    "title": "역전파란 무엇일까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 4,
+    "title": "어느 방향으로 바꿔야 할까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 5,
+    "title": "한 번 학습하면 무엇이 달라질까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 6,
+    "title": "반복하면 정말 학습할까",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 6,
+    "scroll": 1425,
+    "step": 7,
+    "title": "딥러닝은 어떻게 학습할까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 1,
+    "title": "데이터셋 크기와 분포 해석",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 2,
+    "title": "같은 숫자도 모양이 다른 이유",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 3,
+    "title": "28×28 좌표와 픽셀 위치 계산",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 4,
+    "title": "차원 변환과 위치 보존",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 5,
+    "title": "정규화 계산과 필요성",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 6,
+    "title": "레이블과 원-핫 정답 데이터",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 7,
+    "scroll": 1425,
+    "step": 7,
+    "title": "모델에 들어가는 한 쌍 구성",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 1,
+    "title": "학습 조건을 정해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 2,
+    "title": "실제 신경망을 학습시켜 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 3,
+    "title": "오차와 정확도는 어떻게 변했을까",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 4,
+    "title": "처음 보는 숫자로 시험해 보자",
+    "width": 1425
+  },
+  {
+    "completion": [],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 5,
+    "title": "AI가 틀린 숫자를 찾아보자",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 6 활동 완료"
+      }
+    ],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 6,
+    "title": "내가 직접 숫자를 그려 보자",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": " STEP 7 활동 완료"
+      },
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 8,
+    "scroll": 1425,
+    "step": 7,
+    "title": "조건을 바꾸면 결과가 달라질까",
+    "width": 1425
+  },
+  {
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 1,
+    "title": "컴퓨터는 이미지에서 무엇을 찾을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 2 활동 완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 2,
+    "title": "컴퓨터 비전에는 어떤 문제가 있을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 3 활동 완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 3,
+    "title": "이미지를 펼치지 않고 특징을 찾을 수 있을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 4 활동 완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 4,
+    "title": "필터로 특징을 찾아보자",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 5 활동 완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 5,
+    "title": "필터를 움직이면 어떻게 될까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 6 활동 완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 6,
+    "title": "데이터를 줄이면서 중요한 정보는 남길 수 있을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": " STEP 7 활동 완료"
+      },
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 9,
+    "scroll": 1425,
+    "step": 7,
+    "title": "CNN은 이미지를 어떻게 분류할까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 1 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 1,
+    "title": "AI는 분류만 할까, 새로 만들 수도 있을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 2 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 2,
+    "title": "GAN에는 두 AI가 있다",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 3 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 3,
+    "title": "생성자와 감별자가 경쟁하면?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 4 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 4,
+    "title": "AI는 사람의 말을 어떻게 들을까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 5 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 5,
+    "title": "소리에서 글자까지",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": "STEP 6 활동 완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 6,
+    "title": "규칙으로 듣기 vs 데이터로 배우기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": true,
+        "text": " STEP 7 활동 완료"
+      },
+      {
+        "disabled": true,
+        "text": "완료"
+      }
+    ],
+    "lesson": 10,
+    "scroll": 1425,
+    "step": 7,
+    "title": "생성형 AI와 음성 인식 정리하기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 1 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 1,
+    "title": "자연어 처리가 하는 일",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 2 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 2,
+    "title": "문장에서 단어 번호까지",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 3 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 3,
+    "title": "원-핫으로 표현하기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 4 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 4,
+    "title": "임베딩이 필요한 이유",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 5 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 5,
+    "title": "단어 빈도로 기사 분류하기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 6 활동 완료"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 6,
+    "title": "횟수로 알 수 없는 의미",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 7 활동 완료"
+      },
+      {
+        "disabled": true,
+        "text": "완료됨"
+      }
+    ],
+    "lesson": 11,
+    "scroll": 1425,
+    "step": 7,
+    "title": "새로운 글에 적용하기",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 1 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 1,
+    "title": "단어의 순서가 왜 중요할까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 2 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 2,
+    "title": "이전 정보를 활용하는 RNN",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 3 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 3,
+    "title": "문장이 길어지면 어떤 문제가 생길까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 4 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 4,
+    "title": "중요한 단어에 집중하면?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 5 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 5,
+    "title": "Transformer는 무엇이 다를까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 6 활동 완료"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 6,
+    "title": "AI는 다음 단어를 어떻게 고를까?",
+    "width": 1425
+  },
+  {
+    "completion": [
+      {
+        "disabled": false,
+        "text": "STEP 7 활동 완료"
+      },
+      {
+        "disabled": true,
+        "text": "완료됨"
+      }
+    ],
+    "lesson": 12,
+    "scroll": 1425,
+    "step": 7,
+    "title": "생성형 언어 모델과 LLM",
+    "width": 1425
+  }
+]

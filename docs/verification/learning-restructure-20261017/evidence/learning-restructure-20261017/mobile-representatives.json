@@ -1,0 +1,110 @@
+[
+  {
+    "height": 800,
+    "lesson": 1,
+    "scroll": 345,
+    "step": 1,
+    "title": "관찰 정보는 모두 특징일까",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 2,
+    "scroll": 345,
+    "step": 2,
+    "title": "안내된 2입력 퍼셉트론 계산",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 3,
+    "scroll": 345,
+    "step": 6,
+    "title": "여러 종류 중 하나를 고르려면",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 4,
+    "scroll": 345,
+    "step": 4,
+    "title": "작은 신경망을 스스로 계산해 보자",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 5,
+    "scroll": 345,
+    "step": 5,
+    "title": "두 종류 중 하나라면 — BCEE",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 6,
+    "scroll": 345,
+    "step": 5,
+    "title": "한 번 학습하면 무엇이 달라질까",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 7,
+    "scroll": 345,
+    "step": 4,
+    "title": "차원 변환과 위치 보존",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 8,
+    "scroll": 345,
+    "step": 2,
+    "title": "실제 신경망을 학습시켜 보자",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 9,
+    "scroll": 345,
+    "step": 4,
+    "title": "필터로 특징을 찾아보자",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 10,
+    "scroll": 345,
+    "step": 3,
+    "title": "생성자와 감별자가 경쟁하면?",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 11,
+    "scroll": 345,
+    "step": 4,
+    "title": "임베딩이 필요한 이유",
+    "viewport": 360,
+    "width": 345
+  },
+  {
+    "height": 800,
+    "lesson": 12,
+    "scroll": 345,
+    "step": 6,
+    "title": "AI는 다음 단어를 어떻게 고를까?",
+    "viewport": 360,
+    "width": 345
+  }
+]

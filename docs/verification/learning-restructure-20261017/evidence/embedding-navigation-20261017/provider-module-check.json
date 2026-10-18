@@ -1,0 +1,27 @@
+{
+  "scope": "Read-only Provider investigation; no browser manipulation, source edits, server restart, or storage access",
+  "historicalEvidence": {
+    "report": "docs/learning-restructure-20261017.md:90",
+    "finding": "One development-session Provider-null error was reported; original stack and HMR timestamp/log were not saved in the inspected output folders.",
+    "inspectedOutputFolders": ["output/learning-restructure-20261017", "output/learning-followup-20261017"]
+  },
+  "normalPathEvidence": {
+    "report": "docs/learning-followup-20261017.md:79-85",
+    "artifacts": ["output/learning-followup-20261017/ui-completion-results.json", "output/learning-followup-20261017/completed-reentry-results.json"],
+    "finding": "Existing recorded normal-entry, STEP navigation, answer submission, reload, and completed-lesson reentry checks did not reproduce the error. These were prior browser observations, not a new browser test in this diagnostic."
+  },
+  "sourceFindings": {
+    "path": "LessonPage -> lessonRegistry lazy loader -> Lesson11/Lesson12 -> StudyProvider -> all seven StudySteps",
+    "providerConditional": false,
+    "allSixRelatedImportsResolveTo": "src/lessons/lesson11/StudyActivity.tsx",
+    "errorCondition": "useStudy throws when useContext(StudyContext) is null"
+  },
+  "isolatedModuleReevaluation": {
+    "execution": "Node; TypeScript-transpiled current StudyActivity evaluated twice in separate VM module contexts, actual React createContext and installed Vite React Refresh validator; Button import stubbed; no component or hook rendered",
+    "contextsCreated": 2,
+    "contextIdentityPreserved": false,
+    "helperIdentityPreserved": { "passes": false, "numericAnswer": false, "useStudy": false },
+    "refreshBoundaryResult": "Could not Fast Refresh (\"passes\" export is incompatible). Learn more at __README_URL__#consistent-components-exports"
+  },
+  "conclusion": "Mixed-export module reevaluation invalidates the refresh boundary and creates a new Context object. This establishes a possible HMR path, not the cause of the historical Provider-null exception. No actual HMR browser reproduction or proof of stale/new Context coexistence was obtained. No product fix was made."
+}

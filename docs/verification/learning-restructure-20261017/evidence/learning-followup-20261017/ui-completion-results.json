@@ -1,0 +1,110 @@
+[
+  {
+    "lesson": "01",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원; 임시 프로젝트 답안 초기화"
+  },
+  {
+    "lesson": "02",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원"
+  },
+  {
+    "lesson": "03",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원",
+    "console": "S5 값 변경·활동 이후 오류/경고 없음"
+  },
+  {
+    "lesson": "04",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원"
+  },
+  {
+    "lesson": "05",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원"
+  },
+  {
+    "lesson": "06",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100% / 7 STEP 복원; 임시 답안·작은 뉴런 학습 기록 초기화",
+    "wrongRetry": true,
+    "stepReturn": true,
+    "mobile": 360
+  },
+  {
+    "lesson": "07",
+    "steps": 7,
+    "complete": true,
+    "refresh": "100%, train-018749 레이블2 및 실제 정규화 INPUT 복원",
+    "wrongRetry": "좌표 문제 정정→정답"
+  },
+  {
+    "lesson": 8,
+    "steps": 7,
+    "completed": true,
+    "refresh": "100% 및 실험 2개 복원, 실제 모델 미복원 안내",
+    "train": [
+      {
+        "n": 500,
+        "epoch": 1,
+        "loss": 2.1601,
+        "accuracy": 22
+      },
+      {
+        "n": 1000,
+        "epoch": 1,
+        "loss": 1.9386,
+        "accuracy": 39.3
+      }
+    ],
+    "test": {
+      "n": 500,
+      "correct": 198,
+      "wrong": 302,
+      "accuracy": 39.6
+    },
+    "canvas": {
+      "input": "포인터 세로 획 숫자1",
+      "prediction": 8,
+      "probability": 13.19
+    }
+  },
+  {
+    "lesson": 9,
+    "steps": 7,
+    "completed": true,
+    "refresh": "100%, 핵심 답안·흐름 정답 복원",
+    "retry": "S4 합8오답 저장·새로고침 복원→9수정정답",
+    "optional": "추가 계산·7퀴즈 미수행"
+  },
+  {
+    "lesson": 10,
+    "steps": 7,
+    "completed": true,
+    "refresh": "100%, 분류·퀴즈·관찰 기록복원. 서비스선택임시초기화"
+  },
+  {
+    "lesson": 11,
+    "steps": 7,
+    "completed": true,
+    "reload": "100%, 7/7, saved answers and grading restored",
+    "wrongRetry": "embedding question wrong, reload, correction and resubmit succeeded",
+    "explanation": "all 7 scenes; observation row/replay did not change answers or calculated mean/probability/loss"
+  },
+  {
+    "lesson": 12,
+    "steps": 7,
+    "completed": true,
+    "reload": "100%, 7/7, all saved submissions restored",
+    "wrongRetry": "RNN and Attention wrong→feedback→correct",
+    "observation": "RNN 5 positions; independent answers preserved across guide criterion changes and STEP/reload; two token generation bus low probability and milk branch"
+  }
+]

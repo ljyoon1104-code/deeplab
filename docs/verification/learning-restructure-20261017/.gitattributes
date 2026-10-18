@@ -1,0 +1,4 @@
+*.md text eol=lf
+*.json text eol=lf
+evidence/** -text whitespace=cr-at-eol,-blank-at-eof
+learning-followup-20261017-L06.md whitespace=-blank-at-eof

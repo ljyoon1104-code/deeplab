@@ -1,0 +1,222 @@
+{
+  "organizedOn": "2026-10-18",
+  "policy": "Byte-identical copies of cited evidence; original output files retained.",
+  "files": [
+    {
+      "originalPath": "output/embedding-navigation-20261017/experiments-after.txt",
+      "archivedPath": "evidence/embedding-navigation-20261017/experiments-after.txt",
+      "bytes": 500,
+      "sha256": "e8d391a7db0eeb0bb48de43cde31725f311d27295d3239b3a12ec571d1438717"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/experiments-before.txt",
+      "archivedPath": "evidence/embedding-navigation-20261017/experiments-before.txt",
+      "bytes": 502,
+      "sha256": "a51bdd07842ce42082af42d5ba91e162d48b1b61e16a88a09027fab41227e060"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/mnist-branch-harness.cjs",
+      "archivedPath": "evidence/embedding-navigation-20261017/mnist-branch-harness.cjs",
+      "bytes": 13224,
+      "sha256": "892ffad16c4e7ad4e11f354cfb79177b5efe7dd51a8d7f4d8db2188323ae6c00"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/mnist-branch-results.md",
+      "archivedPath": "evidence/embedding-navigation-20261017/mnist-branch-results.md",
+      "bytes": 3382,
+      "sha256": "4c4511c11df546a7d6088fa6c59cc357baf74fff4179d36ebfbafeafaad14be2"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/mnist-cancelled.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/mnist-cancelled.png",
+      "bytes": 79924,
+      "sha256": "0af7f771d97503a6216e98b085ad2469b99fe59e365ba5b1e807aa8375f1a3cf"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/mnist-retrain-result.txt",
+      "archivedPath": "evidence/embedding-navigation-20261017/mnist-retrain-result.txt",
+      "bytes": 1300,
+      "sha256": "f1205685a1a0fcc150d0dce5a9b0f7ac39577421e00d033b548ea216b3c39c27"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/provider-module-check.json",
+      "archivedPath": "evidence/embedding-navigation-20261017/provider-module-check.json",
+      "bytes": 2219,
+      "sha256": "e972e453f837510c5527b196bf0adf0a20c2482822a4de5f09a6d1c18ec25f77"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/scene1-after-replay-mobile.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/scene1-after-replay-mobile.png",
+      "bytes": 39424,
+      "sha256": "5ec3d8cb49a30bea59c0c7a59ed5c0772d372375df9f33746a12020549de247b"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/scene4-bottom-mobile.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/scene4-bottom-mobile.png",
+      "bytes": 39279,
+      "sha256": "268aff0bf68ef7dcde912cea2f5165cf9ef98602128aa49d1b6add0cb6cd289d"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/scene5-after-bottom-desktop-1440.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/scene5-after-bottom-desktop-1440.png",
+      "bytes": 99112,
+      "sha256": "1b1600b6dac3da197d8d18920f07db82a7ff9baa3f24aaf33d4dd0e7d21809d9"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/scene5-after-bottom-mobile-final.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/scene5-after-bottom-mobile-final.png",
+      "bytes": 45348,
+      "sha256": "90c4b5ef27663e30dff7c3075ca7cd51c02860ba6d3dcaa7d26ccc4e97abc6c0"
+    },
+    {
+      "originalPath": "output/embedding-navigation-20261017/scene7-bottom-mobile.png",
+      "archivedPath": "evidence/embedding-navigation-20261017/scene7-bottom-mobile.png",
+      "bytes": 38848,
+      "sha256": "cee3f8c0ae9b6bfeba69888da1028d31981ae93eb29d82e7834a72f0693cdce3"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/completed-reentry-results.json",
+      "archivedPath": "evidence/learning-followup-20261017/completed-reentry-results.json",
+      "bytes": 2233,
+      "sha256": "d6ab158da8635316930aa87578bf4fe39926b57e0e819738237ccb8051dd4fb1"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/Home-12-of-12-after-reload.png",
+      "archivedPath": "evidence/learning-followup-20261017/Home-12-of-12-after-reload.png",
+      "bytes": 71872,
+      "sha256": "1e0ea87a9d5f4153edb53b969eb7394fed9fb80e5976094737777c33019c4184"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L06-repredict-mobile.png",
+      "archivedPath": "evidence/learning-followup-20261017/L06-repredict-mobile.png",
+      "bytes": 35054,
+      "sha256": "15c900f8b05657d9bdc4ec6603f92ae7c33a19df4cd5e0543a094c07806999de"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L06-update-desktop.png",
+      "archivedPath": "evidence/learning-followup-20261017/L06-update-desktop.png",
+      "bytes": 78920,
+      "sha256": "74aa0fde108b495506edd281ea9871919ec2cf978909c9071aacdaa4b65bb397"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L08-canvas-prediction-desktop.png",
+      "archivedPath": "evidence/learning-followup-20261017/L08-canvas-prediction-desktop.png",
+      "bytes": 69125,
+      "sha256": "f3953ff7d692123b6f1378d4fdd4070cdb2af0270ecfaff24593b6ff161c7b2d"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L08-canvas-prediction-mobile.png",
+      "archivedPath": "evidence/learning-followup-20261017/L08-canvas-prediction-mobile.png",
+      "bytes": 25724,
+      "sha256": "b6b2a462a0e42dd57246c123a542b3bebe7c63305d73f6216b05d62baeede178"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L11-mean-desktop.png",
+      "archivedPath": "evidence/learning-followup-20261017/L11-mean-desktop.png",
+      "bytes": 108115,
+      "sha256": "9182fdac6b5269c939ca526ccc0669cf838e1c07a2f628ef144f5ebccbe01fe9"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L11-update-mobile.png",
+      "archivedPath": "evidence/learning-followup-20261017/L11-update-mobile.png",
+      "bytes": 43954,
+      "sha256": "341c41d5b8fcf447f8120275ff912b7bebe6894a08b3d15af0f03991ac5818dd"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L12-attention-desktop.png",
+      "archivedPath": "evidence/learning-followup-20261017/L12-attention-desktop.png",
+      "bytes": 106238,
+      "sha256": "a0e45f2364c37c0f4c5824e3f985095a53f6aad3d7a498ed679301dde1cb2337"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L12-attention-mobile.png",
+      "archivedPath": "evidence/learning-followup-20261017/L12-attention-mobile.png",
+      "bytes": 42251,
+      "sha256": "f5dff8cc71e3130eb528fa9c5ec4936ef4466ce4620664fad5249c2fb21ed122"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/L12-combination-result-mobile.png",
+      "archivedPath": "evidence/learning-followup-20261017/L12-combination-result-mobile.png",
+      "bytes": 46692,
+      "sha256": "378d6a3f52a1690be93480dd00fa63f468debe2afd91b1e5c6e69a964b84d986"
+    },
+    {
+      "originalPath": "output/learning-followup-20261017/ui-completion-results.json",
+      "archivedPath": "evidence/learning-followup-20261017/ui-completion-results.json",
+      "bytes": 2756,
+      "sha256": "f19a0845a96026b9e8c30789834e784630ee455453ca20a1b89e3be498de5cb9"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/desktop-route-results.json",
+      "archivedPath": "evidence/learning-restructure-20261017/desktop-route-results.json",
+      "bytes": 16519,
+      "sha256": "acc078c038080a43d2011536d69c242449fa82bb15646b494a508c73aa699b97"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L06-update-desktop.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L06-update-desktop.png",
+      "bytes": 89211,
+      "sha256": "8c6672978383f6fecaa5d4f7c80298a6a9fa9f5c44f94bbf45c027da73be00ac"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L07-array-mobile.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L07-array-mobile.png",
+      "bytes": 34164,
+      "sha256": "e68b864d8a67c519958040030d0e69debd2cd2cbc9e1b399a9e1d291bd03451a"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L09-convolution-desktop.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L09-convolution-desktop.png",
+      "bytes": 56417,
+      "sha256": "6bf626c4aa9cda6ca62bc8b876d26394ba92ad3c2311347d4bf96b3de2a6614d"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L09-convolution-mobile.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L09-convolution-mobile.png",
+      "bytes": 30712,
+      "sha256": "b84e6b9ad3f08f54fc25ad99c6ed60b2e6d0193d4354c94445de1f48c0312a10"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L10-GAN-mobile.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L10-GAN-mobile.png",
+      "bytes": 35871,
+      "sha256": "2fdf3d2d99a413aa4f25e4bc2c23b72a8acc63febfdb6e8a41885c39fabb81f9"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L11-matrix-after-desktop.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L11-matrix-after-desktop.png",
+      "bytes": 139576,
+      "sha256": "a9a97ae30fe98440acf9954845a810f030cc1a81e1f94e34dc00bdc01d3bef32"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L11-matrix-mobile.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L11-matrix-mobile.png",
+      "bytes": 41111,
+      "sha256": "926288daa5a2edf365a34d2087ae0b285a69a5f1337e86aabe04954867872e7d"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L11-S04-before.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L11-S04-before.png",
+      "bytes": 100922,
+      "sha256": "d8edb87da0abe7af8cca18586c1db0caa19f78033d3294ca8873450b2b244c4a"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/L12-candidates-mobile.png",
+      "archivedPath": "evidence/learning-restructure-20261017/L12-candidates-mobile.png",
+      "bytes": 37755,
+      "sha256": "de064ba5753b1f7e4840dcec76c0a608290d14df2664d49c9f0527f7b996b0fe"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/mobile-representatives.json",
+      "archivedPath": "evidence/learning-restructure-20261017/mobile-representatives.json",
+      "bytes": 2063,
+      "sha256": "e460752c70d822b7259e475e631ee5be8bad94ab3c2e3acd00b10119f25c27c2"
+    },
+    {
+      "originalPath": "output/learning-restructure-20261017/sources.json",
+      "archivedPath": "evidence/learning-restructure-20261017/sources.json",
+      "bytes": 110210,
+      "sha256": "e6a3da70daf2670ec71804746bd1b17a25352b274321ebe3ea86900dacc17e87"
+    }
+  ]
+}

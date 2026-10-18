@@ -17,11 +17,13 @@
 | UI 3단계 검증과 후속 확인 | [보고서](verification/ui/ui-verification-stage3.md) · [캡처](verification/ui/ui-verification-stage3/) |
 | 9~12차시 학습 내용 점검 | [캡처](verification/ui/learning-audit-09-12-20261013/) |
 | 전체 차시 완주·복원 검사 | [보고서](verification/full-ui-verification-20261017/verification.md) · [캡처](verification/full-ui-verification-20261017/) |
+| 전체 학습 화면 재구성·84 STEP 대응표 | [기록 안내](verification/learning-restructure-20261017/README.md) · [초기 개편 보고서](verification/learning-restructure-20261017/learning-restructure-20261017.md) |
+| 개편 후 84/84 STEP·12/12차시 완주·복원 | [후속 보완·완주 보고서](verification/learning-restructure-20261017/learning-followup-20261017.md) · [증거 자료](verification/learning-restructure-20261017/evidence/) |
 | 중복 key·복습 안내 확인 | [캡처](verification/key-review-verification-20261017/) |
 | 운영 배포 화면 확인 | [캡처](verification/deployment-20261017/) |
 | Edge 로컬 기록 초기화·5173 포트 고정 | [보고서](verification/local-reset-20261017/verification.md) · [캡처](verification/local-reset-20261017/) |
 
-보고서는 각 검증 시점의 기록입니다. 이후 수정된 문제에 대한 과거 진단도 원문 그대로 보존했습니다. 전체 완주 보고서의 확인 범위는 83/84 STEP·11/12차시이며, 이번 파일 정리가 검증 범위를 늘리지는 않습니다.
+보고서는 각 검증 시점의 기록입니다. 이후 수정된 문제에 대한 과거 진단과 당시 미검증 항목도 보존했습니다. 기존 `full-ui-verification-20261017` 보고서의 확인 범위는 83/84 STEP·11/12차시입니다. 이후 개편본의 [후속 보고서](verification/learning-restructure-20261017/learning-followup-20261017.md)에는 84/84 STEP·12/12차시 완주·복원과 추가 검증 결과가 별도로 기록돼 있습니다. 같은 보고서의 8절에서 하단 이동·MNIST 취소·통제 테스트의 추가 결과와 남은 한계를 확인할 수 있습니다. 이번 문서 정리에서는 앱 검증을 새로 수행하거나 기존 검증 범위를 늘리지 않았습니다.
 
 [중복 캡처 대응 기록](verification/ui/capture-reuse.md)에 정리한 파일 4개와 보존한 대표 파일의 관계를 남겼습니다. 서로 다른 화면·상태의 캡처와 검증 한계를 설명하는 자료는 유지했습니다.
 
@@ -42,7 +44,9 @@ PDF 생성 코드는 PDF 및 `_qa` 폴더와 함께 이동했습니다. 코드�
 ## 기존 주소와 앱 파일
 
 - 기존 `docs/` 보고서 4개와 `output/full-ui-verification-20261017/verification.md`에는 새 위치 안내를 남겼습니다.
+- `docs/learning-restructure-20261017*.md` 5개와 `docs/learning-followup-20261017*.md` 4개는 [학습 화면 재구성 검증 기록](verification/learning-restructure-20261017/README.md)으로 옮겼습니다. 보고서 사이의 링크와 증거 링크도 새 위치에 맞췄습니다.
 - `docs/`의 보고서·캡처·교재 참고 자료·학습 문서는 Git 제외 대상이 아닙니다. 새 영구 자료도 이 폴더에 보관합니다.
 - `output/`의 생성물은 Git에서 제외하며, 위의 기존 보고서 주소 안내 파일만 예외로 유지합니다. 제외 규칙은 파일 자체를 삭제하지 않습니다.
+- 새 검증 기록에서 인용한 캡처·결과·검증 스크립트 36개는 해당 기록의 `evidence/`에 원본과 같은 바이트로 복사했습니다. GitHub에서도 증거 링크를 열 수 있으며, 원래 `output/` 자료는 로컬에 그대로 남아 있습니다. 복사 목록과 해시는 [증거 보존 목록](verification/learning-restructure-20261017/evidence-manifest.json)에 있습니다.
 - 보고서 안의 과거 작업 경로와 당시 상태 설명은 기록이므로 원문을 유지했습니다. 현재 위치는 이 안내를 기준으로 찾습니다.
 - 앱 소스·배포 설정·실습 데이터·MNIST 원본 데이터·실행 도구는 이번 정리 대상에 포함하지 않았습니다. 브라우저의 학습 기록도 변경하지 않았습니다.
