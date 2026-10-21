@@ -130,15 +130,15 @@ function ProbabilityBars({ values, emphasis }: { values: readonly number[]; emph
       {values.map((value, digit) => (
         <div
           key={digit}
-          className={`grid grid-cols-[2rem_minmax(0,1fr)_4.5rem] items-center gap-3 rounded-xl px-3 py-2 ${
+          className={`grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 rounded-xl px-3 py-2 sm:grid-cols-[2rem_minmax(0,1fr)_4.5rem] sm:gap-3 ${
             digit === emphasis ? 'bg-violet-100 text-violet-950' : 'bg-slate-50 text-slate-700'
           }`}
         >
           <strong>{digit}</strong>
-          <span className="h-3 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
+          <span className="col-span-2 row-start-2 h-3 overflow-hidden rounded-full bg-white ring-1 ring-slate-200 sm:col-span-1 sm:col-start-2 sm:row-start-1">
             <span className="block h-full rounded-full bg-violet-600" style={{ width: `${Math.max(value * 100, 0.3)}%` }} />
           </span>
-          <span className="text-right font-mono text-xs font-bold">{(value * 100).toFixed(2)}%</span>
+          <span className="col-start-2 row-start-1 text-right font-mono text-xs font-bold sm:col-start-3">{(value * 100).toFixed(2)}%</span>
         </div>
       ))}
       <p className="text-xs leading-5 text-slate-500">표시값은 반올림하므로 화면의 백분율 합이 정확히 100%로 보이지 않을 수 있습니다. 내부 계산은 반올림 전 확률을 사용합니다.</p>
@@ -436,9 +436,10 @@ export function Lesson08Step3(props: CommonStepProps) {
           </section>
         })}
       </div>
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
-        <table className="min-w-full text-left text-sm">
-          <caption className="px-4 py-3 text-left font-black">그래프에 사용한 실제 학습 기록</caption>
+      <p id="training-history-scroll-hint" className="mt-6 text-sm leading-6 text-slate-600">표가 화면보다 넓으면 좌우로 이동해 보세요. 키보드는 표에 초점을 맞춘 뒤 ←·→ 키를 사용하세요.</p>
+      <div role="region" aria-labelledby="training-history-caption" aria-describedby="training-history-scroll-hint" tabIndex={0} className="mt-2 min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-slate-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+        <table className="w-full min-w-[360px] text-left text-sm">
+          <caption id="training-history-caption" className="px-4 py-3 text-left font-black">그래프에 사용한 실제 학습 기록</caption>
           <thead className="bg-slate-100"><tr><th className="px-4 py-3">Epoch</th><th className="px-4 py-3">오차(loss)</th><th className="px-4 py-3">정확도(accuracy)</th></tr></thead>
           <tbody>{trainingResult.history.map((item) => <tr key={item.epoch} className="border-t border-slate-200"><td className="px-4 py-3 font-black">{item.epoch}</td><td className="px-4 py-3 font-mono">{item.loss.toFixed(6)}</td><td className="px-4 py-3 font-mono"><Percent value={item.accuracy} /></td></tr>)}</tbody>
         </table>
@@ -780,9 +781,10 @@ export function Lesson08Step7({
 
           {recordA && recordB && recordA.id !== recordB.id ? (
             <>
-              <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200">
-                <table className="min-w-full text-left text-sm">
-                  <caption className="px-4 py-3 text-left font-black">실제 실험 결과 비교</caption>
+              <p id="experiment-comparison-scroll-hint" className="mt-6 text-sm leading-6 text-slate-600">표가 화면보다 넓으면 좌우로 이동해 보세요. 키보드는 표에 초점을 맞춘 뒤 ←·→ 키를 사용하세요.</p>
+              <div role="region" aria-labelledby="experiment-comparison-caption" aria-describedby="experiment-comparison-scroll-hint" tabIndex={0} className="mt-2 min-w-0 max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-slate-200 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <table className="w-full min-w-[600px] table-fixed text-left text-sm">
+                  <caption id="experiment-comparison-caption" className="px-4 py-3 text-left font-black">실제 실험 결과 비교</caption>
                   <thead className="bg-slate-100"><tr><th className="px-4 py-3">항목</th><th className="px-4 py-3">실험 A</th><th className="px-4 py-3">실험 B</th></tr></thead>
                   <tbody>
                     {[

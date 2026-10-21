@@ -21,38 +21,38 @@ export const lessonGroups: LessonGroup[] = [
 export const lessons: LessonMetadata[] = [
   {
     id: '01',
-    title: '기계학습에서 딥러닝으로',
-    description: '특징은 누가 찾을까?',
+    title: '딥러닝이 무엇인가와 퍼셉트론',
+    description: '딥러닝 · 특징 학습 · 뉴런의 역할과 계산',
     group: 'foundations',
   },
   {
     id: '02',
-    title: '퍼셉트론은 어떻게 판단할까?',
-    description: '입력 · 가중치 · 편향',
+    title: '인공신경망과 각 층의 역할',
+    description: 'ANN · 입력층과 중간 계산 · 다층 구조와 DNN',
     group: 'foundations',
   },
   {
     id: '03',
     title: '활성화 함수에 따라 출력이 달라질까?',
-    description: '계단 · 렐루 · 시그모이드 · 소프트맥스',
+    description: '계단 · ReLU · 선형 출력 · 시그모이드 · 소프트맥스',
     group: 'foundations',
   },
   {
     id: '04',
-    title: '퍼셉트론을 연결하면?',
-    description: '인공신경망 · 입력층 · 은닉층 · 출력층',
+    title: '은닉층이 있는 신경망의 순전파',
+    description: 'ReLU 은닉층에서 세 출력 방식까지',
     group: 'foundations',
   },
   {
     id: '05',
     title: 'AI는 얼마나 틀렸을까?',
-    description: '순전파 · 손실함수',
+    description: 'MSE · BCE · CCE · 평균 손실과 해석',
     group: 'foundations',
   },
   {
     id: '06',
     title: 'AI는 틀린 것을 어떻게 고칠까?',
-    description: '역전파 · 가중치와 편향 수정',
+    description: '기울기 계산 · 세 조합의 역전파 · 값 수정과 재예측',
     group: 'foundations',
   },
   {

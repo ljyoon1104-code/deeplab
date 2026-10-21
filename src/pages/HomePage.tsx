@@ -30,7 +30,7 @@ export function HomePage() {
       <main>
         <section className="border-b border-slate-200 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.11),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(6,182,212,0.10),transparent_30%)]">
           <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center lg:px-8">
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-bold tracking-[0.16em] text-indigo-600">
                 고등학교 인공지능 기초
               </p>

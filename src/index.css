@@ -15,13 +15,13 @@
 }
 
 html {
-  min-width: 320px;
+  min-width: 0;
   scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
   min-height: 100vh;
   background: #f8fafc;
 }
@@ -206,6 +206,18 @@ button[aria-selected="true"] {
 
 .step-focus-target {
   scroll-margin-top: 11rem;
+}
+
+/* Keep the content usable when a phone keyboard or landscape viewport leaves
+   little vertical space. The lesson heading remains in the normal page flow. */
+@media (max-width: 767px), (max-height: 600px) {
+  .lesson-header {
+    position: static;
+  }
+
+  .step-focus-target {
+    scroll-margin-top: 1rem;
+  }
 }
 
 .mnist-canvas {

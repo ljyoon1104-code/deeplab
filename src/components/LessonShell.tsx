@@ -39,6 +39,7 @@ interface LessonShellProps {
   progress: LessonProgress
   currentStep: number
   onStepChange: (step: number) => void
+  onNextStep?: () => void
   stepTitles: readonly string[]
   canCompleteLesson?: boolean
   onCompleteLesson?: () => void
@@ -50,6 +51,7 @@ export function LessonShell({
   progress,
   currentStep,
   onStepChange,
+  onNextStep,
   stepTitles,
   canCompleteLesson = false,
   onCompleteLesson,
@@ -60,7 +62,7 @@ export function LessonShell({
     : undefined
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="lesson-header sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-4">
             <Link
@@ -118,7 +120,7 @@ export function LessonShell({
       <BottomLessonNavigation
         currentStep={currentStep}
         onPrevious={() => onStepChange(currentStep - 1)}
-        onNext={() => onStepChange(currentStep + 1)}
+        onNext={onNextStep ?? (() => onStepChange(currentStep + 1))}
         canComplete={canCompleteLesson}
         lessonCompleted={progress.completed}
         onComplete={onCompleteLesson}

@@ -5,7 +5,9 @@ const signals = ['입력', '계산', '출력', '학습']
 export function SignalFlow() {
   return (
     <div
-      className="signal-flow"
+      className="signal-flow min-w-0 max-w-full rounded-xl focus-visible:outline-3 focus-visible:outline-indigo-600"
+      role="region"
+      tabIndex={0}
       aria-label="입력에서 계산, 출력, 학습으로 이어지는 딥러닝 흐름"
     >
       {signals.map((signal, index) => (

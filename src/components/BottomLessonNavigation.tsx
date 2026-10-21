@@ -19,50 +19,45 @@ export function BottomLessonNavigation({
   lessonCompleted = false,
   onComplete,
 }: BottomLessonNavigationProps) {
-  const isFirst = currentStep === 1
-  const isLast = currentStep === STEP_COUNT
+  const isFirst = currentStep <= 1
+  const isLast = currentStep >= STEP_COUNT
+  const buttonStyle = 'min-h-12 min-w-0 whitespace-nowrap enabled:active:translate-y-0.5 motion-reduce:transition-none sm:min-w-36'
 
   return (
-    <div className="mt-10 border-t border-slate-200 bg-white py-3 shadow-[0_-12px_30px_-28px_rgba(30,41,59,0.7)]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <Button className="shrink-0 whitespace-nowrap" variant="secondary" onClick={onPrevious} disabled={isFirst}>
-          <ArrowLeft size={18} aria-hidden="true" />
-          이전
+    <nav aria-label="전체 STEP 이동" className="mt-10 border-t border-slate-200 bg-white py-4 shadow-[0_-12px_30px_-28px_rgba(30,41,59,0.7)]">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 items-center gap-3 px-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:px-6 lg:px-8">
+        <Button className={`${buttonStyle} col-start-1`} variant="secondary" onClick={onPrevious} disabled={isFirst}>
+          <ArrowLeft className="shrink-0" size={18} aria-hidden="true" />
+          이전 STEP
         </Button>
-        <span
-          className="min-w-0 text-center text-sm font-bold tabular-nums text-slate-700"
+        <div
+          id="lesson-navigation-help"
+          className="col-span-2 col-start-1 row-start-1 min-w-0 text-center text-sm leading-6 text-slate-700 sm:col-span-1 sm:col-start-2 sm:row-start-auto"
           aria-live="polite"
         >
-          <span className="block">{currentStep} / {STEP_COUNT}</span>
-          {isLast && !canComplete && !lessonCompleted && (
-            <span className="mt-0.5 block max-w-44 text-[0.68rem] font-semibold leading-tight text-amber-700 sm:max-w-none">
-              완료되지 않은 STEP의 활동을 확인하세요.
-            </span>
-          )}
-        </span>
+          <p className="font-bold tabular-nums">STEP {currentStep} / {STEP_COUNT}</p>
+          <p>{lessonCompleted ? '차시 완료 기록이 유지됩니다.' : isLast
+            ? canComplete ? '필수 활동을 마쳤습니다. 차시 완료를 눌러 주세요.' : '차시 완료를 위해 남은 STEP의 필수 활동을 마쳐 주세요.'
+            : 'STEP 이동과 학습 완료는 별개입니다.'}</p>
+        </div>
         {isLast ? (
           <Button
-            className="shrink-0 whitespace-nowrap"
+            variant="secondary"
+            className={`${buttonStyle} col-start-2 enabled:border-emerald-600 enabled:bg-emerald-600 enabled:text-white enabled:hover:bg-emerald-700 disabled:bg-slate-100 sm:col-start-3`}
             onClick={onComplete}
-            disabled={!canComplete || lessonCompleted}
-            aria-label={
-              lessonCompleted
-                ? '이 차시는 완료되었습니다'
-                : canComplete
-                  ? 'Lesson 완료하기'
-                  : '모든 STEP의 핵심 활동을 마치면 활성화됩니다'
-            }
+            disabled={!canComplete || lessonCompleted || !onComplete}
+            aria-describedby="lesson-navigation-help"
           >
-            <Check size={18} aria-hidden="true" />
-            {lessonCompleted ? '완료됨' : '완료'}
+            <Check className="shrink-0" size={18} aria-hidden="true" />
+            {lessonCompleted ? '차시 완료됨' : '차시 완료'}
           </Button>
         ) : (
-          <Button className="shrink-0 whitespace-nowrap" onClick={onNext}>
-            다음
-            <ArrowRight size={18} aria-hidden="true" />
+          <Button className={`${buttonStyle} col-start-2 sm:col-start-3`} onClick={onNext}>
+            다음 STEP
+            <ArrowRight className="shrink-0" size={18} aria-hidden="true" />
           </Button>
         )}
       </div>
-    </div>
+    </nav>
   )
 }
