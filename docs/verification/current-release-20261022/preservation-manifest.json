@@ -1,0 +1,92 @@
+{
+  "archivedOn": "2026-10-22",
+  "note": "Reports and screenshots are unchanged copies. Python scripts below were first copied exactly, then only their project/output path handling was updated; these hashes describe the original copies.",
+  "files": [
+    {
+      "source": "output/deploy-20261022/deployment-result.md",
+      "preserved": "records/deployment-result.md",
+      "bytes": 4178,
+      "sha256": "3045AAE3BD7C557943AD5630F607035BFF2D2EEF52EEBD4ABBE5A3B12DF1EFA5"
+    },
+    {
+      "source": "output/responsive-20261021/final-checks.json",
+      "preserved": "records/responsive-final-checks.json",
+      "bytes": 3917,
+      "sha256": "6D5C831F177126D69F1282F61DD1E94C1A8057195715940AD045492B9E1CD373"
+    },
+    {
+      "source": "output/responsive-20261021/contract-results.json",
+      "preserved": "records/responsive-contract-results.json",
+      "bytes": 1160,
+      "sha256": "1B1A1461951C7829BFA3B207D3C0FB2389D40DDA08DE168581C196BB1A88211F"
+    },
+    {
+      "source": "output/formula-label-followup-20261021/ui-verification.json",
+      "preserved": "records/formula-ui-verification.json",
+      "bytes": 8334,
+      "sha256": "8A065143728E6C51FA9A5F2B21410E540004F208B3B51EDC8CEBA91438F7AD26"
+    },
+    {
+      "source": "output/formula-label-followup-20261021/contract-render-results.json",
+      "preserved": "records/formula-contract-render-results.json",
+      "bytes": 5155,
+      "sha256": "0ADA88704D42E51C6D0214DBD4CC1E37E72F69CABD0E6105CB8932FD045B4406"
+    },
+    {
+      "source": "output/formula-label-followup-20261021/build-result.json",
+      "preserved": "records/formula-build-result.json",
+      "bytes": 269,
+      "sha256": "370E64BEF75385A57AF2840CFA08B66EF9C3F5FA6E5D12F0EA21567A2AF9A0ED"
+    },
+    {
+      "source": "output/deploy-20261022/new-neuron-image-pc.png",
+      "preserved": "evidence/deployed-neuron-pc.png",
+      "bytes": 98480,
+      "sha256": "C3A1F3F6A06A9F24AF8AE4CB34B457080E2D3B17E8F821BBC84F5EC5357039C3"
+    },
+    {
+      "source": "output/responsive-20261021/backprop-tablet-before.png",
+      "preserved": "evidence/backprop-tablet-before.png",
+      "bytes": 69184,
+      "sha256": "0A987066DCB3E09AD2C9C49DC07E9455AC7F6B432963544D055563C81070B3FC"
+    },
+    {
+      "source": "output/responsive-20261021/backprop-tablet-after.png",
+      "preserved": "evidence/backprop-tablet-after.png",
+      "bytes": 80889,
+      "sha256": "DB49FDE4E4CA56C757243408FE96F528F59C032D62558FC2DAA98C67192C0477"
+    },
+    {
+      "source": "output/formula-label-followup-20261021/relu-mobile.png",
+      "preserved": "evidence/relu-mobile.png",
+      "bytes": 31285,
+      "sha256": "3CC240133BBA9161F650F33C3216F2C650ED6A7BED2458BE945EC85B698BEF51"
+    },
+    {
+      "source": "output/formula-label-followup-20261021/forward-desktop.png",
+      "preserved": "evidence/forward-symbols-pc.png",
+      "bytes": 72555,
+      "sha256": "EE0E695A7466C7EEF505837082506E164874D5092C42786E27374A0C7554F750"
+    },
+    {
+      "source": ".tmp-docs/build_backprop_guide.py",
+      "preserved": "../../learning-materials/backprop-numeric/build_backprop_guide.py",
+      "bytes": 18574,
+      "sha256": "8A41DE8E62D6AC1AD9202EF1BAC77DFC5FEEF018EA0CA5C079A3268945A47E5A",
+      "preservedSha256AfterPathAdjustment": "E9FDD72E5CBAD541C5FB974B912B9412980738E62E87BFE70248284905143F54"
+    },
+    {
+      "source": ".tmp-docs/build_original_examples.py",
+      "preserved": "../../learning-materials/backprop-numeric/build_original_examples.py",
+      "bytes": 13693,
+      "sha256": "15945C99BD6F5336B68B15E4DCD02CFC811EB655E77D0B84F50F32D74EEE8409",
+      "preservedSha256AfterPathAdjustment": "1AD7FAB391E02A3AFE5AE92E10C8316A15D4E7022E0F2222057B4BA6E3AE726A"
+    },
+    {
+      "source": ".tmp-docs/original_examples_typeset.docx",
+      "preserved": "../../learning-materials/backprop-numeric/original_examples_typeset.docx",
+      "bytes": 43238,
+      "sha256": "ACEA05A325E5AB0DB2FFB675F84A02205F89C0218C8C99D1EF7554B1A8B9BD28"
+    }
+  ]
+}

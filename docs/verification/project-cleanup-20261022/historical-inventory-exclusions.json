@@ -1,0 +1,26 @@
+{
+  "protectedSources": [
+    "src/lessons/lesson11/Lesson11Context.tsx",
+    "src/lessons/lesson12/Lesson12Context.tsx"
+  ],
+  "eventProjections": [
+    "src/lessons/lesson11/ContextMeaningActivity.tsx",
+    "src/lessons/lesson11/FrequencyComparison.tsx",
+    "src/lessons/lesson11/LanguageGuides.tsx",
+    "src/lessons/lesson11/Lesson11Context.tsx",
+    "src/lessons/lesson11/Lesson11Steps.tsx",
+    "src/lessons/lesson11/RepresentationWalkthrough.tsx",
+    "src/lessons/lesson11/TokenIndexActivity.tsx",
+    "src/lessons/lesson12/AttentionVisualizer.tsx",
+    "src/lessons/lesson12/CourseRoadmap.tsx",
+    "src/lessons/lesson12/FrequencyProbabilityTable.tsx",
+    "src/lessons/lesson12/LanguageModelFlow.tsx",
+    "src/lessons/lesson12/Lesson12Context.tsx",
+    "src/lessons/lesson12/Lesson12Guides.tsx",
+    "src/lessons/lesson12/Lesson12Steps.tsx",
+    "src/lessons/lesson12/NextWordSimulation.tsx",
+    "src/lessons/lesson12/RnnFlowVisualizer.tsx",
+    "src/lessons/lesson12/RnnTransformerComparison.tsx",
+    "src/lessons/lesson12/SequenceMeaningActivity.tsx"
+  ]
+}

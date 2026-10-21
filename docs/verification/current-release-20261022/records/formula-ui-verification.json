@@ -1,0 +1,285 @@
+{
+  "origin": "http://127.0.0.1:5203",
+  "scope": "Changed representative screens, not a complete course rerun",
+  "desktop": [
+    1440,
+    900
+  ],
+  "mobile": [
+    360,
+    800
+  ],
+  "networkObservations": [
+    {
+      "mode": "forward",
+      "kind": "multi",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 w₁₁, 가중치 1. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12",
+        "v21",
+        "v22",
+        "v31",
+        "v32"
+      ]
+    },
+    {
+      "mode": "forward-selected",
+      "kind": "multi",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₃₂, 가중치 0. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12",
+        "v21",
+        "v22",
+        "v31",
+        "v32"
+      ]
+    },
+    {
+      "mode": "forward",
+      "kind": "linear",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 w₁₁, 가중치 1. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "v11"
+      ]
+    },
+    {
+      "mode": "forward-selected",
+      "kind": "linear",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 0.6. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "v11"
+      ]
+    },
+    {
+      "mode": "forward",
+      "kind": "binary",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 w₁₁, 가중치 1. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12"
+      ]
+    },
+    {
+      "mode": "forward-selected",
+      "kind": "binary",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 w₁₂, 가중치 0. 값은 왼쪽에서 오른쪽으로 전달됩니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12"
+      ]
+    },
+    {
+      "mode": "back-output",
+      "kind": "linear",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 0.6. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "v11"
+      ]
+    },
+    {
+      "mode": "back-hidden-unsolved",
+      "kind": "linear",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 0.6. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "v11"
+      ]
+    },
+    {
+      "mode": "back-output",
+      "kind": "binary",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 1. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12"
+      ]
+    },
+    {
+      "mode": "back-hidden-unsolved",
+      "kind": "binary",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 1. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12"
+      ]
+    },
+    {
+      "mode": "back-output",
+      "kind": "multi",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 1. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12",
+        "v21",
+        "v22",
+        "v31",
+        "v32"
+      ]
+    },
+    {
+      "mode": "back-hidden-unsolved",
+      "kind": "multi",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 v₁₁, 가중치 1. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12",
+        "v21",
+        "v22",
+        "v31",
+        "v32"
+      ]
+    },
+    {
+      "mode": "back-hidden-selected",
+      "kind": "multi",
+      "labelOverlap": [],
+      "name": "입력층·은닉층·출력층. 모든 연결에 가중치 기호가 표시되어 있습니다. 선택 연결 w₁₂, 가중치 0. 기울기는 오른쪽에서 왼쪽으로 전달되며 연결 기호는 순전파와 같습니다.",
+      "pageOverflow": false,
+      "symbols": [
+        "w11",
+        "w12",
+        "w21",
+        "w22",
+        "v11",
+        "v12",
+        "v21",
+        "v22",
+        "v31",
+        "v32"
+      ]
+    }
+  ],
+  "reluCases": [
+    "relu 그래프. 가로축 a, 세로축 h. 현재 입력 -1, 출력 0",
+    "relu 그래프. 가로축 a, 세로축 h. 현재 입력 0, 출력 0",
+    "relu 그래프. 가로축 a, 세로축 h. 현재 입력 1, 출력 1"
+  ],
+  "submittedOnlyInIsolatedOrigin": [
+    {
+      "id": "training-linear-20261019-formula",
+      "answer": "2(ŷ−y)"
+    },
+    {
+      "id": "training-linear-20261019-dz0",
+      "answer": -1.4
+    },
+    {
+      "id": "training-linear-20261019-dv",
+      "answer": -2.8
+    },
+    {
+      "id": "training-binary-20261019-formula",
+      "answer": "p−y"
+    },
+    {
+      "id": "training-binary-20261019-dz0",
+      "answer": -0.5
+    },
+    {
+      "id": "training-binary-20261019-dv",
+      "answer": -0.5
+    },
+    {
+      "id": "training-multi-20261019-formula",
+      "answer": "클래스마다 pₖ−yₖ"
+    },
+    {
+      "id": "training-multi-20261019-dz0",
+      "answer": -0.3347590442251782
+    },
+    {
+      "id": "training-multi-20261019-dz1",
+      "answer": 0.24472847105479764
+    },
+    {
+      "id": "training-multi-20261019-dz2",
+      "answer": 0.09003057317038046
+    },
+    {
+      "id": "training-multi-20261019-dv",
+      "answer": -0.3347590442251782
+    }
+  ],
+  "checks": {
+    "wrongCorrectionResubmission": true,
+    "wrongAnswerPreservedOnStepReturn": true,
+    "trainingSubmittedAnswersPreservedOnStepReturn": true,
+    "missingAndWrongCanUseOuterNext": true,
+    "uncompletedVisitNotMarkedComplete": true,
+    "completedReluStepBeforeReload": "14",
+    "completedReluStepAfterReload": "14",
+    "temporaryAnswersResetByExistingDesign": true,
+    "mathNativeCases": true,
+    "mobileMathWrap": true,
+    "keyboardArrowScrollTablesAndFigures": true,
+    "pageOverflowObserved": false
+  },
+  "console": [],
+  "notTested": [
+    "full 115-answer course completion this turn",
+    "actual touch device",
+    "200% browser zoom",
+    "all combinations of persisted historical records"
+  ]
+}

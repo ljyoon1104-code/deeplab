@@ -10,6 +10,10 @@
 
 보고서가 있는 검증은 보고서와 캡처를 함께 보관했습니다. 캡처만 있는 항목을 전체 검증 완료의 근거로 해석하지 않습니다.
 
+최신 운영본과 반응형·수식 검증은 [현재 배포·검증 기록](verification/current-release-20261022/README.md)을 먼저 확인하세요. 필수 답안 115개·제출 활동 106개 기준의 결과 요약과 대표 증거를 선별 보존했으며, 각 시점의 검증 범위와 미검증 항목을 구별했습니다.
+
+[프로젝트 파일 정리 결과](verification/project-cleanup-20261022/README.md)에는 삭제·보존 목록, 정리 후 코드·계산 검사와 별도 주소에서 수행한 대표 UI 검증을 기록했습니다. 전체 차시 재완주 결과와는 구분합니다.
+
 | 자료 | 위치 |
 | --- | --- |
 | UI 1단계 진단 | [보고서](verification/ui/ui-audit-stage1.md) · [캡처](verification/ui/ui-audit-stage1/) |
@@ -23,7 +27,7 @@
 | 운영 배포 화면 확인 | [캡처](verification/deployment-20261017/) |
 | Edge 로컬 기록 초기화·5173 포트 고정 | [보고서](verification/local-reset-20261017/verification.md) · [캡처](verification/local-reset-20261017/) |
 
-보고서는 각 검증 시점의 기록입니다. 이후 수정된 문제에 대한 과거 진단과 당시 미검증 항목도 보존했습니다. 기존 `full-ui-verification-20261017` 보고서의 확인 범위는 83/84 STEP·11/12차시입니다. 이후 개편본의 [후속 보고서](verification/learning-restructure-20261017/learning-followup-20261017.md)에는 84/84 STEP·12/12차시 완주·복원과 추가 검증 결과가 별도로 기록돼 있습니다. 같은 보고서의 8절에서 하단 이동·MNIST 취소·통제 테스트의 추가 결과와 남은 한계를 확인할 수 있습니다. 이번 문서 정리에서는 앱 검증을 새로 수행하거나 기존 검증 범위를 늘리지 않았습니다.
+보고서는 각 검증 시점의 기록입니다. 이후 수정된 문제에 대한 과거 진단과 당시 미검증 항목도 보존했습니다. 기존 `full-ui-verification-20261017` 보고서의 확인 범위는 83/84 STEP·11/12차시입니다. 이후 개편본의 [후속 보고서](verification/learning-restructure-20261017/learning-followup-20261017.md)에는 84/84 STEP·12/12차시 완주·복원과 추가 검증 결과가 별도로 기록돼 있습니다. 같은 보고서의 8절에서 하단 이동·MNIST 취소·통제 테스트의 추가 결과와 남은 한계를 확인할 수 있습니다. 보고서 이동·보존 자체가 당시 앱 검증 범위를 늘리는 것은 아닙니다. 이번 파일 정리의 대표 회귀 검증은 위의 정리 결과에 따로 기록했습니다.
 
 [중복 캡처 대응 기록](verification/ui/capture-reuse.md)에 정리한 파일 4개와 보존한 대표 파일의 관계를 남겼습니다. 서로 다른 화면·상태의 캡처와 검증 한계를 설명하는 자료는 유지했습니다.
 
@@ -38,6 +42,7 @@
 - [CNN·GAN·자연어 처리 그림 설명](learning-materials/cnn-gan-nlp/CNN_GAN_%EC%9E%90%EC%97%B0%EC%96%B4%EC%B2%98%EB%A6%AC_%EA%B7%B8%EB%A6%BC%EC%9C%BC%EB%A1%9C_%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0.pdf) — PDF 문서
 - [PDF 생성 코드](learning-materials/cnn-gan-nlp/build_ai_guide.py)
 - [PDF 페이지 검수 이미지와 기존 해시 기록](learning-materials/cnn-gan-nlp/_qa/)
+- [역전파 숫자 예제 제작 코드 2개와 편집 원본](learning-materials/backprop-numeric/README.md) — `.tmp-docs`에서 영구 보관 위치로 옮긴 자료이며, 수업용 PDF와 Word 결과물은 `output/pdf/`, `output/앱_역전파_숫자예제.docx`에 유지합니다.
 
 PDF 생성 코드는 PDF 및 `_qa` 폴더와 함께 이동했습니다. 코드가 자신의 위치를 기준으로 경로를 계산하므로 세 항목은 함께 보관합니다. 이번에는 문서를 다시 생성하지 않았습니다.
 
@@ -47,6 +52,6 @@ PDF 생성 코드는 PDF 및 `_qa` 폴더와 함께 이동했습니다. 코드�
 - `docs/learning-restructure-20261017*.md` 5개와 `docs/learning-followup-20261017*.md` 4개는 [학습 화면 재구성 검증 기록](verification/learning-restructure-20261017/README.md)으로 옮겼습니다. 보고서 사이의 링크와 증거 링크도 새 위치에 맞췄습니다.
 - `docs/`의 보고서·캡처·교재 참고 자료·학습 문서는 Git 제외 대상이 아닙니다. 새 영구 자료도 이 폴더에 보관합니다.
 - `output/`의 생성물은 Git에서 제외하며, 위의 기존 보고서 주소 안내 파일만 예외로 유지합니다. 제외 규칙은 파일 자체를 삭제하지 않습니다.
-- 새 검증 기록에서 인용한 캡처·결과·검증 스크립트 36개는 해당 기록의 `evidence/`에 원본과 같은 바이트로 복사했습니다. GitHub에서도 증거 링크를 열 수 있으며, 원래 `output/` 자료는 로컬에 그대로 남아 있습니다. 복사 목록과 해시는 [증거 보존 목록](verification/learning-restructure-20261017/evidence-manifest.json)에 있습니다.
+- 2026-10-17 검증 기록에서 인용한 캡처·결과·검증 스크립트 36개는 해당 기록의 `evidence/`에 원본과 같은 바이트로 보존했습니다. GitHub에서도 증거 링크를 열 수 있으며, 이전 `output/` 중간물을 정리해도 이 보존본은 유지합니다. 복사 목록과 해시는 [증거 보존 목록](verification/learning-restructure-20261017/evidence-manifest.json)에 있습니다.
 - 보고서 안의 과거 작업 경로와 당시 상태 설명은 기록이므로 원문을 유지했습니다. 현재 위치는 이 안내를 기준으로 찾습니다.
-- 앱 소스·배포 설정·실습 데이터·MNIST 원본 데이터·실행 도구는 이번 정리 대상에 포함하지 않았습니다. 브라우저의 학습 기록도 변경하지 않았습니다.
+- 영구 기록과 재생성 가능한 작업 산출물은 구별합니다. `.tmp-docs/`의 렌더·검수 이미지·중간 PDF는 작업용이며, 필요한 생성 코드와 편집 원본은 `docs/learning-materials/`에 보관합니다. 과거 보고서 안의 임시 경로는 당시 기록으로 남기고, 현재 자료 위치는 이 안내를 기준으로 찾습니다.

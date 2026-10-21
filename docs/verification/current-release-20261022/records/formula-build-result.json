@@ -1,0 +1,7 @@
+{
+  "typescript": "passed (tsc -b)",
+  "productionBuild": "passed (Vite 7.3.6)",
+  "exitCode": 0,
+  "warning": "Existing output chunk over 500 kB",
+  "whitespace": "git diff --check and four untracked changed files checked; no whitespace errors, LF/CRLF notices only"
+}

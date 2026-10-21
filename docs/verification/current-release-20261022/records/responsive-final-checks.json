@@ -1,0 +1,56 @@
+{
+  "scope": "Responsive UI verification; not a new full curriculum completion audit",
+  "testOrigin": "http://127.0.0.1:5204/deeplab/",
+  "userOriginTouched": false,
+  "storageInjectedOrCleared": false,
+  "requiredAnswersBeforeAfter": [115, 115],
+  "submissionActivitiesBeforeAfter": [106, 106],
+  "layout": {
+    "lessons01to06": "All 42 STEP screens at 320x568, 768x1024, 1440x900",
+    "lessons07to12": "All 42 STEP screens at 320x568; selected interactive/result screens additionally inspected",
+    "homeAndAnnSizes": ["1280x800", "1440x900", "1920x1080", "768x1024", "820x1180", "1024x768", "320x568", "360x800", "390x844", "430x932", "568x320", "800x360", "1024x820", "640x800", "767x800", "900x700"],
+    "postFixPageOverflowInRecordedScans": 0,
+    "note": "Local scrolling is intentional for wide equations, tables and ANN drawings. Not every answer state was tested at every viewport."
+  },
+  "normalUiChecks": {
+    "lesson03": "Wrong answer, correction, all 10 required answers, 7 STEP completion, lesson completion, home 1/12 and reload restoration verified. Temporary answers reset as designed; completion remains 100%.",
+    "lesson04": "All three forward calculation paths submitted; selection of zero-weight connection retains all connection symbols.",
+    "lesson05": "Average MSE/BCE/CCE table: two correct rows locked, wrong BCE row corrected and resubmitted; all three rows remain correct after STEP round trip.",
+    "lesson06": "Linear 11/11, binary 11/11, multi 13/13 training paths completed through UI, including interpretation; missing interpretation prevented internal completion. Forward results after update: 1.8054 / 0.037869, 0.602286 / 0.507023, 0.773289 / 0.257103 (prediction / loss display).",
+    "mnist": "Real data loaded; actual 500-sample 1-epoch and 3-epoch training, 500-sample evaluations and misclassification probability display inspected. Three real experiment records restored after reload; in-memory model correctly requires new training. History/comparison tables support keyboard horizontal scrolling.",
+    "other": "Lesson07 coordinate/normalization input focus, Lesson09 pooling region controls, Lesson11 updated embedding scene, home reset dialog open/cancel only.",
+    "keyboard": "Enter STEP navigation, Tab between bottom buttons, local table/ANN ArrowRight scrolling, heading focus after navigation verified. Mobile heading settles 16px below viewport top; bottom buttons measured 48px high."
+  },
+  "finalChecks": {
+    "typescript": "passed via npm run build / tsc -b",
+    "vite": "passed; existing large-chunk warning remains",
+    "syntaxWhitespace": "passed; tracked diff and untracked foundation TSX checked",
+    "contracts": "passed: 30 protected source files, 82 event projections, 345 completion cases, 210 STEP movement cases, 28 navigation button cases",
+    "browserConsoleErrorsAtFinalInspection": []
+  },
+  "modifiedFilesThisTask": [
+    "src/index.css",
+    "src/components/LessonShell.tsx",
+    "src/components/SignalFlow.tsx",
+    "src/components/ui/Button.tsx",
+    "src/pages/HomePage.tsx",
+    "src/pages/LessonPage.tsx",
+    "src/lib/viewportLayout.ts",
+    "src/lessons/foundations/FoundationLesson.tsx",
+    "src/lessons/foundations/TeachingUI.tsx",
+    "src/lessons/foundations/GroupedActivity.tsx",
+    "src/lessons/foundations/Basics03_04.tsx",
+    "src/lessons/foundations/Basics05_06.tsx",
+    "src/lessons/foundations/NetworkLab.tsx",
+    "src/lessons/foundations/BackpropPicture.tsx",
+    "src/lessons/lesson08/Lesson08Steps.tsx"
+  ],
+  "notVerified": [
+    "Actual browser 200% zoom (viewport emulation is not zoom)",
+    "Physical devices, touch input and mobile software keyboard",
+    "Every optional review and every answer combination at every viewport",
+    "Handwritten Canvas prediction in this responsive-only pass",
+    "Full 12-lesson completion and restoration in this pass"
+  ],
+  "commitPushDeploy": false
+}

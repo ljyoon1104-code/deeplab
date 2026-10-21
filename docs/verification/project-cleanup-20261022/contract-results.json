@@ -1,0 +1,63 @@
+{
+  "scope": "Isolated source, function and component contracts; not actual browser UI",
+  "status": "passed",
+  "counts": {
+    "answers": 115,
+    "submissions": 106,
+    "byLesson": [
+      {
+        "id": "01",
+        "answers": 16,
+        "submissions": 16
+      },
+      {
+        "id": "02",
+        "answers": 10,
+        "submissions": 7
+      },
+      {
+        "id": "03",
+        "answers": 10,
+        "submissions": 10
+      },
+      {
+        "id": "04",
+        "answers": 18,
+        "submissions": 14
+      },
+      {
+        "id": "05",
+        "answers": 15,
+        "submissions": 13
+      },
+      {
+        "id": "06",
+        "answers": 46,
+        "submissions": 46
+      }
+    ]
+  },
+  "protectedSourceFiles": 28,
+  "eventFiles": 64,
+  "completionChecks": 345,
+  "movementChecks": 210,
+  "buttonChecks": 28,
+  "networkCases": [
+    {
+      "kind": "linear",
+      "connections": 2,
+      "allFiveStages": true
+    },
+    {
+      "kind": "binary",
+      "connections": 6,
+      "allFiveStages": true
+    },
+    {
+      "kind": "multi",
+      "connections": 10,
+      "allFiveStages": true
+    }
+  ],
+  "userRecordsAccessed": false
+}

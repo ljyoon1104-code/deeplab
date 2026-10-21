@@ -1,0 +1,268 @@
+{
+  "scope": "Isolated component rendering and exact source/math contracts, not browser layout or persisted user storage",
+  "status": "passed",
+  "counts": {
+    "answers": 115,
+    "submissions": 106,
+    "byLesson": [
+      {
+        "id": "01",
+        "answers": 16,
+        "submissions": 16
+      },
+      {
+        "id": "02",
+        "answers": 10,
+        "submissions": 7
+      },
+      {
+        "id": "03",
+        "answers": 10,
+        "submissions": 10
+      },
+      {
+        "id": "04",
+        "answers": 18,
+        "submissions": 14
+      },
+      {
+        "id": "05",
+        "answers": 15,
+        "submissions": 13
+      },
+      {
+        "id": "06",
+        "answers": 46,
+        "submissions": 46
+      }
+    ]
+  },
+  "unchangedTasksMathStorageNavigation": true,
+  "completionChecks": 345,
+  "networkCases": [
+    {
+      "kind": "linear",
+      "edges": 2,
+      "zeroWeightEdges": 0,
+      "allStages": [
+        "hidden",
+        "output",
+        "back-output",
+        "back-hidden",
+        "update"
+      ],
+      "allSelectionsChecked": true
+    },
+    {
+      "kind": "binary",
+      "edges": 6,
+      "zeroWeightEdges": 2,
+      "allStages": [
+        "hidden",
+        "output",
+        "back-output",
+        "back-hidden",
+        "update"
+      ],
+      "allSelectionsChecked": true
+    },
+    {
+      "kind": "multi",
+      "edges": 10,
+      "zeroWeightEdges": 5,
+      "allStages": [
+        "hidden",
+        "output",
+        "back-output",
+        "back-hidden",
+        "update"
+      ],
+      "allSelectionsChecked": true
+    }
+  ],
+  "depthChecks": [
+    {
+      "hiddenLayers": 1,
+      "edges": 8,
+      "allSymbols": true
+    },
+    {
+      "hiddenLayers": 3,
+      "edges": 16,
+      "allSymbols": true
+    }
+  ],
+  "maskChecks": [
+    {
+      "kind": "linear",
+      "formulaGate": true,
+      "currentGradientAnswerHidden": true
+    },
+    {
+      "kind": "binary",
+      "formulaGate": true,
+      "currentGradientAnswerHidden": true
+    },
+    {
+      "kind": "multi",
+      "formulaGate": true,
+      "currentGradientAnswerHidden": true
+    }
+  ],
+  "movementChecks": [
+    {
+      "lesson": "03",
+      "step": 2,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "03",
+      "step": 6,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "04",
+      "step": 1,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "04",
+      "step": 2,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "04",
+      "step": 3,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "04",
+      "step": 4,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "05",
+      "step": 1,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "06",
+      "step": 3,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "06",
+      "step": 4,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    },
+    {
+      "lesson": "06",
+      "step": 5,
+      "states": [
+        "missing",
+        "wrong",
+        "unsubmitted",
+        "correct",
+        "completed-review"
+      ],
+      "freeStepMovement": true,
+      "correctOnlyCompletion": true,
+      "answersUntouched": true
+    }
+  ],
+  "relu": {
+    "nativeCases": true,
+    "inputs": [
+      -1,
+      0,
+      1
+    ],
+    "outputs": [
+      0,
+      0,
+      1
+    ]
+  },
+  "userStorageReadOrWritten": false
+}

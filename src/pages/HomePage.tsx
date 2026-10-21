@@ -1,10 +1,15 @@
-import { FlaskConical, Settings2 } from 'lucide-react'
+import { Download, FlaskConical, Settings2 } from 'lucide-react'
 import { LessonCard } from '../components/LessonCard'
 import { ProgressBar } from '../components/ProgressBar'
 import { ResetProgressDialog } from '../components/ResetProgressDialog'
 import { SignalFlow } from '../components/SignalFlow'
 import { lessonGroups, lessons } from '../data/lessons'
 import { useProgress } from '../hooks/useProgress'
+
+const learningMaterials = [
+  { title: '인공신경망', file: 'ann.pdf', download: '인공신경망.pdf', bytes: 246366 },
+  { title: '역전파 숫자 예제', file: 'backprop-numeric-examples.pdf', download: '역전파_숫자예제.pdf', bytes: 445093 },
+] as const
 
 export function HomePage() {
   const { progress, summary } = useProgress()
@@ -69,6 +74,30 @@ export function HomePage() {
         </section>
 
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <section aria-labelledby="learning-materials-title" className="mb-10">
+            <h2 id="learning-materials-title" className="mb-4 text-xl font-black text-slate-950">
+              학습자료 다운로드
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {learningMaterials.map((material) => (
+                <div key={material.file} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                  <h3 className="font-bold text-slate-950">{material.title}</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    PDF · {(material.bytes / 1000).toFixed(1)} KB
+                  </p>
+                  <a
+                    href={`${import.meta.env.BASE_URL}downloads/${material.file}`}
+                    download={material.download}
+                    className="mt-3 inline-flex min-h-12 w-full min-w-0 max-w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-1 text-sm font-semibold leading-5 text-white shadow-sm transition-[color,background-color,box-shadow,transform] duration-150 hover:bg-indigo-700 active:translate-y-0.5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 motion-reduce:transition-none"
+                  >
+                    <Download size={18} className="shrink-0" aria-hidden="true" />
+                    <span className="min-w-0 [overflow-wrap:anywhere]">{material.title} PDF 다운로드</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </section>
+
           {lessonGroups.map((group, groupIndex) => {
             const groupLessons = lessons.filter((lesson) => lesson.group === group.id)
             return (
