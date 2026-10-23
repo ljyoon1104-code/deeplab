@@ -99,7 +99,7 @@ export function GroupedActivity({ mode, tasks, answers, change }: GroupedActivit
             </select>
             {response?.value && <span className="break-words">선택: {response.value}</span>}
           </label> : <label className="grid min-w-0 gap-2 leading-7">평균 손실 입력
-            <input aria-label={task.prompt} aria-describedby={feedbackId} inputMode="decimal" className="min-h-12 w-full min-w-0 rounded-lg border border-slate-400 p-3" value={response?.value ?? ''} onChange={event => change(task.id, { value: event.target.value, submitted: false })}/>
+            <input aria-label={task.prompt} aria-describedby={feedbackId} type="text" inputMode="text" className="min-h-12 w-full min-w-0 rounded-lg border border-slate-400 p-3" value={response?.value ?? ''} onChange={event => change(task.id, { value: event.target.value, submitted: false })}/>
           </label>}
           <p id={feedbackId} aria-live="polite" className={`rounded-lg p-3 leading-7 ${response?.submitted ? ok ? 'bg-emerald-50' : 'bg-rose-50' : 'text-slate-600'}`}>
             {response?.submitted ? ok ? task.explanation : `다시 확인해 보세요. ${task.hint} 이 행을 수정한 뒤 다시 제출하세요.` : response?.value ? '아래 함께 제출 버튼으로 확인하세요.' : '이 행의 답을 입력하거나 선택해 주세요.'}

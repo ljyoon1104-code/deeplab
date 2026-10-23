@@ -182,7 +182,7 @@ function IrisDesign({ page, answers, change }: Props) {
       return <fieldset key={item.id} id={`task-${item.id}`} className="min-w-0 rounded-xl border border-indigo-200 bg-white p-4">
         <legend className="max-w-full px-2 font-bold leading-7">{item.prompt}</legend>
         <label className="grid gap-2">뉴런 수
-          <input aria-label={item.prompt} inputMode="numeric" disabled={itemCorrect} className="min-h-12 w-full min-w-0 rounded-lg border border-slate-400 p-3 disabled:bg-emerald-50" value={itemResponse?.value ?? ''} onChange={event => change(item.id, { value: event.target.value, submitted: false })} />
+          <input aria-label={item.prompt} type="text" inputMode="text" disabled={itemCorrect} className="min-h-12 w-full min-w-0 rounded-lg border border-slate-400 p-3 disabled:bg-emerald-50" value={itemResponse?.value ?? ''} onChange={event => change(item.id, { value: event.target.value, submitted: false })} />
         </label>
         <p aria-live="polite" className={`mt-3 rounded-lg p-3 ${itemResponse?.submitted ? itemCorrect ? 'bg-emerald-50' : 'bg-rose-50' : 'bg-slate-50'}`}>{itemResponse?.submitted ? itemCorrect ? '✓ 정답 유지 · 다른 오답 항목만 고치세요.' : `이 수를 다시 확인하세요. ${item.hint}` : '특징 선택과 두 뉴런 수를 모두 작성한 뒤 함께 제출하세요.'}</p>
       </fieldset>
