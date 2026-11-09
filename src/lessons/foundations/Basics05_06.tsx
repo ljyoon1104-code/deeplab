@@ -197,7 +197,7 @@ function DirectionObservation() {
     return `${x(v)},${y(forward({ ...initial, v: [[v]] }).loss)}`
   }).join(' ')
   return <Box title="손실 곡선에서 수정 방향을 먼저 예상하기">
-    <p>다른 값은 고정하고 <strong>출력 가중치 v₁ 하나만</strong> 바꾸어 계산한 곡선입니다. 처음 v₁=0.6에서 왼쪽과 오른쪽 중 어느 쪽으로 조금 움직이면 손실이 작아질까요?</p>
+    <p>다른 값은 고정하고 <strong>출력 가중치 v₁ 하나만</strong> 바꾸어 계산한 곡선입니다. 처음 v₁=0.4에서 왼쪽과 오른쪽 중 어느 쪽으로 조금 움직이면 손실이 작아질까요?</p>
     <svg viewBox="0 0 360 270" role="img" aria-label={`가로축 출력 가중치 v1, 세로축 MSE 손실. 현재 v1 ${fmt(value)}, 손실 ${fmt(currentForward.loss)}`} className="mx-auto w-full max-w-md">
       <line x1={left} y1={top} x2={left} y2={bottom} stroke="#64748b" />
       <line x1={left} y1={bottom} x2={right} y2={bottom} stroke="#64748b" />
@@ -209,9 +209,9 @@ function DirectionObservation() {
       <text x="190" y="259" textAnchor="middle" fontSize="17">출력 가중치 v₁</text>
     </svg>
     <div className="flex flex-wrap gap-2">
-      <Button variant="secondary" onClick={() => setValue(.5)}>초기값보다 0.1 낮추어 비교</Button>
-      <Button variant="secondary" onClick={() => setValue(.7)}>초기값보다 0.1 높여 비교</Button>
-      <Button variant="ghost" onClick={() => setValue(.6)}>v₁=0.6 다시 보기</Button>
+      <Button variant="secondary" onClick={() => setValue(.3)}>초기값보다 0.1 낮추어 비교</Button>
+      <Button variant="secondary" onClick={() => setValue(.5)}>초기값보다 0.1 높여 비교</Button>
+      <Button variant="ghost" onClick={() => setValue(.4)}>v₁=0.4 다시 보기</Button>
     </div>
     <p className="rounded-lg bg-white p-3" aria-live="polite">현재 v₁=<strong>{fmt(value)}</strong> → 예측 ŷ=<strong>{fmt(currentForward.p[0])}</strong> → MSE 손실 L=<strong>{fmt(currentForward.loss)}</strong><br />이 지점의 기울기 ∂L/∂v₁=<strong>{fmt(gradient)}</strong>입니다. {gradient < 0 ? '음수이면 v₁을 조금 늘릴 때 손실이 줄어드는 방향입니다.' : '양수이면 v₁을 조금 줄일 때 손실이 줄어드는 방향입니다.'}</p>
     <p>학습률 η(에타)는 <strong>기울기를 실제 수정량으로 바꾸는 배율</strong>입니다. 지금 관찰한 같은 가중치와 기울기에 η={initial.eta}를 적용해 봅니다.</p>

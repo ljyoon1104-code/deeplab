@@ -10,11 +10,11 @@ export const names: Record<Pair, string> = { linear: '선형 출력 + MSE', bina
 export const pairs: Pair[] = ['linear', 'binary', 'multi']
 export const examples: Record<Pair, Network> = {
   // ANN p.7의 h=2를 만드는 은닉층 x=2,w=1,b=0을 보완했습니다.
-  linear: { kind: 'linear', x: [2], y: [2], eta: .05, w: [[1]], b: [0], v: [[.6]], bo: [.1] },
+  linear: { kind: 'linear', x: [2], y: [1], eta: .1, w: [[.5]], b: [0], v: [[.4]], bo: [.1] },
   // ANN pp.17–21 및 앱 역전파 pp.3–5의 공통 예제 그대로입니다.
-  binary: { kind: 'binary', x: [1, 2], y: [1], eta: .1, w: [[1, 0], [-1, 0]], b: [0, 0], v: [[1, 1]], bo: [-1] },
+  binary: { kind: 'binary', x: [1, 2], y: [1], eta: .2, w: [[1, 0], [-1, 0]], b: [0, 0], v: [[1, 1]], bo: [-1] },
   // ANN p.3의 은닉층과 p.5의 점수 [2,1,0]를 연결하도록 출력층을 보완했습니다.
-  multi: { kind: 'multi', x: [1, 2], y: [1, 0, 0], eta: .1, w: [[1, 0], [0, 1]], b: [0, 0], v: [[1, .5], [0, .5], [0, 0]], bo: [0, 0, 0] },
+  multi: { kind: 'multi', x: [1, 1], y: [1, 0, 0], eta: .2, w: [[1, 0], [0, 1]], b: [0, 0], v: [[1, -1], [-1, 1], [-1, 1]], bo: [0.6931471805599453, 0, 0] },
 }
 export const sum = (xs: readonly number[]) => xs.reduce((a, b) => a + b, 0)
 export const mean = (xs: readonly number[]) => sum(xs) / xs.length
