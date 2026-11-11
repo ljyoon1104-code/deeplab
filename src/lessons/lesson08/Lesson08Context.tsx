@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { isMnistDatasetSize, loadMnistDataset, loadMnistMetadata } from '../lesson07/mnistLoader'
-import type { MnistDatasetSize } from '../lesson07/mnistTypes'
+import type { MnistDatasetSize, MnistSample } from '../lesson07/mnistTypes'
 import { BATCH_SIZE, friendlyErrorMessages } from './lesson08Data'
 import { loadExperimentRecords, saveExperimentRecord } from './experimentStorage'
 import { loadMnistTestDataset } from './mnistTestLoader'
@@ -40,6 +40,14 @@ import type {
 
 const LESSON07_SIZE_KEY = 'deep-learning-lab:lesson07:dataset-size'
 
+export interface SamplePrediction {
+  sampleId: string
+  prediction: DrawingPrediction
+  trained: boolean
+  modelType: Lesson08ModelType
+  recordId?: string
+}
+
 interface Lesson08LabValue {
   datasetSize: MnistDatasetSize
   epochs: Lesson08Epochs
@@ -53,7 +61,13 @@ interface Lesson08LabValue {
   batchProgress: BatchProgress | null
   trainingResult: TrainingResult | null
   evaluation: EvaluationResult | null
+  evaluationRecordId: string | null
   drawingPrediction: DrawingPrediction | null
+  drawingRecordId: string | null
+  samplePrediction: SamplePrediction | null
+  previewBusy: boolean
+  previewStatus: 'idle' | 'loading' | 'ready' | 'error'
+  previewError: string | null
   experiments: ExperimentRecord[]
   error: OperationError | null
   modelReady: boolean
@@ -65,6 +79,7 @@ interface Lesson08LabValue {
   startTraining: () => Promise<void>
   cancelTraining: () => void
   evaluateTest: () => Promise<void>
+  previewSample: (sample: MnistSample) => Promise<void>
   predictDrawing: (normalized: number[], previewPixels: number[]) => Promise<void>
   clearDrawingPrediction: () => void
   markEmptyDrawing: () => void
@@ -113,7 +128,41 @@ function disposeOwned(model: TrainableModel | null, optimizer: OwnedOptimizer | 
   }
 }
 
-export function Lesson08LabProvider({ children }: { children: ReactNode }) {
+function readScopedExperiments(key: string): ExperimentRecord[] {
+  try {
+    const parsed: unknown = JSON.parse(localStorage.getItem(key) ?? '[]')
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((value): value is ExperimentRecord => {
+      if (!value || typeof value !== 'object') return false
+      const record = value as Partial<ExperimentRecord>
+      const finite = (item: unknown): item is number => typeof item === 'number' && Number.isFinite(item)
+      const unit = (item: unknown) => finite(item) && item >= 0 && item <= 1
+      return typeof record.id === 'string' && typeof record.datasetVersion === 'string' &&
+        finite(record.trainSampleCount) && isMnistDatasetSize(record.trainSampleCount) &&
+        ['simple', 'textbook', 'wide'].includes(String(record.modelType)) &&
+        [1, 3, 5].includes(Number(record.epochs)) && record.batchSize === 32 &&
+        finite(record.finalTrainLoss) && unit(record.finalTrainAccuracy) &&
+        (record.testAccuracy === null || unit(record.testAccuracy)) &&
+        (record.testCorrect === null || (finite(record.testCorrect) && Number.isInteger(record.testCorrect) && record.testCorrect >= 0 && record.testCorrect <= 500)) &&
+        (record.testWrong === null || (finite(record.testWrong) && Number.isInteger(record.testWrong) && record.testWrong >= 0 && record.testWrong <= 500)) &&
+        finite(record.durationMs) && record.durationMs >= 0 && typeof record.timestamp === 'string'
+    })
+  } catch { return [] }
+}
+
+function loadSessionExperiments(key?: string) {
+  const legacy = loadExperimentRecords()
+  return key ? [...readScopedExperiments(key), ...legacy] : legacy
+}
+
+function saveSessionExperiment(record: ExperimentRecord, key?: string) {
+  if (!key) return saveExperimentRecord(record)
+  const scoped = [record, ...readScopedExperiments(key).filter((item) => item.id !== record.id)]
+  try { localStorage.setItem(key, JSON.stringify(scoped)) } catch { /* Keep the current result in memory when storage is unavailable. */ }
+  return [...scoped, ...loadExperimentRecords()]
+}
+
+export function Lesson08LabProvider({ children, experimentStorageKey }: { children: ReactNode; experimentStorageKey?: string }) {
   const [datasetSize, setDatasetSizeState] = useState<MnistDatasetSize>(initialDatasetSize)
   const [epochs, setEpochsState] = useState<Lesson08Epochs>(3)
   const [modelType, setModelTypeState] = useState<Lesson08ModelType>('textbook')
@@ -126,8 +175,14 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const [batchProgress, setBatchProgress] = useState<BatchProgress | null>(null)
   const [trainingResult, setTrainingResult] = useState<TrainingResult | null>(null)
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null)
+  const [evaluationRecordId, setEvaluationRecordId] = useState<string | null>(null)
   const [drawingPrediction, setDrawingPrediction] = useState<DrawingPrediction | null>(null)
-  const [experiments, setExperiments] = useState<ExperimentRecord[]>(loadExperimentRecords)
+  const [drawingRecordId, setDrawingRecordId] = useState<string | null>(null)
+  const [samplePrediction, setSamplePrediction] = useState<SamplePrediction | null>(null)
+  const [previewBusy, setPreviewBusy] = useState(false)
+  const [previewStatus, setPreviewStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [previewError, setPreviewError] = useState<string | null>(null)
+  const [experiments, setExperiments] = useState<ExperimentRecord[]>(() => loadSessionExperiments(experimentStorageKey))
   const [error, setError] = useState<OperationError | null>(null)
   const [modelReady, setModelReady] = useState(false)
   const [emptyDrawingMessage, setEmptyDrawingMessage] = useState<string | null>(null)
@@ -142,8 +197,10 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const currentModelRef = useRef<TrainableModel | null>(null)
   const currentOptimizerRef = useRef<OwnedOptimizer | null>(null)
   const currentRecordIdRef = useRef<string | null>(null)
+  const previewRunRef = useRef(0)
+  const untrainedModelsRef = useRef(new Map<Lesson08ModelType, { model: TrainableModel; optimizer: OwnedOptimizer }>())
 
-  const isBusy = [
+  const isBusy = previewBusy || [
     'loading-data',
     'loading-engine',
     'converting-data',
@@ -199,7 +256,10 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       setBatchProgress(null)
       setTrainingResult(null)
       setEvaluation(null)
+      setEvaluationRecordId(null)
       setDrawingPrediction(null)
+      setDrawingRecordId(null)
+      setSamplePrediction(null)
       setModelReady(false)
       setEmptyDrawingMessage(null)
     }
@@ -216,7 +276,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
         if (controller.signal.aborted) throw cause
         throw new OperationFailure('data', cause)
       }
-      if (cancelRequestedRef.current || controller.signal.aborted) throw new DOMException('취소됨', 'AbortError')
+      if (!isCurrentRun() || cancelRequestedRef.current || controller.signal.aborted) throw new DOMException('취소됨', 'AbortError')
 
       if (isCurrentRun()) setStatus('loading-engine')
       let tf
@@ -225,13 +285,14 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       } catch (cause) {
         throw new OperationFailure('engine', cause)
       }
-      if (cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
+      if (!isCurrentRun() || cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
 
       if (isCurrentRun()) {
         setBackend(tf.getBackend() || 'unknown')
         setStatus('converting-data')
       }
       await tf.nextFrame()
+      if (!isCurrentRun() || cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
 
       disposeOwned(currentModelRef.current, currentOptimizerRef.current)
       currentModelRef.current = null
@@ -247,6 +308,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       }
       if (isCurrentRun()) setStatus('preparing-model')
       await tf.nextFrame()
+      if (!isCurrentRun() || cancelRequestedRef.current) throw new DOMException('취소됨', 'AbortError')
       try {
         const created = createTrainableModel(tf, selected.modelType)
         nextModel = created.model
@@ -300,7 +362,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       if (isCurrentRun()) setStatus('summarizing')
       await tf.nextFrame()
 
-      if (cancelRequestedRef.current || history.length !== selected.epochs) {
+      if (!isCurrentRun() || cancelRequestedRef.current || history.length !== selected.epochs) {
         throw new DOMException('취소됨', 'AbortError')
       }
       const finalMetric = history.at(-1)
@@ -350,7 +412,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       if (isCurrentRun()) {
         setTrainingResult(result)
         setElapsedMs(durationMs)
-        setExperiments(saveExperimentRecord(record))
+        setExperiments(saveSessionExperiment(record, experimentStorageKey))
         setModelReady(true)
         setStatus('trained')
       }
@@ -374,7 +436,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       abortControllerRef.current = null
       operationBusyRef.current = false
     }
-  }, [datasetSize, epochs, modelType])
+  }, [datasetSize, epochs, modelType, experimentStorageKey])
 
   const cancelTraining = useCallback(() => {
     if (!operationBusyRef.current || status === 'evaluating') return
@@ -386,6 +448,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
   const evaluateTest = useCallback(async () => {
     const model = currentModelRef.current
     if (!model || operationBusyRef.current) return
+    const recordId = currentRecordIdRef.current
     operationBusyRef.current = true
     const controller = new AbortController()
     abortControllerRef.current = controller
@@ -397,20 +460,20 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       const testDataset = await loadMnistTestDataset(controller.signal)
       const tf = await loadTensorFlow()
       const result = await evaluateModel(tf, model, testDataset.samples)
-      const recordId = currentRecordIdRef.current
-      const currentRecord = loadExperimentRecords().find((record) => record.id === recordId)
+      const currentRecord = loadSessionExperiments(experimentStorageKey).find((record) => record.id === recordId)
       if (currentRecord && mountedRef.current) {
         setExperiments(
-          saveExperimentRecord({
+          saveSessionExperiment({
             ...currentRecord,
             testAccuracy: result.accuracy,
             testCorrect: result.correct,
             testWrong: result.wrong,
-          }),
+          }, experimentStorageKey),
         )
       }
       if (mountedRef.current) {
         setEvaluation(result)
+        setEvaluationRecordId(recordId)
         setStatus('ready')
       }
     } catch (cause) {
@@ -422,7 +485,51 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       abortControllerRef.current = null
       operationBusyRef.current = false
     }
-  }, [])
+  }, [experimentStorageKey])
+
+  const previewSample = useCallback(async (sample: MnistSample) => {
+    if (operationBusyRef.current) return
+    operationBusyRef.current = true
+    const runId = ++previewRunRef.current
+    const isCurrentPreview = () => mountedRef.current && previewRunRef.current === runId
+    setPreviewBusy(true)
+    setPreviewStatus('loading')
+    setPreviewError(null)
+    setSamplePrediction(null)
+    try {
+      const tf = await loadTensorFlow()
+      if (!isCurrentPreview()) return
+      const trainedModel = modelReady ? currentModelRef.current : null
+      const recordId = trainedModel ? currentRecordIdRef.current : null
+      const selectedType = trainedModel && trainingResult ? trainingResult.config.modelType : modelType
+      let model = trainedModel
+      if (!model) {
+        // A separate, never-fitted model keeps the same weights across sample previews.
+        let untrained = untrainedModelsRef.current.get(selectedType)
+        if (!untrained) {
+          untrained = createTrainableModel(tf, selectedType)
+          untrainedModelsRef.current.set(selectedType, untrained)
+        }
+        model = untrained.model
+      }
+      const prediction = await runDrawingPrediction(tf, model, sample.pixels.map((pixel) => pixel / 255), [...sample.pixels])
+      if (isCurrentPreview()) {
+        setSamplePrediction({ sampleId: sample.id, prediction, trained: Boolean(trainedModel), modelType: selectedType, ...(recordId ? { recordId } : {}) })
+        setPreviewStatus('ready')
+      }
+    } catch (cause) {
+      if (isCurrentPreview()) {
+        setPreviewError(cause instanceof Error ? cause.message : '샘플의 실제 예측을 실행하지 못했습니다.')
+        setPreviewStatus('error')
+      }
+    } finally {
+      operationBusyRef.current = false
+      if (mountedRef.current) {
+        setPreviewBusy(false)
+        if (!isCurrentPreview()) setPreviewStatus('idle')
+      }
+    }
+  }, [modelReady, modelType, trainingResult])
 
   const predictDrawing = useCallback(async (normalized: number[], previewPixels: number[]) => {
     const model = currentModelRef.current
@@ -432,6 +539,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
     }
     if (operationBusyRef.current) return
     operationBusyRef.current = true
+    const recordId = currentRecordIdRef.current
     try {
       setError(null)
       setEmptyDrawingMessage(null)
@@ -440,6 +548,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       const prediction = await runDrawingPrediction(tf, model, normalized, previewPixels)
       if (mountedRef.current) {
         setDrawingPrediction(prediction)
+        setDrawingRecordId(recordId)
         setStatus(evaluation ? 'ready' : 'trained')
       }
     } catch (cause) {
@@ -454,12 +563,14 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
 
   const clearDrawingPrediction = useCallback(() => {
     setDrawingPrediction(null)
+    setDrawingRecordId(null)
     setEmptyDrawingMessage(null)
     setError((current) => (current?.kind === 'drawing' ? null : current))
   }, [])
 
   const markEmptyDrawing = useCallback(() => {
     setDrawingPrediction(null)
+    setDrawingRecordId(null)
     setEmptyDrawingMessage('먼저 숫자를 그려 주세요.')
   }, [])
 
@@ -468,8 +579,11 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
     return () => {
       mountedRef.current = false
       trainingRunRef.current += 1
+      previewRunRef.current += 1
       cancelRequestedRef.current = true
       abortControllerRef.current?.abort()
+      for (const owned of untrainedModelsRef.current.values()) disposeOwned(owned.model, owned.optimizer)
+      untrainedModelsRef.current.clear()
       if (trainingModelRef.current) {
         trainingModelRef.current.stopTraining = true
       } else {
@@ -494,7 +608,13 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       batchProgress,
       trainingResult,
       evaluation,
+      evaluationRecordId,
       drawingPrediction,
+      drawingRecordId,
+      samplePrediction,
+      previewBusy,
+      previewStatus,
+      previewError,
       experiments,
       error,
       modelReady,
@@ -506,6 +626,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       startTraining,
       cancelTraining,
       evaluateTest,
+      previewSample,
       predictDrawing,
       clearDrawingPrediction,
       markEmptyDrawing,
@@ -525,7 +646,13 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       batchProgress,
       trainingResult,
       evaluation,
+      evaluationRecordId,
       drawingPrediction,
+      drawingRecordId,
+      samplePrediction,
+      previewBusy,
+      previewStatus,
+      previewError,
       experiments,
       error,
       modelReady,
@@ -537,6 +664,7 @@ export function Lesson08LabProvider({ children }: { children: ReactNode }) {
       startTraining,
       cancelTraining,
       evaluateTest,
+      previewSample,
       predictDrawing,
       clearDrawingPrediction,
       markEmptyDrawing,

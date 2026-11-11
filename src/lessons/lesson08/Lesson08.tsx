@@ -10,7 +10,7 @@ import {
   Lesson08Step7,
 } from './Lesson08Steps'
 
-function Lesson08Content({
+export function Lesson08Content({
   currentStep,
   progress,
   onStepComplete,

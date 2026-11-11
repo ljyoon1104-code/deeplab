@@ -11,8 +11,15 @@ import {
   type FoundationNavigationState,
 } from '../lessons/lessonRegistry'
 import { foundationStorageSteps, type FoundationId } from '../lessons/foundations/curriculum'
+import { MnistIntegratedLesson } from '../lessons/mnistIntegrated/MnistIntegratedLesson'
 
 export function LessonPage() {
+  const { lessonId = '' } = useParams()
+  if (lessonId === '07' || lessonId === '08') return <MnistIntegratedLesson part={lessonId} />
+  return <StandardLessonPage />
+}
+
+function StandardLessonPage() {
   const { lessonId = '' } = useParams()
   const lesson = getLesson(lessonId)
   const { progress, setCurrentStep, markStepComplete } = useProgress()

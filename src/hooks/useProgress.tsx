@@ -21,6 +21,7 @@ interface ProgressContextValue {
   setCurrentStep: (lessonId: LessonId, step: number) => void
   markStepComplete: (lessonId: LessonId, step: number) => void
   resetProgress: () => void
+  resetRevision: number
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null)
@@ -29,6 +30,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState<ProgressRecord>(() =>
     progressStorage.load(),
   )
+  const [resetRevision, setResetRevision] = useState(0)
 
   useEffect(() => {
     const syncAcrossTabs = () => setProgress(progressStorage.load())
@@ -81,6 +83,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const resetProgress = useCallback(() => {
     progressStorage.clear()
     setProgress(createInitialProgress())
+    setResetRevision((revision) => revision + 1)
   }, [])
 
   const summary = useMemo<ProgressSummary>(() => {
@@ -101,8 +104,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setCurrentStep,
       markStepComplete,
       resetProgress,
+      resetRevision,
     }),
-    [progress, summary, setCurrentStep, markStepComplete, resetProgress],
+    [progress, summary, setCurrentStep, markStepComplete, resetProgress, resetRevision],
   )
 
   return (
