@@ -12,14 +12,14 @@ import { TrainingScenes } from './TrainingScenes'
 const SupplementalLessons = lazy(() => import('./SupplementalLessons'))
 const scenes = [
   ['손글씨 인식 문제', '0~4분', '입력 사진·예측·실제 정답을 구별합니다.'],
-  ['사진을 숫자로 준비', '4~12분', '같은 사진의 숫자를 연결하고 정규화 한 칸을 계산합니다.'],
+  ['사진을 숫자로 준비', '4~12분', '같은 사진의 입력 표현이 어떻게 바뀌고, 왜 준비하는지 판단합니다.'],
   ['실제 신경망의 예측', '12~18분', '준비한 입력이 층을 거쳐 예측 확률이 되는 과정을 봅니다.'],
   ['실제 학습과 변화', '18~28분', '한 번 학습하고 실제 손실·정확도의 변화를 해석합니다.'],
-  ['Test 평가', '28~36분', '별도 Test로 평가한 뒤 맞힌 수로 정확도를 계산합니다.'],
+  ['Test 평가', '28~36분', '새로운 사진으로 평가하고 실제 훈련·Test 결과의 의미를 비교합니다.'],
   ['오분류와 내 손글씨', '36~43분', '실제 관찰과 원인 추측을 구별하고 입력을 바꾸어 비교합니다.'],
   ['설명·정리·완료', '43~50분', '내 결과를 근거로 입력 준비부터 평가까지 연결합니다.'],
 ] as const
-const requirementScenes: Record<string, CourseScene> = { normalization: 2, 'actual-training': 4, 'train-interpret': 4, accuracy: 5, 'error-analysis': 6, 'drawing-comparison': 6, 'final-explain': 7 }
+const requirementScenes: Record<string, CourseScene> = { 'input-understanding-v2': 2, 'actual-training': 4, 'train-interpret-v2': 4, 'test-interpret-v2': 5, 'error-analysis': 6, 'drawing-comparison': 6, 'final-explain-v2': 7 }
 
 export function MnistIntegratedLesson({ part }: { part: '07' | '08' }) {
   const course = useMnistCourse()
@@ -77,6 +77,7 @@ export function MnistIntegratedLesson({ part }: { part: '07' | '08' }) {
         <p>장면은 자유롭게 이동할 수 있습니다. 이동이나 설명 관찰은 제출·완료와 별개이며, 학습 중 이동해도 현재 실행과 모델은 유지됩니다.</p>
         {lab.isBusy && <p role="status" className="mt-1 font-bold">실제 실행이 진행 중입니다. 장면 4에서 진행 상태와 취소를 확인할 수 있습니다.</p>}
         {course.record.completedAt && <p className="mt-1 font-bold">통합 완료 기록은 유지됩니다. 아래 조건은 현재 복습 답안과 연결된 실험 기준입니다.</p>}
+        {course.record.legacyCompletedAt && <p className="mt-1 font-bold">이전 계산 중심 통합 실습의 완료 기록은 보존되어 있습니다. 아래는 새 과정·이유 활동의 제출 상태이며, 이전 계산 정답으로 대신하지 않습니다.</p>}
       </div>
       <div className="mb-5"><p className="text-sm font-bold text-indigo-700">장면 {scene}/7 · 수업 목표 {scenes[scene - 1][1]}</p><h2 ref={heading} tabIndex={-1} id="mnist-course-title" className="mt-1 text-2xl font-black focus:outline-none">{scenes[scene - 1][0]}</h2><p className="mt-2 leading-7">{scenes[scene - 1][2]}</p></div>
       <div className="min-w-0">

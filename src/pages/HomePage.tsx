@@ -105,6 +105,7 @@ export function HomePage() {
             <h2 id="mnist-integrated-home" className="text-xl font-black">7·8차시 · 50분 손글씨 인식 통합 실습</h2>
             <p className="mt-2 leading-7">사진 준비 → 실제 학습 → Test 평가 → 내 손글씨 예측을 한 모델로 이어 갑니다.</p>
             <p className="mt-2 font-bold">{course.record.completedAt ? '통합 실습 완료' : `통합 필수 활동 ${course.requirements.filter((item) => item.ready).length}/${course.requirements.length}`}</p>
+            {course.record.legacyCompletedAt && <p className="mt-1 text-sm leading-6 text-slate-600">이전 계산 중심 통합 실습 완료 기록은 보존됩니다. 위 표시는 새 과정·이유 활동 기준입니다.</p>}
             <p className="mt-1 text-sm leading-6 text-slate-600">위 전체 진행률은 기존 차시 기록입니다. 새 통합 실습의 완료는 별도로 보존하며 기존 기록을 자동으로 바꾸지 않습니다.</p>
             <div className="mt-4 flex flex-wrap gap-3">{(['07', '08'] as const).map((id) => <Link key={id} to={`/lesson/${id}`} className="inline-flex min-h-12 items-center rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">{id === '07' ? '7차시 · 입력과 예측' : '8차시 · 학습과 평가'}</Link>)}</div>
           </section>

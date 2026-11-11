@@ -7,6 +7,15 @@ import { useMnistCourse } from './CourseSession'
 
 const box = 'min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6'
 
+interface InputUnderstanding { representation?: string; pair?: string; scale?: string }
+function readInputUnderstanding(value: string): InputUnderstanding {
+  try { return JSON.parse(value) ?? {} } catch { return {} }
+}
+
+function InputChoice({ label, value, options, onChange }: { label: string; value?: string; options: [string, string][]; onChange: (value: string) => void }) {
+  return <fieldset className="min-w-0 space-y-2"><legend className="mb-2 font-bold leading-6">{label}</legend>{options.map(([id, text]) => <button key={id} type="button" aria-pressed={value === id} onClick={() => onChange(id)} className={`min-h-12 w-full rounded-xl border px-3 py-3 text-left leading-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${value === id ? 'border-indigo-600 bg-indigo-50 text-indigo-900' : 'border-slate-300 bg-white'}`}>{text}</button>)}</fieldset>
+}
+
 export function PreparationScenes({ scene }: { scene: number }) {
   const course = useMnistCourse()
   const lab = useLesson08Lab()
@@ -21,6 +30,9 @@ export function PreparationScenes({ scene }: { scene: number }) {
   const activeModelType = lab.modelReady && lab.trainingResult ? lab.trainingResult.config.modelType : lab.modelType
   const prediction = lab.samplePrediction?.sampleId === sample.id && lab.samplePrediction.modelType === activeModelType ? lab.samplePrediction : null
   const normalizedAnswer = record.answers.normalization
+  const preparationAnswer = record.answers['input-understanding-v2']
+  const understanding = readInputUnderstanding(preparationAnswer.value)
+  const updateUnderstanding = (patch: Partial<InputUnderstanding>) => course.setAnswer('input-understanding-v2', JSON.stringify({ ...understanding, ...patch }))
   const vectorLabel = trialLabel ?? sample.label
 
   return <>
@@ -53,14 +65,6 @@ export function PreparationScenes({ scene }: { scene: number }) {
           <p>정규화: 밝기 ÷ 255 → 선택한 칸은 <strong>{pixel} ÷ 255 ≈ {(pixel / 255).toFixed(4)}</strong>입니다. 입력 크기를 일정한 범위로 맞춥니다.</p>
         </div>
         <div className="space-y-5">
-          {target && targetSample && <form className={`${box} space-y-3`} onSubmit={(event) => { event.preventDefault(); course.submitAnswer('normalization') }}>
-            <h3 className="text-lg font-bold">직접 계산 1 · 한 칸 정규화</h3>
-            <div className="flex flex-wrap items-center gap-4"><MnistCanvas sample={targetSample} size={84} /><p className="min-w-0 flex-1">이 사진의 {Math.floor(target.index / 28) + 1}행 {target.index % 28 + 1}열<br /><strong>밝기 {target.value} ÷ 255</strong></p></div>
-            <p className="text-sm">관찰할 픽셀을 바꾸어도 이 계산 문제의 칸은 유지됩니다. 소수 셋째 자리까지 입력해 보세요.</p>
-            <label className="block font-semibold">정규화 답<input type="text" inputMode="text" className="mt-2 min-h-12 w-full rounded-xl border p-3" value={normalizedAnswer?.value ?? ''} onChange={(event) => course.setAnswer('normalization', event.target.value)} /></label>
-            <Button type="submit" className="min-h-12">정규화 제출</Button>
-            {normalizedAnswer?.submitted && <p role="status" className={course.answerReady('normalization') ? 'text-emerald-700' : 'text-rose-700'}>{course.answerReady('normalization') ? '맞았습니다. 이 값은 선택한 칸의 정규화된 밝기입니다.' : '다시 계산해 보세요. 밝기를 최대 밝기 255로 나눕니다.'}</p>}
-          </form>}
           <div className={`${box} space-y-3`}>
             <h3 className="text-lg font-bold">INPUT과 TARGET은 같은 사진의 한 쌍</h3>
             <p><strong>INPUT</strong>: 이 사진을 펼쳐 정규화한 숫자 784개입니다.</p>
@@ -69,12 +73,46 @@ export function PreparationScenes({ scene }: { scene: number }) {
             <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">{Array.from({ length: 10 }, (_, n) => <div key={n} className={`rounded-lg border p-2 text-center ${n === vectorLabel ? 'border-emerald-600 bg-emerald-50 font-bold' : 'border-slate-200'}`}><span className="text-sm">{n}번</span><p>{n === vectorLabel ? 1 : 0}</p></div>)}</div>
             <p className="text-sm">{vectorLabel === sample.label ? '현재 사진의 실제 TARGET입니다.' : `지금은 레이블 ${vectorLabel}의 위치를 살펴보는 예시입니다. 실제 사진의 정답 ${sample.label}이나 학습 자료는 바뀌지 않습니다.`}</p>
           </div>
+          <div className={`${box} space-y-5`}>
+            <h3 className="text-lg font-bold">이 사진을 올바르게 준비하려면?</h3>
+            <InputChoice label="784개 값을 펼친 뒤 순서를 뒤섞으면, 위 사진의 입력으로 그대로 써도 될까요?" value={understanding.representation} options={[
+              ['same-image-order', '안 됩니다. 펼칠 때도 각 픽셀의 순서와 같은 사진의 정보가 이어져야 합니다.'],
+              ['same-count', '됩니다. 숫자가 784개이기만 하면 같은 사진입니다.'],
+            ]} onChange={(representation) => updateUnderstanding({ representation })} />
+            <InputChoice label={`이 사진의 실제 정답 ${sample.label} 대신 다른 사진의 TARGET을 짝지으면?`} value={understanding.pair} options={[
+              ['model-guess', '모델이 알아서 맞는 정답을 찾아 학습합니다.'],
+              ['same-sample', '이 사진과 엉뚱한 정답의 연결을 배우므로, 같은 사진의 INPUT·TARGET을 짝지어야 합니다.'],
+            ]} onChange={(pair) => updateUnderstanding({ pair })} />
+            <InputChoice label={`선택한 밝기 ${pixel}를 ${ (pixel / 255).toFixed(4) }로 바꾼 목적은?`} value={understanding.scale} options={[
+              ['prediction', '이 사진이 정답일 확률을 미리 구하려고 합니다.'],
+              ['brightness-not-probability', '입력 밝기의 범위를 0~1로 맞춥니다. 아직 모델의 예측 확률은 아닙니다.'],
+            ]} onChange={(scale) => updateUnderstanding({ scale })} />
+            <Button className="min-h-12" disabled={!understanding.representation || !understanding.pair || !understanding.scale} onClick={() => course.submitAnswer('input-understanding-v2')}>입력 준비 판단 제출</Button>
+            {preparationAnswer.submitted && <div role="status" className={`space-y-2 leading-6 ${course.answerReady('input-understanding-v2') ? 'text-emerald-700' : 'text-rose-700'}`}>
+              {course.answerReady('input-understanding-v2') ? <p>현재 사진의 입력 준비를 연결했습니다. 픽셀을 바꾸어 관찰해도 제출한 판단은 유지됩니다.</p> : <>
+                {understanding.representation !== 'same-image-order' && <p>배열의 위치를 바꾸면 원래 사진과의 대응도 바뀝니다. 펼치기는 순서를 섞는 작업일까요?</p>}
+                {understanding.pair !== 'same-sample' && <p>학습은 주어진 TARGET과 예측을 비교합니다. 다른 사진의 정답을 주면 무엇을 따라 배우게 될까요?</p>}
+                {understanding.scale !== 'brightness-not-probability' && <p>지금 바뀐 수는 한 픽셀의 밝기입니다. 숫자 0~9의 예측 확률은 순전파 후에 계산합니다.</p>}
+                {understanding.representation === 'same-image-order' && understanding.pair === 'same-sample' && understanding.scale === 'brightness-not-probability' && <p>사진이 바뀌었습니다. 현재 사진과 TARGET을 확인하고 다시 제출해 주세요.</p>}
+              </>}
+            </div>}
+          </div>
         </div>
       </div>
+      {target && targetSample && <details className={box}>
+        <summary className="min-h-12 cursor-pointer font-bold leading-7">보충 계산 · 한 칸 정규화 (통합 완료와 별개)</summary>
+        <form className="mt-4 space-y-3" onSubmit={(event) => { event.preventDefault(); course.submitAnswer('normalization') }}>
+          <div className="flex flex-wrap items-center gap-4"><MnistCanvas sample={targetSample} size={84} /><p className="min-w-0 flex-1">이 사진의 {Math.floor(target.index / 28) + 1}행 {target.index % 28 + 1}열<br /><strong>밝기 {target.value} ÷ 255</strong></p></div>
+          <p className="text-sm">관찰할 픽셀을 바꾸어도 이 계산 문제의 칸은 유지됩니다. 소수 셋째 자리까지 입력해 보세요.</p>
+          <label className="block font-semibold">정규화 답<input type="text" inputMode="text" className="mt-2 min-h-12 w-full rounded-xl border p-3" value={normalizedAnswer?.value ?? ''} onChange={(event) => course.setAnswer('normalization', event.target.value)} /></label>
+          <Button type="submit" className="min-h-12">정규화 제출</Button>
+          {normalizedAnswer?.submitted && <p role="status" className={course.answerReady('normalization') ? 'text-emerald-700' : 'text-rose-700'}>{course.answerReady('normalization') ? '맞았습니다. 이 값은 선택한 칸의 정규화된 밝기입니다.' : '다시 계산해 보세요. 밝기를 최대 밝기 255로 나눕니다.'}</p>}
+        </form>
+      </details>}
     </section>
 
     <section hidden={scene !== 3} className="space-y-5" aria-label="실제 신경망의 예측">
-      <p className="leading-7">순전파는 현재 가중치·편향으로 예측을 계산하는 과정입니다. 앞 뉴런의 출력이 다음 뉴런의 입력이 되며, 입력층은 준비한 숫자를 전달합니다.</p>
+      <p className="leading-7">순전파는 현재 가중치·편향으로 예측을 계산하는 과정입니다. 앞 뉴런의 출력이 다음 뉴런의 입력이 됩니다. <strong>예측만 할 때는 가중치·편향을 수정하지 않습니다.</strong></p>
       <div className={`${box} grid gap-4 sm:grid-cols-3`}>
         <div className="rounded-xl bg-cyan-50 p-4"><strong>① 입력층 · 784개</strong><p className="mt-2">사진의 정규화된 밝기입니다.</p></div>
         <div className="rounded-xl bg-indigo-50 p-4"><strong>② 은닉층 · {MODEL_OPTIONS[activeModelType].layers.join(' → ')}개</strong><p className="mt-2">입력×가중치의 합에 편향을 더합니다. ReLU는 가중합이 양수이면 그대로, 0 이하면 0을 보냅니다.</p></div>

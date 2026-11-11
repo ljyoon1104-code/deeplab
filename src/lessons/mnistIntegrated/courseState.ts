@@ -1,8 +1,12 @@
 import type { MnistSample } from '../lesson07/mnistTypes'
 import type { DrawingPrediction, TestPrediction, TrainingResult } from '../lesson08/lesson08Types'
 
-export const COURSE_STORAGE_KEY = 'deep-learning-lab:mnist-integrated:20261112:v1'
-export const ANSWER_IDS = ['normalization', 'train-interpret', 'accuracy', 'error-evidence', 'error-hypothesis', 'drawing-comparison', 'final-explain'] as const
+export const LEGACY_COURSE_STORAGE_KEY = 'deep-learning-lab:mnist-integrated:20261112:v1'
+export const COURSE_STORAGE_KEY = 'deep-learning-lab:mnist-integrated:20261112:v2'
+// Experiment history belongs to the runtime, not to a particular question revision.
+export const COURSE_EXPERIMENT_STORAGE_KEY = `${LEGACY_COURSE_STORAGE_KEY}:experiments`
+const LEGACY_ANSWER_IDS = ['normalization', 'train-interpret', 'accuracy', 'error-evidence', 'error-hypothesis', 'drawing-comparison', 'final-explain'] as const
+export const ANSWER_IDS = [...LEGACY_ANSWER_IDS, 'input-understanding-v2', 'train-interpret-v2', 'test-interpret-v2', 'final-explain-v2'] as const
 export type AnswerId = (typeof ANSWER_IDS)[number]
 export type CourseScene = 1 | 2 | 3 | 4 | 5 | 6 | 7
 export interface CourseAnswer { value: string; submitted: boolean; evidenceKey?: string }
@@ -17,7 +21,7 @@ export interface CourseEvaluation {
 }
 export type CourseDrawing = DrawingPrediction & { recordId: string }
 export interface CourseRecord {
-  version: 1
+  version: 2
   scene: CourseScene
   sampleId: string | null
   pixelIndex: number
@@ -27,6 +31,7 @@ export interface CourseRecord {
   evaluation: CourseEvaluation | null
   drawings: CourseDrawing[]
   completedAt: string | null
+  legacyCompletedAt: string | null
 }
 export interface CourseRequirement { id: string; label: string; ready: boolean }
 
@@ -74,16 +79,17 @@ function readLegacySample(): string | null {
 
 export function newCourseRecord(): CourseRecord {
   return {
-    version: 1, scene: 1, sampleId: readLegacySample(), pixelIndex: 0,
+    version: 2, scene: 1, sampleId: readLegacySample(), pixelIndex: 0,
     normalizationTarget: null,
     answers: Object.fromEntries(ANSWER_IDS.map((id) => [id, { value: '', submitted: false }])) as Record<AnswerId, CourseAnswer>,
-    training: null, evaluation: null, drawings: [], completedAt: null,
+    training: null, evaluation: null, drawings: [], completedAt: null, legacyCompletedAt: null,
   }
 }
 
 export function validateCourseRecord(value: unknown): CourseRecord {
   const result = newCourseRecord()
-  if (!isObject(value) || value.version !== 1) return result
+  if (!isObject(value) || (value.version !== 1 && value.version !== 2)) return result
+  const isLegacy = value.version === 1
   if (integer(value.scene, 1, 7)) result.scene = value.scene as CourseScene
   if (nonempty(value.sampleId)) result.sampleId = value.sampleId
   if (integer(value.pixelIndex, 0, 783)) result.pixelIndex = value.pixelIndex
@@ -92,7 +98,9 @@ export function validateCourseRecord(value: unknown): CourseRecord {
     result.normalizationTarget = { sampleId: target.sampleId, index: target.index, value: target.value }
   }
   if (isObject(value.answers)) {
-    for (const id of ANSWER_IDS) {
+    // Old calculations and unchanged observations remain available. New judgments
+    // have different IDs and never inherit a previous question's correct state.
+    for (const id of isLegacy ? LEGACY_ANSWER_IDS : ANSWER_IDS) {
       const answer = value.answers[id]
       if (isObject(answer) && typeof answer.value === 'string') {
         result.answers[id] = { value: answer.value.slice(0, 20000), submitted: answer.submitted === true, ...(typeof answer.evidenceKey === 'string' ? { evidenceKey: answer.evidenceKey.slice(0, 2000) } : {}) }
@@ -104,14 +112,22 @@ export function validateCourseRecord(value: unknown): CourseRecord {
   if (Array.isArray(value.drawings)) {
     result.drawings = value.drawings.filter((item) => validDrawing(item, result.training?.recordId)).reduce<CourseDrawing[]>((items, item) => appendDrawing(items, item), [])
   }
-  if (typeof value.completedAt === 'string' && Number.isFinite(Date.parse(value.completedAt))) result.completedAt = value.completedAt
+  if (typeof value.completedAt === 'string' && Number.isFinite(Date.parse(value.completedAt))) {
+    if (isLegacy) result.legacyCompletedAt = value.completedAt
+    else result.completedAt = value.completedAt
+  }
+  if (!isLegacy && typeof value.legacyCompletedAt === 'string' && Number.isFinite(Date.parse(value.legacyCompletedAt))) result.legacyCompletedAt = value.legacyCompletedAt
   return result
 }
 
-export function loadCourseRecord(): CourseRecord {
+export function loadCourseRecord(restoreLegacy = true): CourseRecord {
   try {
     const stored = localStorage.getItem(COURSE_STORAGE_KEY)
-    return stored ? validateCourseRecord(JSON.parse(stored)) : newCourseRecord()
+    if (stored) return validateCourseRecord(JSON.parse(stored))
+    // Read the former record without rewriting or removing it. A reset never
+    // falls back to that record, even if a storage operation was unavailable.
+    const previous = restoreLegacy ? localStorage.getItem(LEGACY_COURSE_STORAGE_KEY) : null
+    return previous ? validateCourseRecord(JSON.parse(previous)) : newCourseRecord()
   } catch { return newCourseRecord() }
 }
 
@@ -152,11 +168,14 @@ export function evidenceKey(record: CourseRecord, id: AnswerId): string | undefi
   const sample = evaluated?.representative
   const errorKey = evalKey && sample ? `${evalKey}:${sample.sample.id}:${sample.actualLabel}:${sample.predictedLabel}` : undefined
   const drawingKey = record.drawings.length === 2 && record.drawings.every((item) => item.recordId === trainId) && !sameDrawing(record.drawings[0], record.drawings[1]) ? `${trainId}:${record.drawings.map((item) => `${pixelKey(item.previewPixels)}:${item.predictedLabel}`).join(':')}` : undefined
+  const inputKey = record.sampleId ? `input:${record.sampleId}` : undefined
   if (id === 'normalization') return norm
-  if (id === 'train-interpret') return trainId
-  if (id === 'accuracy') return evalKey
+  if (id === 'input-understanding-v2') return inputKey
+  if (id === 'train-interpret' || id === 'train-interpret-v2') return trainId
+  if (id === 'accuracy' || id === 'test-interpret-v2') return evalKey
   if (id === 'error-evidence' || id === 'error-hypothesis') return errorKey
   if (id === 'drawing-comparison') return drawingKey
+  if (id === 'final-explain-v2') return inputKey && errorKey && drawingKey ? `${inputKey}|${errorKey}|${drawingKey}` : undefined
   return norm && errorKey && drawingKey ? `${norm}|${errorKey}|${drawingKey}` : undefined
 }
 
@@ -175,25 +194,35 @@ export function answerReady(record: CourseRecord, id: AnswerId): boolean {
   if (id === 'error-evidence') return answer.value === (record.evaluation!.wrong > 0 ? 'different' : 'all-correct')
   const parsed = parseAnswer(answer.value)
   if (!parsed) return false
-  if (id === 'train-interpret') {
+  if (id === 'input-understanding-v2') return parsed.representation === 'same-image-order' && parsed.pair === 'same-sample' && parsed.scale === 'brightness-not-probability'
+  if (id === 'train-interpret' || id === 'train-interpret-v2') {
     const history = record.training!.history
     const first = history[0]
     const last = history.at(-1)!
-    return parsed.loss === direction(first.loss, last.loss) && parsed.accuracy === direction(first.accuracy, last.accuracy) && parsed.meaning === 'train-not-test'
+    return parsed.loss === direction(first.loss, last.loss) && parsed.accuracy === direction(first.accuracy, last.accuracy) && parsed.meaning === (id === 'train-interpret-v2' ? 'weights-biases' : 'train-not-test')
+  }
+  if (id === 'test-interpret-v2') {
+    // Students compare the percentages actually displayed, not invisible
+    // floating-point differences. The stored metrics retain full precision.
+    const difference = Number((record.evaluation!.accuracy * 100).toFixed(2)) - Number((record.training!.finalAccuracy * 100).toFixed(2))
+    const comparison = difference === 0 ? 'same' : difference < 0 ? 'lower' : 'higher'
+    return parsed.role === 'held-out' && parsed.comparison === comparison && parsed.meaning === 'probability-not-accuracy'
   }
   if (id === 'error-hypothesis') return ['shape', 'coverage', 'uncertain'].includes(String(parsed.cause)) && parsed.certainty === 'hypothesis' && reasonLength(parsed.reason, 4)
   if (id === 'drawing-comparison') return parsed.change === (record.drawings[0].predictedLabel === record.drawings[1].predictedLabel ? 'same' : 'different') && parsed.meaning === 'input-not-guarantee' && reasonLength(parsed.reason, 4)
-  return JSON.stringify(parsed.order) === JSON.stringify(['input', 'predict', 'loss', 'update', 'test']) && reasonLength(parsed.reason, 10)
+  // The structured judgment is graded. Text length only checks that an
+  // explanation was submitted; its reasoning is for student/teacher review.
+  return JSON.stringify(parsed.order) === JSON.stringify(['input', 'predict', 'loss', 'update', 'test']) && (id !== 'final-explain-v2' || parsed.transfer === 'loss-updates-not-test') && reasonLength(parsed.reason, 10)
 }
 
 export function courseRequirements(record: CourseRecord): CourseRequirement[] {
   return [
-    { id: 'normalization', label: '실제 픽셀의 정규화 계산', ready: answerReady(record, 'normalization') },
+    { id: 'input-understanding-v2', label: '입력 준비의 변화와 이유 이해', ready: answerReady(record, 'input-understanding-v2') },
     { id: 'actual-training', label: '실제 모델 학습 완료', ready: Boolean(record.training) },
-    { id: 'train-interpret', label: '학습 지표 변화 해석', ready: answerReady(record, 'train-interpret') },
-    { id: 'accuracy', label: 'Test 정확도 계산', ready: answerReady(record, 'accuracy') },
+    { id: 'train-interpret-v2', label: '학습 지표 변화와 값 수정 이유 해석', ready: answerReady(record, 'train-interpret-v2') },
+    { id: 'test-interpret-v2', label: 'Test 평가의 목적과 결과 해석', ready: answerReady(record, 'test-interpret-v2') },
     { id: 'error-analysis', label: 'Test 관찰과 원인 가설 구별', ready: answerReady(record, 'error-evidence') && answerReady(record, 'error-hypothesis') },
     { id: 'drawing-comparison', label: '다른 두 입력의 예측 비교', ready: answerReady(record, 'drawing-comparison') },
-    { id: 'final-explain', label: '입력부터 평가까지 연결 설명', ready: answerReady(record, 'final-explain') },
+    { id: 'final-explain-v2', label: '입력부터 평가까지 연결 설명', ready: answerReady(record, 'final-explain-v2') },
   ]
 }

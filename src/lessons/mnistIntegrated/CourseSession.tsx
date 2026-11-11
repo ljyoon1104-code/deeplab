@@ -6,8 +6,8 @@ import type { MnistDataset, MnistMetadata, MnistSample } from '../lesson07/mnist
 import { Lesson08LabProvider, useLesson08Lab } from '../lesson08/Lesson08Context'
 import type { TestPrediction } from '../lesson08/lesson08Types'
 import {
-  COURSE_STORAGE_KEY, answerReady as isAnswerReady, appendDrawing, chooseNormalizationTarget, courseRequirements, evidenceKey,
-  loadCourseRecord, saveCourseRecord,
+  COURSE_STORAGE_KEY, LEGACY_COURSE_STORAGE_KEY, COURSE_EXPERIMENT_STORAGE_KEY, answerReady as isAnswerReady, appendDrawing, chooseNormalizationTarget, courseRequirements, evidenceKey,
+  loadCourseRecord, newCourseRecord, saveCourseRecord,
   type AnswerId, type CourseRecord, type CourseRequirement, type CourseScene,
 } from './courseState'
 
@@ -36,11 +36,11 @@ export interface MnistCourseValue {
 
 const CourseContext = createContext<MnistCourseValue | null>(null)
 
-function CourseStateProvider({ children }: { children: ReactNode }) {
+function CourseStateProvider({ children, restoreLegacy }: { children: ReactNode; restoreLegacy: boolean }) {
   const lab = useLesson08Lab()
   const { pathname } = useLocation()
   const active = /^\/lesson\/(07|08)(?:\/|$)/.test(pathname)
-  const [record, setRecord] = useState<CourseRecord>(loadCourseRecord)
+  const [record, setRecord] = useState<CourseRecord>(() => restoreLegacy ? loadCourseRecord() : newCourseRecord())
   const [dataset, setDataset] = useState<MnistDataset | null>(null)
   const [metadata, setMetadata] = useState<MnistMetadata | null>(null)
   const [loading, setLoading] = useState(false)
@@ -172,7 +172,7 @@ export function CourseSessionProvider({ children }: { children: ReactNode }) {
   const [externalResetRevision, setExternalResetRevision] = useState(0)
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
-      if (event.storageArea === window.localStorage && event.newValue === null && (event.key === COURSE_STORAGE_KEY || event.key === null)) {
+      if (event.storageArea === window.localStorage && event.newValue === null && (event.key === COURSE_STORAGE_KEY || event.key === LEGACY_COURSE_STORAGE_KEY || event.key === null)) {
         setExternalResetRevision((revision) => revision + 1)
       }
     }
@@ -180,7 +180,7 @@ export function CourseSessionProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
   // Only an explicit storage reset replaces this session. Ordinary navigation keeps its model alive.
-  return <Lesson08LabProvider key={`${resetRevision}:${externalResetRevision}`} experimentStorageKey={`${COURSE_STORAGE_KEY}:experiments`}><CourseStateProvider>{children}</CourseStateProvider></Lesson08LabProvider>
+  return <Lesson08LabProvider key={`${resetRevision}:${externalResetRevision}`} experimentStorageKey={COURSE_EXPERIMENT_STORAGE_KEY}><CourseStateProvider restoreLegacy={resetRevision === 0 && externalResetRevision === 0}>{children}</CourseStateProvider></Lesson08LabProvider>
 }
 
 export function useMnistCourse() {
